@@ -23,5 +23,6 @@ export interface LoginCredentials {
 export interface AuthState {
   user: User | null;
   isLoading: boolean;
+  isInitialized: boolean;
   error: string | null;
 }

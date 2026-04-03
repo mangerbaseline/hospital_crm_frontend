@@ -11,6 +11,7 @@ import {
 const initialState: AuthState = {
   user: null,
   isLoading: false,
+  isInitialized: false,
   error: null,
 };
 
@@ -75,10 +76,12 @@ const authSlice = createSlice({
       })
       .addCase(fetchMe.fulfilled, (state, action: PayloadAction<User>) => {
         state.isLoading = false;
+        state.isInitialized = true;
         state.user = action.payload;
       })
       .addCase(fetchMe.rejected, (state) => {
         state.isLoading = false;
+        state.isInitialized = true;
         state.user = null;
       });
   },

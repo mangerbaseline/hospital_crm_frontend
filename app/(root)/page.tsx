@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Building2, DollarSign, CheckCircle2, UserPlus } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
