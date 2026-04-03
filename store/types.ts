@@ -1,8 +1,15 @@
+export enum UserRole {
+  SALES = "Sales",
+  CUSTOMER_SUCCESS = "Customer Success",
+  EXECUTIVE = "Executive",
+  ADMIN = "Admin",
+}
+
 export interface User {
   _id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
 }
 
 export interface ApiResponse<T> {
@@ -25,4 +32,47 @@ export interface AuthState {
   isLoading: boolean;
   isInitialized: boolean;
   error: string | null;
+}
+
+export interface CreateUserPayload {
+  name: string;
+  email: string;
+  password?: string;
+  role: UserRole;
+}
+
+export interface UpdateUserPayload extends Partial<CreateUserPayload> {
+  id: string;
+}
+
+export interface UserState {
+  users: User[];
+  selectedUser: User | null;
+  isFetchingUsers: boolean;
+  isGetSingleUserLoading: boolean;
+  isCreateUserLoading: boolean;
+  isUpdateUserLoading: boolean;
+  isDeleteUserLoading: boolean;
+  fetchUsersError: string | null;
+  getSingleUserError: string | null;
+  createUserError: string | null;
+  updateUserError: string | null;
+  deleteUserError: string | null;
+  page: number;
+  limit: number;
+  totalUsers: number;
+  totalPages: number;
+}
+
+export interface FetchUsersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface PaginatedApiResponse<T> extends ApiResponse<T> {
+  page: number;
+  limit: number;
+  totalUsers: number;
+  totalPages: number;
 }
