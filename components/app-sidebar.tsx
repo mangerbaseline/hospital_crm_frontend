@@ -21,9 +21,12 @@ import {
   Plus,
   LayoutDashboard,
   Kanban,
+  LogOut,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAppDispatch } from "@/lib/hooks";
+import { logout } from "@/store/features/auth/authSlice";
 
 const data = {
   navMain: [
@@ -67,6 +70,14 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push("/auth/sign-in");
+  };
 
   return (
     <Sidebar variant="sidebar" {...props}>
@@ -124,7 +135,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarSeparator />
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-4 flex flex-col gap-4">
         <div className="flex flex-col gap-3 rounded-xl bg-muted border border-border shadow-lg p-2">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Building2 className="h-4 w-4" />
@@ -145,6 +156,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
           </div>
         </div>
+
+        <SidebarMenu className="px-0">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="h-9 w-full cursor-pointer justify-start gap-4 rounded-lg px-3 text-base font-medium transition-colors text-destructive hover:bg-destructive/10 hover:text-destructive!"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm">Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );
