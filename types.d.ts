@@ -23,3 +23,25 @@ export interface UserTableProps {
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
+
+export interface Contact {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  designation: string;
+  email: string;
+  phoneNumber: string;
+  hospital?:
+    | {
+        _id: string;
+        idn?: { name: string };
+        hospitalName: string;
+      }
+    | string;
+  isPrimary?: boolean;
+}
+
+export interface ContactCardProps {
+  contact: Contact;
+  className?: string;
+}

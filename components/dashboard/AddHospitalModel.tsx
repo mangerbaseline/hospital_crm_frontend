@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
+import { Plus, Check, ChevronsUpDown } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -31,14 +31,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { ProductFields } from "../ProductFields";
 
 export function AddHospitalModal({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -82,7 +81,7 @@ export function AddHospitalModal({ children }: { children: React.ReactNode }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px] md:max-w-[500px] h-auto max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-6">
+      <DialogContent className="sm:max-w-[425px] md:max-w-[500px] h-auto max-h-[75vh] overflow-y-auto p-6 flex flex-col gap-6">
         <DialogHeader className="text-left">
           <DialogTitle className="text-lg font-bold">
             Add New Hospital
@@ -338,58 +337,5 @@ export function AddHospitalModal({ children }: { children: React.ReactNode }) {
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function ProductFields() {
-  const [date, setDate] = useState<Date>();
-
-  return (
-    <div className="pl-6 space-y-3 mt-3 mb-2">
-      <div>
-        <Label className="text-[11px] font-semibold">Deal Amount</Label>
-        <div className="relative mt-1.5 flex items-center">
-          <span className="absolute left-3 text-xs text-muted-foreground font-medium">
-            $
-          </span>
-          <Input
-            placeholder="0.00"
-            className="pl-7 text-xs h-9 bg-muted border-border"
-          />
-        </div>
-      </div>
-      <div>
-        <Label className="text-[11px] font-semibold">Deal Stage</Label>
-        <Select>
-          <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted border-border text-muted-foreground">
-            <SelectValue placeholder="Select deal stage" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="s1">Stage 1</SelectItem>
-            <SelectItem value="s2">Stage 2</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label className="text-[11px] font-semibold">Expected Close Date</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "mt-1.5 flex h-9 w-full justify-start items-center rounded-md border border-border bg-muted/70 px-3 py-1 text-xs shadow-sm transition-colors cursor-pointer hover:bg-muted",
-                !date ? "text-muted-foreground" : "text-zinc-900",
-              )}
-            >
-              <CalendarIcon className="-ml-1 mr-2 h-[14px] w-[14px]" />
-              {date ? format(date, "PPP") : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 z-100" align="start">
-            <Calendar mode="single" selected={date} onSelect={setDate} />
-          </PopoverContent>
-        </Popover>
-      </div>
-    </div>
   );
 }

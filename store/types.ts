@@ -73,6 +73,92 @@ export interface FetchUsersParams {
 export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   page: number;
   limit: number;
-  totalUsers: number;
+  totalUsers?: number;
+  totalHospitals?: number;
+  totalContacts?: number;
   totalPages: number;
+}
+
+export interface Hospital {
+  _id: string;
+  idn: { name: string };
+  hospitalName: string;
+  address: string;
+  user: string;
+  city: string;
+  state: string;
+  zip: string;
+  gpo: string;
+  competitiveProduct: string;
+  teamHospital: boolean;
+  magnetHospital: boolean;
+  products: string[];
+  notes: string;
+  contacts: string[];
+  documents: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Contact {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  user: string;
+  designation: string;
+  hospital: string | Hospital;
+  phoneNumber: string;
+  email: string;
+  isPrimary: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HospitalState {
+  hospitals: Hospital[];
+  selectedHospital: Hospital | null;
+  isFetchingHospitals: boolean;
+  isGetSingleHospitalLoading: boolean;
+  fetchHospitalsError: string | null;
+  getSingleHospitalError: string | null;
+  page: number;
+  limit: number;
+  totalHospitals: number;
+  totalPages: number;
+}
+
+export interface ContactState {
+  contacts: Contact[];
+  selectedContact: Contact | null;
+  isFetchingContacts: boolean;
+  isCreateContactLoading: boolean;
+  fetchContactsError: string | null;
+  createContactError: string | null;
+  page: number;
+  limit: number;
+  totalContacts: number;
+  totalPages: number;
+}
+
+export interface CreateContactPayload {
+  firstName: string;
+  lastName: string;
+  designation: string;
+  hospital: string;
+  phoneNumber: string;
+  email: string;
+  isPrimary: boolean;
+}
+
+export interface FetchContactsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  userId?: string;
+}
+
+export interface FetchHospitalsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
 }
