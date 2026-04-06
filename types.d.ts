@@ -24,6 +24,20 @@ export interface UserTableProps {
   onDelete: (id: string) => void;
 }
 
+export interface ProductModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  product?: import("@/store/types").Product | null;
+}
+
+export interface ProductTableProps {
+  products: import("@/store/types").Product[];
+  isLoading: boolean;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
 export interface Contact {
   _id: string;
   firstName: string;

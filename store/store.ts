@@ -3,6 +3,7 @@ import authReducer from "./features/auth/authSlice";
 import userReducer from "./features/user/userSlice";
 import hospitalReducer from "./features/hospital/hospitalSlice";
 import contactReducer from "./features/contact/contactSlice";
+import productReducer from "./features/product/productSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     user: userReducer,
     hospital: hospitalReducer,
     contact: contactReducer,
+    product: productReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });

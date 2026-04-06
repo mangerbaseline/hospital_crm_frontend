@@ -23,6 +23,7 @@ import {
   LayoutDashboard,
   Kanban,
   LogOut,
+  Package,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -74,6 +75,11 @@ const data = {
       title: "Users",
       url: "/admin/users",
       icon: Users,
+    },
+    {
+      title: "Products",
+      url: "/admin/products",
+      icon: Package,
     },
   ],
 };

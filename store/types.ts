@@ -76,6 +76,7 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   totalUsers?: number;
   totalHospitals?: number;
   totalContacts?: number;
+  totalProducts?: number;
   totalPages: number;
 }
 
@@ -158,6 +159,50 @@ export interface FetchContactsParams {
 }
 
 export interface FetchHospitalsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  Marketprice: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductState {
+  products: Product[];
+  selectedProduct: Product | null;
+  isFetchingProducts: boolean;
+  isGetSingleProductLoading: boolean;
+  isCreateProductLoading: boolean;
+  isUpdateProductLoading: boolean;
+  isDeleteProductLoading: boolean;
+  fetchProductsError: string | null;
+  getSingleProductError: string | null;
+  createProductError: string | null;
+  updateProductError: string | null;
+  deleteProductError: string | null;
+  page: number;
+  limit: number;
+  totalProducts: number;
+  totalPages: number;
+}
+
+export interface CreateProductPayload {
+  name: string;
+  description: string;
+  Marketprice: number;
+}
+
+export interface UpdateProductPayload extends Partial<CreateProductPayload> {
+  id: string;
+}
+
+export interface FetchProductsParams {
   page?: number;
   limit?: number;
   search?: string;
