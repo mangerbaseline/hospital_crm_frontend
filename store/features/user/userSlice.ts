@@ -143,7 +143,7 @@ const userSlice = createSlice({
           state.users = action.payload.data;
           state.page = action.payload.page;
           state.limit = action.payload.limit;
-          state.totalUsers = action.payload.totalUsers;
+          state.totalUsers = action.payload.totalUsers || 0;
           state.totalPages = action.payload.totalPages;
         },
       )
