@@ -168,7 +168,6 @@ export interface Product {
   _id: string;
   name: string;
   description: string;
-  Marketprice: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -195,7 +194,6 @@ export interface ProductState {
 export interface CreateProductPayload {
   name: string;
   description: string;
-  Marketprice: number;
 }
 
 export interface UpdateProductPayload extends Partial<CreateProductPayload> {

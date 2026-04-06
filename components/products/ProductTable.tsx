@@ -38,7 +38,6 @@ export function ProductTable({
             <TableRow>
               <TableHead className="w-[80px]">#</TableHead>
               <TableHead>Product Details</TableHead>
-              <TableHead>Market Price</TableHead>
               <TableHead>Date Added</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -54,9 +53,6 @@ export function ProductTable({
                     <Skeleton className="h-4 w-[200px]" />
                     <Skeleton className="h-3 w-[150px]" />
                   </div>
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-6 w-[80px]" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-[100px]" />
@@ -79,7 +75,6 @@ export function ProductTable({
           <TableRow>
             <TableHead className="w-[80px] pl-6">#</TableHead>
             <TableHead>Product Details</TableHead>
-            <TableHead>Market Price</TableHead>
             <TableHead>Date Added</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -88,7 +83,7 @@ export function ProductTable({
           {products.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={4}
                 className="h-32 text-center text-muted-foreground font-medium"
               >
                 <div className="flex flex-col items-center justify-center gap-2">
@@ -119,15 +114,6 @@ export function ProductTable({
                       {product.description}
                     </span>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <span className="font-medium bg-green-50 text-green-700 px-2 py-1 rounded-md text-sm border border-green-200">
-                    $
-                    {product.Marketprice.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </span>
                 </TableCell>
                 <TableCell>
                   <span className="text-sm text-muted-foreground font-medium">

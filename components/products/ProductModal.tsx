@@ -51,7 +51,6 @@ export function ProductModal({
     defaultValues: {
       name: "",
       description: "",
-      Marketprice: 0,
     },
   });
 
@@ -60,13 +59,11 @@ export function ProductModal({
       reset({
         name: product.name,
         description: product.description,
-        Marketprice: product.Marketprice,
       });
     } else if (!isOpen) {
       reset({
         name: "",
         description: "",
-        Marketprice: 0,
       });
     }
   }, [product, reset, isOpen]);
@@ -109,18 +106,6 @@ export function ProductModal({
               <FieldLabel htmlFor="name">Product Name <span className="text-destructive">*</span></FieldLabel>
               <Input id="name" placeholder="Enter product name" {...register("name")} />
               <FieldError errors={[errors.name]} />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="Marketprice">Market Price ($) <span className="text-destructive">*</span></FieldLabel>
-              <Input
-                id="Marketprice"
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                {...register("Marketprice", { valueAsNumber: true })}
-              />
-              <FieldError errors={[errors.Marketprice]} />
             </Field>
 
             <Field>
