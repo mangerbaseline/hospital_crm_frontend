@@ -4,6 +4,7 @@ import userReducer from "./features/user/userSlice";
 import hospitalReducer from "./features/hospital/hospitalSlice";
 import contactReducer from "./features/contact/contactSlice";
 import productReducer from "./features/product/productSlice";
+import gpoReducer from "./features/gpo/gpoSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     hospital: hospitalReducer,
     contact: contactReducer,
     product: productReducer,
+    gpo: gpoReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });

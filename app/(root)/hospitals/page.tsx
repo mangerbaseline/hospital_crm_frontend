@@ -1,14 +1,8 @@
 import { DashboardHeader } from "@/components/Header";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { HospitalSearchBar } from "@/components/hospitals/HospitalSearchBar";
 import { HospitalCard } from "@/components/hospitals/HospitalCard";
 import { hospitals } from "@/lib/hospital-data";
+import { UserSelect } from "@/components/UserSelect";
 
 function Hospitals() {
   return (
@@ -18,18 +12,7 @@ function Hospitals() {
         title="All Hospitals"
         subTitle="Hospitals organized by expected close date"
       >
-        <Select defaultValue="karlee">
-          <SelectTrigger className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer">
-            <SelectValue placeholder="Select Sales Rep" />
-          </SelectTrigger>
-          <SelectContent className="border-border">
-            <SelectItem value="all">All Sales Reps</SelectItem>
-            <SelectItem value="karlee">Karlee Mason</SelectItem>
-            <SelectItem value="jason">Jason Bobay</SelectItem>
-            <SelectItem value="katie">Katie Zerbe</SelectItem>
-            <SelectItem value="zac">Zac Mires</SelectItem>
-          </SelectContent>
-        </Select>
+        <UserSelect className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer" />
       </DashboardHeader>
 
       {/* searchbar */}

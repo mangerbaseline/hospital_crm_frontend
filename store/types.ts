@@ -77,6 +77,7 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   totalHospitals?: number;
   totalContacts?: number;
   totalProducts?: number;
+  totalGPOs?: number;
   totalPages: number;
 }
 
@@ -201,6 +202,46 @@ export interface UpdateProductPayload extends Partial<CreateProductPayload> {
 }
 
 export interface FetchProductsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface GPO {
+  _id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GPOState {
+  gpos: GPO[];
+  selectedGPO: GPO | null;
+  isFetchingGPOs: boolean;
+  isGetSingleGPOLoading: boolean;
+  isCreateGPOLoading: boolean;
+  isUpdateGPOLoading: boolean;
+  isDeleteGPOLoading: boolean;
+  fetchGPOsError: string | null;
+  getSingleGPOError: string | null;
+  createGPOError: string | null;
+  updateGPOError: string | null;
+  deleteGPOError: string | null;
+  page: number;
+  limit: number;
+  totalGPOs: number;
+  totalPages: number;
+}
+
+export interface CreateGPOPayload {
+  name: string;
+}
+
+export interface UpdateGPOPayload extends Partial<CreateGPOPayload> {
+  id: string;
+}
+
+export interface FetchGPOsParams {
   page?: number;
   limit?: number;
   search?: string;

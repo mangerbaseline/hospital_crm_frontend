@@ -38,6 +38,20 @@ export interface ProductTableProps {
   onDelete: (id: string) => void;
 }
 
+export interface GPOModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  gpo?: import("@/store/types").GPO | null;
+}
+
+export interface GPOTableProps {
+  gpos: import("@/store/types").GPO[];
+  isLoading: boolean;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
 export interface Contact {
   _id: string;
   firstName: string;

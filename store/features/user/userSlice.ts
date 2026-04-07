@@ -33,9 +33,14 @@ export const fetchUsers = createAsyncThunk(
   "user/fetchUsers",
   async (params: FetchUsersParams, { rejectWithValue }) => {
     try {
-      const { page = 1, limit = 10, search = "" } = params;
+      const { page, limit, search = "" } = params;
+      const queryParams = new URLSearchParams();
+      if (page) queryParams.append("page", page.toString());
+      if (limit) queryParams.append("limit", limit.toString());
+      if (search) queryParams.append("search", search);
+
       const response = await axiosInstance.get<PaginatedApiResponse<User[]>>(
-        `/api/user/all-users?page=${page}&limit=${limit}&search=${search}`,
+        `/api/user/all-users?${queryParams.toString()}`,
       );
       return response.data;
     } catch (error: any) {

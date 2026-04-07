@@ -81,6 +81,11 @@ const data = {
       url: "/admin/products",
       icon: Package,
     },
+    {
+      title: "Create GPOs",
+      url: "/admin/create-gpos",
+      icon: ShoppingCart,
+    },
   ],
 };
 
