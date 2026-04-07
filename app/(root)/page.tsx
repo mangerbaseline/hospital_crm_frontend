@@ -8,7 +8,7 @@ import { UpcomingTasks } from "@/components/dashboard/UpcomingTasks";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { SalesPipelineFunnel } from "@/components/dashboard/SalesPipelineFunnel";
 import { DashboardHeader } from "@/components/Header";
-import { AddHospitalModal } from "@/components/dashboard/AddHospitalModel";
+import { AddDealModal } from "@/components/dashboard/AddDealModel";
 import { AddContactModal } from "@/components/dashboard/AddContactModal";
 
 function Home() {
@@ -16,12 +16,12 @@ function Home() {
     <section className="w-full max-w-7xl mx-auto">
       {/* Header */}
       <DashboardHeader>
-        <AddHospitalModal>
+        <AddDealModal>
           <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-3 p-3 md:p-[18px] text-sm cursor-pointer">
             <Building2 className="h-2 w-2 md:h-4 md:w-4" />{" "}
             <span className="md:block hidden">Add Hospital</span>
           </Button>
-        </AddHospitalModal>
+        </AddDealModal>
         <AddContactModal>
           <Button className="flex gap-3 p-3 md:p-[18px] text-sm bg-sidebar border border-border text-foreground cursor-pointer hover:bg-muted shadow-xl shadow-muted">
             <UserPlus className="h-2 w-2 md:h-4 md:w-4" />{" "}

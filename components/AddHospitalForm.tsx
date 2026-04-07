@@ -64,9 +64,9 @@ function AddHospitalForm() {
       gpo: "",
       teamHospital: false,
       magnetHospital: false,
-      notes: "",
       bedsWithMac: 0,
       ICUBeds: 0,
+      competitiveProduct: "",
     },
   });
 
@@ -311,6 +311,7 @@ function AddHospitalForm() {
             <Input
               placeholder="Enter competitive product"
               className="text-xs mt-1.5 h-9 bg-muted"
+              {...register("competitiveProduct")}
             />
           </div>
         </div>
@@ -390,15 +391,6 @@ function AddHospitalForm() {
               )}
             />
           </div>
-        </div>
-
-        <div>
-          <Label className="text-xs font-semibold block">Notes</Label>
-          <Textarea
-            placeholder="Enter any additional notes"
-            className="bg-muted mt-1.5 text-xs min-h-[70px] resize-none"
-            {...register("notes")}
-          />
         </div>
 
         <Button

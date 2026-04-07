@@ -84,17 +84,19 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T> {
 
 export interface Hospital {
   _id: string;
-  idn: { name: string };
+  idn: { _id: string; name: string };
   hospitalName: string;
   address: string;
   user: string;
   city: string;
   state: string;
   zip: string;
-  gpo: string;
+  gpo: string | { _id: string; name: string };
   competitiveProduct: string;
   teamHospital: boolean;
   magnetHospital: boolean;
+  bedsWithMac: number;
+  ICUBeds: number;
   products: string[];
   notes: string;
   contacts: string[];
@@ -140,9 +142,9 @@ export interface CreateHospitalPayload {
   state: string;
   zip: string;
   gpo: string;
+  competitiveProduct: string;
   teamHospital: boolean;
   magnetHospital: boolean;
-  notes: string;
   bedsWithMac: number;
   ICUBeds: number;
 }
@@ -181,6 +183,7 @@ export interface FetchHospitalsParams {
   page?: number;
   limit?: number;
   search?: string;
+  idn?: string;
 }
 
 export interface Product {
