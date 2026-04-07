@@ -65,8 +65,8 @@ const data = {
       icon: Users,
     },
     {
-      title: "Add Hospital",
-      url: "/hospitals/add",
+      title: "Add Deal",
+      url: "/hospitals/add-deal",
       icon: Plus,
     },
   ],
@@ -81,10 +81,22 @@ const data = {
       url: "/admin/products",
       icon: Package,
     },
+  ],
+  create: [
     {
       title: "Create GPOs",
       url: "/admin/create-gpos",
       icon: ShoppingCart,
+    },
+    {
+      title: "Create IDNs",
+      url: "/admin/create-idns",
+      icon: Network,
+    },
+    {
+      title: "Add Hospital",
+      url: "/hospitals/add",
+      icon: Plus,
     },
   ],
 };
@@ -125,6 +137,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu className="gap-2">
               {data.navMain.map((item) => {
+                const isActive =
+                  pathname === item.url ||
+                  (item.title === "Dashboard" && pathname === "/");
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      className={`
+                        h-9 w-full justify-start gap-4 rounded-lg px-3 text-base font-medium transition-colors
+                        ${
+                          isActive
+                            ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
+                            : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
+                        }
+                      `}
+                    >
+                      <Link href={item.url} className="flex items-center gap-4">
+                        <item.icon
+                          className={`h-3 w-3 ${isActive ? "text-white" : "text-[#1e293b]"}`}
+                        />
+                        <span className="text-sm">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Create</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-2">
+              {data.create.map((item) => {
                 const isActive =
                   pathname === item.url ||
                   (item.title === "Dashboard" && pathname === "/");

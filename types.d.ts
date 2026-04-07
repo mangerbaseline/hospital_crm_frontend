@@ -52,6 +52,20 @@ export interface GPOTableProps {
   onDelete: (id: string) => void;
 }
 
+export interface IDNModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  idn?: import("@/store/types").IDN | null;
+}
+
+export interface IDNTableProps {
+  idns: import("@/store/types").IDN[];
+  isLoading: boolean;
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
+}
+
 export interface Contact {
   _id: string;
   firstName: string;

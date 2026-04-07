@@ -78,6 +78,7 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   totalContacts?: number;
   totalProducts?: number;
   totalGPOs?: number;
+  totalIDNs?: number;
   totalPages: number;
 }
 
@@ -242,6 +243,44 @@ export interface UpdateGPOPayload extends Partial<CreateGPOPayload> {
 }
 
 export interface FetchGPOsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface IDN {
+  _id: string;
+  name: string;
+}
+
+export interface IDNState {
+  idns: IDN[];
+  selectedIDN: IDN | null;
+  isFetchingIDNs: boolean;
+  isGetSingleIDNLoading: boolean;
+  isCreateIDNLoading: boolean;
+  isUpdateIDNLoading: boolean;
+  isDeleteIDNLoading: boolean;
+  fetchIDNsError: string | null;
+  getSingleIDNError: string | null;
+  createIDNError: string | null;
+  updateIDNError: string | null;
+  deleteIDNError: string | null;
+  page: number;
+  limit: number;
+  totalIDNs: number;
+  totalPages: number;
+}
+
+export interface CreateIDNPayload {
+  name: string;
+}
+
+export interface UpdateIDNPayload extends Partial<CreateIDNPayload> {
+  id: string;
+}
+
+export interface FetchIDNsParams {
   page?: number;
   limit?: number;
   search?: string;
