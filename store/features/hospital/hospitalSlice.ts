@@ -3,8 +3,10 @@ import axiosInstance from "@/lib/api/axiosInstance";
 import {
   Hospital,
   HospitalState,
+  CreateHospitalPayload,
   FetchHospitalsParams,
   PaginatedApiResponse,
+  ApiResponse,
 } from "@/store/types";
 
 const initialState: HospitalState = {
@@ -12,8 +14,10 @@ const initialState: HospitalState = {
   selectedHospital: null,
   isFetchingHospitals: false,
   isGetSingleHospitalLoading: false,
+  isCreateHospitalLoading: false,
   fetchHospitalsError: null,
   getSingleHospitalError: null,
+  createHospitalError: null,
   page: 1,
   limit: 10,
   totalHospitals: 0,
@@ -39,6 +43,23 @@ export const fetchHospitals = createAsyncThunk(
   },
 );
 
+export const createHospital = createAsyncThunk(
+  "hospital/createHospital",
+  async (payload: CreateHospitalPayload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post<ApiResponse<Hospital>>(
+        "/api/hospital/create",
+        payload,
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create hospital",
+      );
+    }
+  },
+);
+
 const hospitalSlice = createSlice({
   name: "hospital",
   initialState,
@@ -49,8 +70,10 @@ const hospitalSlice = createSlice({
     resetHospitalStatus: (state) => {
       state.isFetchingHospitals = false;
       state.isGetSingleHospitalLoading = false;
+      state.isCreateHospitalLoading = false;
       state.fetchHospitalsError = null;
       state.getSingleHospitalError = null;
+      state.createHospitalError = null;
     },
   },
   extraReducers: (builder) => {
@@ -73,6 +96,22 @@ const hospitalSlice = createSlice({
       .addCase(fetchHospitals.rejected, (state, action) => {
         state.isFetchingHospitals = false;
         state.fetchHospitalsError = action.payload as string;
+      })
+      .addCase(createHospital.pending, (state) => {
+        state.isCreateHospitalLoading = true;
+        state.createHospitalError = null;
+      })
+      .addCase(
+        createHospital.fulfilled,
+        (state, action: PayloadAction<Hospital>) => {
+          state.isCreateHospitalLoading = false;
+          state.hospitals.unshift(action.payload);
+          state.totalHospitals += 1;
+        },
+      )
+      .addCase(createHospital.rejected, (state, action) => {
+        state.isCreateHospitalLoading = false;
+        state.createHospitalError = action.payload as string;
       });
   },
 });

@@ -122,12 +122,29 @@ export interface HospitalState {
   selectedHospital: Hospital | null;
   isFetchingHospitals: boolean;
   isGetSingleHospitalLoading: boolean;
+  isCreateHospitalLoading: boolean;
   fetchHospitalsError: string | null;
   getSingleHospitalError: string | null;
+  createHospitalError: string | null;
   page: number;
   limit: number;
   totalHospitals: number;
   totalPages: number;
+}
+
+export interface CreateHospitalPayload {
+  idn: string;
+  hospitalName: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  gpo: string;
+  teamHospital: boolean;
+  magnetHospital: boolean;
+  notes: string;
+  bedsWithMac: number;
+  ICUBeds: number;
 }
 
 export interface ContactState {
