@@ -10,8 +10,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import AddHospitalForm from "../AddHospitalForm";
 import { useAppSelector } from "@/lib/hooks";
+import AddDealForm from "../AddDealForm";
 
 export function AddHospitalModal({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -36,7 +36,7 @@ export function AddHospitalModal({ children }: { children: React.ReactNode }) {
           <div className="mt-1 text-sm font-medium">{user?.name}</div>
         </div>
 
-        <AddHospitalForm />
+        <AddDealForm />
       </DialogContent>
     </Dialog>
   );
