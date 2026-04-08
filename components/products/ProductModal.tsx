@@ -27,7 +27,10 @@ import {
 } from "@/store/features/product/productSlice";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { productSchema, ProductFormValues } from "@/validations/product.validations";
+import {
+  productSchema,
+  ProductFormValues,
+} from "@/validations/product.validations";
 import { ProductModalProps } from "@/types";
 
 export function ProductModal({
@@ -71,9 +74,7 @@ export function ProductModal({
   const onSubmit = async (data: ProductFormValues) => {
     try {
       if (product) {
-        await dispatch(
-          updateProduct({ id: product._id, ...data }),
-        ).unwrap();
+        await dispatch(updateProduct({ id: product._id, ...data })).unwrap();
         toast.success("Product updated successfully");
       } else {
         await dispatch(createProduct(data)).unwrap();
@@ -82,7 +83,9 @@ export function ProductModal({
       onSuccess?.();
       onClose();
     } catch (error: any) {
-      toast.error(error || `Failed to ${product ? "update" : "create"} product`);
+      toast.error(
+        error || `Failed to ${product ? "update" : "create"} product`,
+      );
     }
   };
 
@@ -92,7 +95,9 @@ export function ProductModal({
     <Dialog open={isOpen} onOpenChange={isLoading ? undefined : onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{product ? "Edit Product" : "Add New Product"}</DialogTitle>
+          <DialogTitle>
+            {product ? "Edit Product" : "Add New Product"}
+          </DialogTitle>
           <DialogDescription>
             {product
               ? "Update the product's information below."
@@ -103,13 +108,21 @@ export function ProductModal({
         <form onSubmit={handleSubmit(onSubmit)}>
           <FieldGroup className="py-4">
             <Field>
-              <FieldLabel htmlFor="name">Product Name <span className="text-destructive">*</span></FieldLabel>
-              <Input id="name" placeholder="Enter product name" {...register("name")} />
+              <FieldLabel htmlFor="name">
+                Product Name <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                id="name"
+                placeholder="Enter product name"
+                {...register("name")}
+              />
               <FieldError errors={[errors.name]} />
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="description">Description <span className="text-destructive">*</span></FieldLabel>
+              <FieldLabel htmlFor="description">
+                Description <span className="text-destructive">*</span>
+              </FieldLabel>
               <Textarea
                 id="description"
                 placeholder="Enter product description"

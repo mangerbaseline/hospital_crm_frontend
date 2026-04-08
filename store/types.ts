@@ -118,18 +118,36 @@ export interface Hospital {
   city: string;
   state: string;
   zip: string;
-  gpo: string | { _id: string; name: string };
-  competitiveProduct: string;
-  teamHospital: boolean;
-  magnetHospital: boolean;
-  bedsWithMac: number;
-  ICUBeds: number;
-  products: string[];
-  notes: string;
-  contacts: string[];
-  documents: string[];
-  createdAt: string;
-  updatedAt: string;
+  gpo: { _id: string; name: string } | string;
+  competitiveProduct?: string;
+  teamHospital?: boolean;
+  magnetHospital?: boolean;
+  bedsWithMac?: number;
+  ICUBeds?: number;
+  products?: string[];
+  notes?: string;
+  contacts: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    designation: string;
+    phoneNumber: string;
+    email: string;
+  }[];
+  documents?: string[];
+  deals?: {
+    _id: string;
+    products: {
+      product: { _id: string; name: string } | any;
+      dealAmount: number;
+      stage: string;
+      expectedCloseDate: string;
+      _id: string;
+      dealDate?: string;
+    }[];
+  }[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Contact {
