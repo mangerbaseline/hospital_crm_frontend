@@ -1,21 +1,27 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/api/axiosInstance";
 import {
-  Hospital,
+  HospitalWithDeals,
   HospitalState,
+  Hospital,
   CreateHospitalPayload,
   FetchHospitalsParams,
+  FetchHospitalsDealsParams,
+  HospitalForSelection,
   PaginatedApiResponse,
   ApiResponse,
 } from "@/store/types";
 
 const initialState: HospitalState = {
   hospitals: [],
+  hospitalsWithDeals: [],
   selectedHospital: null,
   isFetchingHospitals: false,
+  isFetchingHospitalsWithDeals: false,
   isGetSingleHospitalLoading: false,
   isCreateHospitalLoading: false,
   fetchHospitalsError: null,
+  fetchHospitalsWithDealsError: null,
   getSingleHospitalError: null,
   createHospitalError: null,
   page: 1,
@@ -24,19 +30,38 @@ const initialState: HospitalState = {
   totalPages: 1,
 };
 
-export const fetchHospitals = createAsyncThunk(
-  "hospital/fetchHospitals",
+export const fetchHospitalsForSelection = createAsyncThunk(
+  "hospital/fetchHospitalsForSelection",
   async (params: FetchHospitalsParams, { rejectWithValue }) => {
     try {
-      const { page = 1, limit = 10, search = "", idn } = params;
-      let url = `/api/hospital/all-hospitals?page=${page}&limit=${limit}&search=${search}`;
-      if (idn) url += `&idn=${idn}`;
+      const { idn } = params;
+      let url = "/api/hospital/all-hospitals";
+      if (idn) url += `?idn=${idn}`;
       const response =
-        await axiosInstance.get<PaginatedApiResponse<Hospital[]>>(url);
+        await axiosInstance.get<ApiResponse<HospitalForSelection[]>>(url);
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+          "Failed to fetch hospitals for selection",
+      );
+    }
+  },
+);
+
+export const fetchHospitalsWithDeals = createAsyncThunk(
+  "hospital/fetchHospitalsWithDeals",
+  async (params: FetchHospitalsDealsParams, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 10, search = "", userId = "" } = params;
+      let url = `/api/hospital/all-hospitals-deals?page=${page}&limit=${limit}&search=${search}`;
+      if (userId) url += `&userId=${userId}`;
+      const response =
+        await axiosInstance.get<PaginatedApiResponse<HospitalWithDeals[]>>(url);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch hospitals",
+        error.response?.data?.message || "Failed to fetch hospitals with deals",
       );
     }
   },
@@ -84,33 +109,53 @@ const hospitalSlice = createSlice({
     },
     resetHospitalStatus: (state) => {
       state.isFetchingHospitals = false;
+      state.isFetchingHospitalsWithDeals = false;
       state.isGetSingleHospitalLoading = false;
       state.isCreateHospitalLoading = false;
       state.fetchHospitalsError = null;
+      state.fetchHospitalsWithDealsError = null;
       state.getSingleHospitalError = null;
       state.createHospitalError = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchHospitals.pending, (state) => {
+      .addCase(fetchHospitalsForSelection.pending, (state) => {
         state.isFetchingHospitals = true;
         state.fetchHospitalsError = null;
       })
       .addCase(
-        fetchHospitals.fulfilled,
-        (state, action: PayloadAction<PaginatedApiResponse<Hospital[]>>) => {
+        fetchHospitalsForSelection.fulfilled,
+        (state, action: PayloadAction<HospitalForSelection[]>) => {
           state.isFetchingHospitals = false;
-          state.hospitals = action.payload.data;
+          state.hospitals = action.payload;
+        },
+      )
+      .addCase(fetchHospitalsForSelection.rejected, (state, action) => {
+        state.isFetchingHospitals = false;
+        state.fetchHospitalsError = action.payload as string;
+      })
+      .addCase(fetchHospitalsWithDeals.pending, (state) => {
+        state.isFetchingHospitalsWithDeals = true;
+        state.fetchHospitalsWithDealsError = null;
+      })
+      .addCase(
+        fetchHospitalsWithDeals.fulfilled,
+        (
+          state,
+          action: PayloadAction<PaginatedApiResponse<HospitalWithDeals[]>>,
+        ) => {
+          state.isFetchingHospitalsWithDeals = false;
+          state.hospitalsWithDeals = action.payload.data;
           state.page = action.payload.page;
           state.limit = action.payload.limit;
           state.totalHospitals = action.payload.totalHospitals || 0;
           state.totalPages = action.payload.totalPages;
         },
       )
-      .addCase(fetchHospitals.rejected, (state, action) => {
-        state.isFetchingHospitals = false;
-        state.fetchHospitalsError = action.payload as string;
+      .addCase(fetchHospitalsWithDeals.rejected, (state, action) => {
+        state.isFetchingHospitalsWithDeals = false;
+        state.fetchHospitalsWithDealsError = action.payload as string;
       })
       .addCase(createHospital.pending, (state) => {
         state.isCreateHospitalLoading = true;
@@ -120,7 +165,6 @@ const hospitalSlice = createSlice({
         createHospital.fulfilled,
         (state, action: PayloadAction<Hospital>) => {
           state.isCreateHospitalLoading = false;
-          state.hospitals.unshift(action.payload);
           state.totalHospitals += 1;
         },
       )

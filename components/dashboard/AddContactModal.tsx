@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchHospitals } from "@/store/features/hospital/hospitalSlice";
+import { fetchHospitalsForSelection } from "@/store/features/hospital/hospitalSlice";
 import {
   createContact,
   resetContactStatus,
@@ -74,7 +74,7 @@ export function AddContactModal({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (open) {
-      dispatch(fetchHospitals({ limit: 100 }));
+      dispatch(fetchHospitalsForSelection({}));
     }
   }, [open, dispatch]);
 

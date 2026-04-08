@@ -79,7 +79,34 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   totalProducts?: number;
   totalGPOs?: number;
   totalIDNs?: number;
+  totalDeals?: number;
   totalPages: number;
+}
+
+export interface HospitalForSelection {
+  _id: string;
+  idn: { _id: string; name: string };
+  gpo: { _id: string; name: string };
+  hospitalName: string;
+}
+
+export interface HospitalWithDeals {
+  _id: string;
+  hospitalName: string;
+  city: string;
+  state: string;
+  zip: string;
+  idn: { _id: string; name: string; user: string };
+  gpo: { _id: string; name: string; user: string };
+  deals: {
+    products: {
+      product: string;
+      dealAmount: number;
+      stage: string;
+      expectedCloseDate: string;
+      _id: string;
+    }[];
+  }[];
 }
 
 export interface Hospital {
@@ -120,12 +147,15 @@ export interface Contact {
 }
 
 export interface HospitalState {
-  hospitals: Hospital[];
+  hospitals: HospitalForSelection[];
+  hospitalsWithDeals: HospitalWithDeals[];
   selectedHospital: Hospital | null;
   isFetchingHospitals: boolean;
+  isFetchingHospitalsWithDeals: boolean;
   isGetSingleHospitalLoading: boolean;
   isCreateHospitalLoading: boolean;
   fetchHospitalsError: string | null;
+  fetchHospitalsWithDealsError: string | null;
   getSingleHospitalError: string | null;
   createHospitalError: string | null;
   page: number;
@@ -180,10 +210,14 @@ export interface FetchContactsParams {
 }
 
 export interface FetchHospitalsParams {
+  idn?: string;
+}
+
+export interface FetchHospitalsDealsParams {
   page?: number;
   limit?: number;
   search?: string;
-  idn?: string;
+  userId?: string;
 }
 
 export interface Product {
@@ -304,4 +338,53 @@ export interface FetchIDNsParams {
   page?: number;
   limit?: number;
   search?: string;
+}
+
+export enum DealProductStage {
+  DEMO = "Demo",
+  CPA = "CPA",
+  COMMITTEE = "Committee",
+  TRIAL = "Trial",
+  PENDING_DECISION = "Pending Decision",
+  CLOSED_WON = "Closed Won",
+  IMPLEMENTED = "Implemented",
+}
+
+export interface DealProduct {
+  product: string | Product;
+  dealAmount?: number;
+  stage?: DealProductStage;
+  expectedCloseDate?: string | Date;
+}
+
+export interface Deal {
+  _id: string;
+  hospital: string | Hospital;
+  contact?: string | Contact;
+  user: string | User;
+  gpo: string | GPO;
+  idn: string | IDN;
+  products: DealProduct[];
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateDealPayload {
+  hospital: string;
+  idn: string;
+  gpo: string;
+  contact?: string;
+  products: {
+    product: string;
+    dealAmount?: number;
+    stage?: DealProductStage;
+    expectedCloseDate?: string | Date;
+  }[];
+  notes?: string;
+}
+
+export interface DealState {
+  isCreateDealLoading: boolean;
+  createDealError: string | null;
 }

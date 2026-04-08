@@ -19,7 +19,7 @@ function Home() {
         <AddDealModal>
           <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-3 p-3 md:p-[18px] text-sm cursor-pointer">
             <Building2 className="h-2 w-2 md:h-4 md:w-4" />{" "}
-            <span className="md:block hidden">Add Hospital</span>
+            <span className="md:block hidden">Add Deal</span>
           </Button>
         </AddDealModal>
         <AddContactModal>

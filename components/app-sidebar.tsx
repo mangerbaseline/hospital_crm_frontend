@@ -19,11 +19,11 @@ import {
   Network,
   ShoppingCart,
   Users,
-  Plus,
   LayoutDashboard,
   Kanban,
   LogOut,
   Package,
+  Handshake,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -67,7 +67,7 @@ const data = {
     {
       title: "Add Deal",
       url: "/hospitals/add-deal",
-      icon: Plus,
+      icon: Handshake,
     },
   ],
   navAdmin: [
@@ -96,7 +96,7 @@ const data = {
     {
       title: "Add Hospital",
       url: "/hospitals/add",
-      icon: Plus,
+      icon: Building2,
     },
   ],
 };
