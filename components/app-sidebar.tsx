@@ -124,7 +124,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </div>
               <div className="flex flex-1 flex-col justify-center">
                 <span className="text-xl font-bold leading-none tracking-tight">
-                  Hospital CRM
+                  RF Health CRM
                 </span>
               </div>
             </Link>
