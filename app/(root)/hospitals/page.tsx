@@ -8,7 +8,6 @@ import { HospitalCardSkeleton } from "@/components/hospitals/HospitalCardSkeleto
 import { UserSelect } from "@/components/UserSelect";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchHospitalsWithDeals } from "@/store/features/hospital/hospitalSlice";
-import { debounce } from "lodash";
 import { SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,46 +31,35 @@ function Hospitals() {
   } = useAppSelector((state) => state.hospital);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+
   const [selectedUser, setSelectedUser] = useState<string>(
     currentUser?._id || "all",
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const fetchData = useMemo(
-    () =>
-      debounce((search: string, userId: string) => {
-        dispatch(
-          fetchHospitalsWithDeals({
-            page: currentPage,
-            limit: pageSize,
-            search,
-            userId: userId === "all" ? "" : userId,
-          }),
-        );
-      }, 500),
-    [dispatch, currentPage, pageSize],
-  );
-
   useEffect(() => {
-    fetchData(searchQuery, selectedUser);
-    return () => fetchData.cancel();
-  }, [searchQuery, selectedUser, fetchData]);
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   useEffect(() => {
     dispatch(
       fetchHospitalsWithDeals({
         page: currentPage,
         limit: pageSize,
-        search: searchQuery,
+        search: debouncedSearchQuery,
         userId: selectedUser === "all" ? "" : selectedUser,
       }),
     );
-  }, [currentPage, pageSize]);
+  }, [dispatch, currentPage, pageSize, debouncedSearchQuery, selectedUser]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedUser]);
+  }, [debouncedSearchQuery, selectedUser]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {

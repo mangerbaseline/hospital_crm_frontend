@@ -287,15 +287,48 @@ export interface GPO {
   updatedAt?: string;
 }
 
+export interface GPOHospitalWithARR {
+  _id: string;
+  idn: { _id: string; name: string };
+  gpo: string;
+  hospitalName: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  competitiveProduct?: string;
+  teamHospital?: boolean;
+  magnetHospital?: boolean;
+  bedsWithMac?: number;
+  ICUBeds?: number;
+  totalExpectedARR?: number;
+  expectedARRByProduct?: { name: string; amount: number }[];
+}
+
+export interface GPOWithDeals {
+  _id: string;
+  name: string;
+  hospitals: GPOHospitalWithARR[];
+  user: string;
+  createdAt?: string;
+  updatedAt?: string;
+  totalHospitals?: number;
+  gpoTotalExpectedARR?: number;
+  gpoARRByProduct?: { name: string; amount: number }[];
+}
+
 export interface GPOState {
   gpos: GPO[];
+  gposWithDeals: GPOWithDeals[];
   selectedGPO: GPO | null;
   isFetchingGPOs: boolean;
+  isFetchingGPOsWithDeals: boolean;
   isGetSingleGPOLoading: boolean;
   isCreateGPOLoading: boolean;
   isUpdateGPOLoading: boolean;
   isDeleteGPOLoading: boolean;
   fetchGPOsError: string | null;
+  fetchGPOsWithDealsError: string | null;
   getSingleGPOError: string | null;
   createGPOError: string | null;
   updateGPOError: string | null;
@@ -318,6 +351,13 @@ export interface FetchGPOsParams {
   page?: number;
   limit?: number;
   search?: string;
+}
+
+export interface FetchGPOsDealsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  userId?: string;
 }
 
 export interface IDN {

@@ -2,23 +2,28 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/api/axiosInstance";
 import {
   GPO,
+  GPOWithDeals,
   GPOState,
   CreateGPOPayload,
   UpdateGPOPayload,
   ApiResponse,
   PaginatedApiResponse,
   FetchGPOsParams,
+  FetchGPOsDealsParams,
 } from "@/store/types";
 
 const initialState: GPOState = {
   gpos: [],
+  gposWithDeals: [],
   selectedGPO: null,
   isFetchingGPOs: false,
+  isFetchingGPOsWithDeals: false,
   isGetSingleGPOLoading: false,
   isCreateGPOLoading: false,
   isUpdateGPOLoading: false,
   isDeleteGPOLoading: false,
   fetchGPOsError: null,
+  fetchGPOsWithDealsError: null,
   getSingleGPOError: null,
   createGPOError: null,
   updateGPOError: null,
@@ -41,6 +46,24 @@ export const fetchGPOs = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch GPOs",
+      );
+    }
+  },
+);
+
+export const fetchGPOsWithDeals = createAsyncThunk(
+  "gpo/fetchGPOsWithDeals",
+  async (params: FetchGPOsDealsParams, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 10, search = "", userId = "" } = params;
+      let url = `/api/gpo/all-gpo-deals?page=${page}&limit=${limit}&search=${search}`;
+      if (userId) url += `&userId=${userId}`;
+      const response =
+        await axiosInstance.get<PaginatedApiResponse<GPOWithDeals[]>>(url);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch GPOs with deals",
       );
     }
   },
@@ -119,11 +142,13 @@ const gpoSlice = createSlice({
     },
     resetGPOStatus: (state) => {
       state.isFetchingGPOs = false;
+      state.isFetchingGPOsWithDeals = false;
       state.isGetSingleGPOLoading = false;
       state.isCreateGPOLoading = false;
       state.isUpdateGPOLoading = false;
       state.isDeleteGPOLoading = false;
       state.fetchGPOsError = null;
+      state.fetchGPOsWithDealsError = null;
       state.getSingleGPOError = null;
       state.createGPOError = null;
       state.updateGPOError = null;
@@ -141,15 +166,41 @@ const gpoSlice = createSlice({
         (state, action: PayloadAction<PaginatedApiResponse<GPO[]>>) => {
           state.isFetchingGPOs = false;
           state.gpos = action.payload.data;
-          state.page = action.payload.page;
-          state.limit = action.payload.limit;
-          state.totalGPOs = action.payload.totalGPOs || 0;
-          state.totalPages = action.payload.totalPages;
+          const pagination =
+            (action.payload as any).pagination || action.payload;
+          state.page = pagination.page || 1;
+          state.limit = pagination.limit || 10;
+          state.totalGPOs = pagination.total || pagination.totalGPOs || 0;
+          state.totalPages = pagination.totalPages || 1;
         },
       )
       .addCase(fetchGPOs.rejected, (state, action) => {
         state.isFetchingGPOs = false;
         state.fetchGPOsError = action.payload as string;
+      })
+      .addCase(fetchGPOsWithDeals.pending, (state) => {
+        state.isFetchingGPOsWithDeals = true;
+        state.fetchGPOsWithDealsError = null;
+      })
+      .addCase(
+        fetchGPOsWithDeals.fulfilled,
+        (
+          state,
+          action: PayloadAction<PaginatedApiResponse<GPOWithDeals[]>>,
+        ) => {
+          state.isFetchingGPOsWithDeals = false;
+          state.gposWithDeals = action.payload.data;
+          const pagination =
+            (action.payload as any).pagination || action.payload;
+          state.page = pagination.page || 1;
+          state.limit = pagination.limit || 10;
+          state.totalGPOs = pagination.total || pagination.totalGPOs || 0;
+          state.totalPages = pagination.totalPages || 1;
+        },
+      )
+      .addCase(fetchGPOsWithDeals.rejected, (state, action) => {
+        state.isFetchingGPOsWithDeals = false;
+        state.fetchGPOsWithDealsError = action.payload as string;
       })
       .addCase(getSingleGPO.pending, (state) => {
         state.isGetSingleGPOLoading = true;
