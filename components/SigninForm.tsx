@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { loginSchema } from "@/validations/auth.validations";
 import { z } from "zod";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
+import { Eye, EyeOff } from "lucide-react";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -32,6 +35,7 @@ export function SigninForm({
   ...props
 }: React.ComponentProps<"div">) {
   const dispatch = useAppDispatch();
+  const [showPassword, setShowPassword] = useState(false);
   const { isLoading } = useAppSelector((state) => state.auth);
   const router = useRouter();
 
@@ -85,11 +89,24 @@ export function SigninForm({
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input
-                  id="password"
-                  type="password"
-                  {...register("password")}
-                />
+                <InputGroup>
+                  <InputGroupInput
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                  />
+                  <InputGroupAddon align={"inline-end"}>
+                    <Button
+                      type="button"
+                      variant={"ghost"}
+                      size={"icon"}
+                      className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center h-full px-2"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </Button>
+                  </InputGroupAddon>
+                </InputGroup>
                 {errors.password && (
                   <FieldDescription className="text-destructive">
                     {errors.password.message}

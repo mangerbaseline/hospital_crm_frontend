@@ -75,7 +75,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
         )}
       </CardContent>
 
-      <CardFooter className="px-5">
+      <CardFooter className="px-5 mt-auto">
         <Link href={`/hospitals/${hospital._id}`} className="w-full">
           <Button
             variant="secondary"

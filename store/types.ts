@@ -325,15 +325,48 @@ export interface IDN {
   name: string;
 }
 
+export interface IDNHospitalWithARR {
+  _id: string;
+  idn: string;
+  gpo: { _id: string; name: string };
+  hospitalName: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  competitiveProduct?: string;
+  teamHospital?: boolean;
+  magnetHospital?: boolean;
+  bedsWithMac?: number;
+  ICUBeds?: number;
+  totalExpectedARR?: number;
+  expectedARRByProduct?: { name: string; amount: number }[];
+}
+
+export interface IDNWithDeals {
+  _id: string;
+  name: string;
+  hospitals: IDNHospitalWithARR[];
+  user: string;
+  createdAt?: string;
+  updatedAt?: string;
+  totalHospitals?: number;
+  idnTotalExpectedARR?: number;
+  idnARRByProduct?: { name: string; amount: number }[];
+}
+
 export interface IDNState {
   idns: IDN[];
+  idnsWithDeals: IDNWithDeals[];
   selectedIDN: IDN | null;
   isFetchingIDNs: boolean;
+  isFetchingIDNsWithDeals: boolean;
   isGetSingleIDNLoading: boolean;
   isCreateIDNLoading: boolean;
   isUpdateIDNLoading: boolean;
   isDeleteIDNLoading: boolean;
   fetchIDNsError: string | null;
+  fetchIDNsWithDealsError: string | null;
   getSingleIDNError: string | null;
   createIDNError: string | null;
   updateIDNError: string | null;
@@ -356,6 +389,13 @@ export interface FetchIDNsParams {
   page?: number;
   limit?: number;
   search?: string;
+}
+
+export interface FetchIDNsDealsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  userId?: string;
 }
 
 export enum DealProductStage {

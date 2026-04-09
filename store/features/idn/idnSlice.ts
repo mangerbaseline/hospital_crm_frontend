@@ -2,23 +2,28 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/api/axiosInstance";
 import {
   IDN,
+  IDNWithDeals,
   IDNState,
   CreateIDNPayload,
   UpdateIDNPayload,
   ApiResponse,
   PaginatedApiResponse,
   FetchIDNsParams,
+  FetchIDNsDealsParams,
 } from "@/store/types";
 
 const initialState: IDNState = {
   idns: [],
+  idnsWithDeals: [],
   selectedIDN: null,
   isFetchingIDNs: false,
+  isFetchingIDNsWithDeals: false,
   isGetSingleIDNLoading: false,
   isCreateIDNLoading: false,
   isUpdateIDNLoading: false,
   isDeleteIDNLoading: false,
   fetchIDNsError: null,
+  fetchIDNsWithDealsError: null,
   getSingleIDNError: null,
   createIDNError: null,
   updateIDNError: null,
@@ -41,6 +46,24 @@ export const fetchIDNs = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch IDNs",
+      );
+    }
+  },
+);
+
+export const fetchIDNsWithDeals = createAsyncThunk(
+  "idn/fetchIDNsWithDeals",
+  async (params: FetchIDNsDealsParams, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 10, search = "", userId = "" } = params;
+      let url = `/api/idn/all-idns-deals?page=${page}&limit=${limit}&search=${search}`;
+      if (userId) url += `&userId=${userId}`;
+      const response =
+        await axiosInstance.get<PaginatedApiResponse<IDNWithDeals[]>>(url);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch IDNs with deals",
       );
     }
   },
@@ -119,11 +142,13 @@ const idnSlice = createSlice({
     },
     resetIDNStatus: (state) => {
       state.isFetchingIDNs = false;
+      state.isFetchingIDNsWithDeals = false;
       state.isGetSingleIDNLoading = false;
       state.isCreateIDNLoading = false;
       state.isUpdateIDNLoading = false;
       state.isDeleteIDNLoading = false;
       state.fetchIDNsError = null;
+      state.fetchIDNsWithDealsError = null;
       state.getSingleIDNError = null;
       state.createIDNError = null;
       state.updateIDNError = null;
@@ -141,15 +166,41 @@ const idnSlice = createSlice({
         (state, action: PayloadAction<PaginatedApiResponse<IDN[]>>) => {
           state.isFetchingIDNs = false;
           state.idns = action.payload.data;
-          state.page = action.payload.page;
-          state.limit = action.payload.limit;
-          state.totalIDNs = action.payload.totalIDNs || 0;
-          state.totalPages = action.payload.totalPages;
+          const pagination =
+            (action.payload as any).pagination || action.payload;
+          state.page = pagination.page || 1;
+          state.limit = pagination.limit || 10;
+          state.totalIDNs = pagination.total || pagination.totalIDNs || 0;
+          state.totalPages = pagination.totalPages || 1;
         },
       )
       .addCase(fetchIDNs.rejected, (state, action) => {
         state.isFetchingIDNs = false;
         state.fetchIDNsError = action.payload as string;
+      })
+      .addCase(fetchIDNsWithDeals.pending, (state) => {
+        state.isFetchingIDNsWithDeals = true;
+        state.fetchIDNsWithDealsError = null;
+      })
+      .addCase(
+        fetchIDNsWithDeals.fulfilled,
+        (
+          state,
+          action: PayloadAction<PaginatedApiResponse<IDNWithDeals[]>>,
+        ) => {
+          state.isFetchingIDNsWithDeals = false;
+          state.idnsWithDeals = action.payload.data;
+          const pagination =
+            (action.payload as any).pagination || action.payload;
+          state.page = pagination.page || 1;
+          state.limit = pagination.limit || 10;
+          state.totalIDNs = pagination.total || pagination.totalIDNs || 0;
+          state.totalPages = pagination.totalPages || 1;
+        },
+      )
+      .addCase(fetchIDNsWithDeals.rejected, (state, action) => {
+        state.isFetchingIDNsWithDeals = false;
+        state.fetchIDNsWithDealsError = action.payload as string;
       })
       .addCase(getSingleIDN.pending, (state) => {
         state.isGetSingleIDNLoading = true;

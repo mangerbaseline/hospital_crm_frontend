@@ -10,6 +10,7 @@ import {
 } from "@/store/features/hospital/hospitalSlice";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ExpectedARRCard } from "@/components/hospitals/ExpectedARRCard";
 import {
   Building2,
   FileText,
@@ -192,6 +193,10 @@ function HospitalDetails() {
             )}
           </Card>
         )}
+
+      {selectedHospital && !isGetSingleHospitalLoading && (
+        <ExpectedARRCard hospital={selectedHospital} />
+      )}
     </section>
   );
 }
