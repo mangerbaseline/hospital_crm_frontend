@@ -482,7 +482,77 @@ export interface CreateDealPayload {
   notes?: string;
 }
 
+export interface PipelineDeal {
+  _id: string;
+  dealId: string;
+  hospital: {
+    _id: string;
+    idn: { _id: string; name: string };
+    gpo: { _id: string; name: string };
+    hospitalName: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  product: {
+    _id: string;
+    name: string;
+    description: string;
+    Marketprice: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+  dealAmount: number;
+  stage: string | DealProductStage;
+  expectedCloseDate: string;
+  dealDate?: string;
+}
+
+export interface FetchAllDealsParams {
+  userId?: string;
+}
+
+export interface ProductRevenue {
+  ARR: number;
+  productId: string;
+  productName: string;
+}
+
+export interface FetchAllDealsResponse {
+  success: boolean;
+  totalDeals: number;
+  totalHospitals: number;
+  closedBusiness: number;
+  productRevenue: ProductRevenue[];
+  data: PipelineDeal[];
+}
+
+export interface UpdateDealStagePayload {
+  hospitalId: string;
+  dealId: string;
+  productId: string;
+  stage: string;
+}
+
 export interface DealState {
   isCreateDealLoading: boolean;
   createDealError: string | null;
+  deals: PipelineDeal[];
+  isFetchingDeals: boolean;
+  fetchDealsError: string | null;
+  isUpdateDealStageLoading: boolean;
+  updateDealStageError: string | null;
+  stats: {
+    totalHospitals: number;
+    closedBusiness: number;
+    productRevenue: ProductRevenue[];
+  } | null;
 }

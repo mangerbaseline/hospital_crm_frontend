@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
   closestCorners,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragStartEvent,
@@ -15,119 +16,34 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { PipelineColumn, ColumnData } from "./PipelineColumn";
-import { PipelineCard, Deal } from "./PipelineCard";
+import { PipelineCard, PipelineCardDeal } from "./PipelineCard";
+import { useAppSelector, useAppDispatch } from "@/lib/hooks";
+import { DealProductStage } from "@/store/types";
+import { updateDealStage } from "@/store/features/deal/dealSlice";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const initialData: Record<string, ColumnData> = {
-  demo: {
-    id: "demo",
-    title: "Demo",
-    color: "#3b82f6",
-    deals: [
-      {
-        id: "d1",
-        hospitalName: "VA Palo Alto Health Care System",
-        location: "Palo Alto, CA",
-        product: "MAC System",
-        arr: 225,
-        idn: "VA",
-        gpo: "VA",
-      },
-    ],
-  },
-  cpa: {
-    id: "cpa",
-    title: "CPA",
-    color: "#8b5cf6",
-    deals: [
-      {
-        id: "d2",
-        hospitalName: "St. Joseph Medical Center",
-        location: "Webster, TX",
-        product: "ELEVATE",
-        arr: 145,
-        idn: "CommonSpirit Health",
-        gpo: "Premier",
-      },
-    ],
-  },
+const emptyColumnsSkeleton: Record<string, ColumnData> = {
+  demo: { id: "demo", title: "Demo", color: "#3b82f6", deals: [] },
+  cpa: { id: "cpa", title: "CPA", color: "#8b5cf6", deals: [] },
   committee: {
     id: "committee",
     title: "Committee",
     color: "#ff8c00",
-    deals: [
-      {
-        id: "d3",
-        hospitalName: "St. Joseph Medical Center",
-        location: "Webster, TX",
-        product: "MAC System",
-        arr: 89,
-        idn: "CommonSpirit Health",
-        gpo: "Premier",
-      },
-    ],
+    deals: [],
   },
-  trial: {
-    id: "trial",
-    title: "Trial",
-    color: "#eab308",
-    deals: [
-      {
-        id: "d4",
-        hospitalName: "AdventHealth Orlando",
-        location: "Orlando, FL",
-        product: "MAC System",
-        arr: 185,
-        idn: "AdventHealth",
-        gpo: "HealthTrust",
-      },
-    ],
-  },
+  trial: { id: "trial", title: "Trial", color: "#eab308", deals: [] },
   pending: {
     id: "pending",
     title: "Pending Decision",
     color: "#ec4899",
-    deals: [
-      {
-        id: "d5",
-        hospitalName: "AdventHealth Orlando",
-        location: "Orlando, FL",
-        product: "HeelPOD",
-        arr: 95,
-        idn: "AdventHealth",
-        gpo: "HealthTrust",
-      },
-    ],
-  },
-  closed: {
-    id: "closed",
-    title: "Closed Won",
-    color: "#22c55e",
     deals: [],
   },
+  closed: { id: "closed", title: "Closed Won", color: "#22c55e", deals: [] },
   implemented: {
     id: "implemented",
     title: "Implemented",
     color: "#16a34a",
-    deals: [
-      {
-        id: "d6",
-        hospitalName: "NYU Langone Tisch Hospital",
-        location: "New York, NY",
-        product: "MAC System",
-        arr: 195,
-        idn: "NYU Langone Health",
-        gpo: "Premier",
-      },
-      {
-        id: "d7",
-        hospitalName: "NYU Langone Tisch Hospital",
-        location: "New York, NY",
-        product: "HeelPOD",
-        arr: 88,
-        idn: "NYU Langone Health",
-        gpo: "Premier",
-      },
-    ],
+    deals: [],
   },
 };
 
@@ -141,15 +57,92 @@ const columnOrder = [
   "implemented",
 ];
 
-export function PipelineBoard() {
+const stageToColumnId = (stage?: string) => {
+  switch (stage) {
+    case DealProductStage.DEMO:
+      return "demo";
+    case DealProductStage.CPA:
+      return "cpa";
+    case DealProductStage.COMMITTEE:
+      return "committee";
+    case DealProductStage.TRIAL:
+      return "trial";
+    case DealProductStage.PENDING_DECISION:
+      return "pending";
+    case DealProductStage.CLOSED_WON:
+      return "closed";
+    case DealProductStage.IMPLEMENTED:
+      return "implemented";
+    default:
+      return "demo";
+  }
+};
+
+const columnIdToStage = (id: string) => {
+  switch (id) {
+    case "demo":
+      return DealProductStage.DEMO;
+    case "cpa":
+      return DealProductStage.CPA;
+    case "committee":
+      return DealProductStage.COMMITTEE;
+    case "trial":
+      return DealProductStage.TRIAL;
+    case "pending":
+      return DealProductStage.PENDING_DECISION;
+    case "closed":
+      return DealProductStage.CLOSED_WON;
+    case "implemented":
+      return DealProductStage.IMPLEMENTED;
+    default:
+      return DealProductStage.DEMO;
+  }
+};
+
+interface PipelineBoardProps {
+  onStageChange?: () => void;
+}
+
+export function PipelineBoard({ onStageChange }: PipelineBoardProps = {}) {
+  const dispatch = useAppDispatch();
+  const { deals, isFetchingDeals } = useAppSelector((state) => state.deal);
+
+  const derivedColumns = useMemo(() => {
+    const cols = JSON.parse(JSON.stringify(emptyColumnsSkeleton)) as Record<
+      string,
+      ColumnData
+    >;
+    deals.forEach((deal) => {
+      const colId = stageToColumnId(deal.stage as string);
+      const pipelineCardDeal: PipelineCardDeal = {
+        ...deal,
+        id: `${deal._id}-${deal.product?._id || Math.random()}`,
+      };
+      if (cols[colId]) {
+        cols[colId].deals.push(pipelineCardDeal);
+      }
+    });
+    return cols;
+  }, [deals]);
+
   const [columns, setColumns] =
-    useState<Record<string, ColumnData>>(initialData);
-  const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
+    useState<Record<string, ColumnData>>(derivedColumns);
+  const [activeDeal, setActiveDeal] = useState<PipelineCardDeal | null>(null);
+
+  useEffect(() => {
+    setColumns(derivedColumns);
+  }, [derivedColumns]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
         distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -160,7 +153,7 @@ export function PipelineBoard() {
   const onDragStart = (event: DragStartEvent) => {
     const { active } = event;
     if (active.data.current?.type !== "Column") {
-      setActiveDeal(active.data.current as Deal);
+      setActiveDeal(active.data.current as PipelineCardDeal);
     }
   };
 
@@ -268,33 +261,76 @@ export function PipelineBoard() {
         return prev;
       });
     }
+
+    if (activeDeal) {
+      const newStage = columnIdToStage(overColumnId!);
+
+      if (activeDeal.stage !== newStage) {
+        dispatch(
+          updateDealStage({
+            hospitalId: activeDeal.hospital._id,
+            dealId: activeDeal.dealId,
+            productId: activeDeal.product._id,
+            stage: newStage,
+          }),
+        )
+          .unwrap()
+          .then(() => {
+            if (onStageChange) onStageChange();
+          });
+      }
+    }
   };
 
   return (
     <div className="w-full min-h-[450px] pt-6 min-w-0 max-w-full flex flex-col">
-      <div className="w-full flex-1 overflow-x-auto pb-4">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={onDragStart}
-          onDragOver={onDragOver}
-          onDragEnd={onDragEnd}
-        >
-          <div className="flex gap-4 min-w-max pr-4 h-full outline-none">
-            {columnOrder.map((columnId) => (
-              <PipelineColumn key={columnId} column={columns[columnId]} />
-            ))}
-          </div>
-
-          <DragOverlay>
-            {activeDeal ? (
-              <div className="opacity-90 scale-[1.02] shadow-xl z-50">
-                <PipelineCard deal={activeDeal} index={0} />
+      {isFetchingDeals ? (
+        <div className="flex-1 w-full overflow-x-hidden flex gap-4">
+          {Array.from({ length: 7 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex flex-col h-full w-[280px] shrink-0 bg-muted/20 rounded-xl border border-border/50 p-3"
+            >
+              <div className="flex items-center justify-between mb-4 mt-1">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="w-2.5 h-2.5 rounded-full" />
+                  <Skeleton className="h-4 w-24 rounded" />
+                </div>
+                <Skeleton className="h-3 w-8" />
               </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-      </div>
+              <div className="flex flex-col gap-3 mt-2">
+                <Skeleton className="h-32 w-full rounded-lg" />
+                <Skeleton className="h-32 w-full rounded-lg" />
+                {i % 2 === 0 && <Skeleton className="h-32 w-full rounded-lg" />}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="w-full flex-1 overflow-x-auto pb-4">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDragEnd={onDragEnd}
+          >
+            <div className="flex gap-4 min-w-max pr-4 h-full outline-none">
+              {columnOrder.map((columnId) => (
+                <PipelineColumn key={columnId} column={columns[columnId]} />
+              ))}
+            </div>
+
+            <DragOverlay>
+              {activeDeal ? (
+                <div className="opacity-90 scale-[1.02] shadow-xl z-50">
+                  <PipelineCard deal={activeDeal} index={0} />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        </div>
+      )}
     </div>
   );
 }

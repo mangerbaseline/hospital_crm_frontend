@@ -5,14 +5,14 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { PipelineCard, Deal } from "./PipelineCard";
+import { PipelineCard, PipelineCardDeal } from "./PipelineCard";
 import { cn } from "@/lib/utils";
 
 export interface ColumnData {
   id: string;
   title: string;
   color: string;
-  deals: Deal[];
+  deals: PipelineCardDeal[];
 }
 
 interface KanbanColumnProps {
@@ -36,7 +36,10 @@ export function PipelineColumn({ column }: KanbanColumnProps) {
     },
   });
 
-  const totalArr = column.deals.reduce((sum, deal) => sum + deal.arr, 0);
+  const totalArr = column.deals.reduce(
+    (sum, deal) => sum + (deal.dealAmount || 0),
+    0,
+  );
 
   return (
     <div className="flex flex-col h-full w-[280px] shrink-0 bg-muted/40 rounded-xl border border-border/50 p-3">

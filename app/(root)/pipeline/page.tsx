@@ -1,15 +1,35 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { fetchAllDeals } from "@/store/features/deal/dealSlice";
 import { DashboardHeader } from "@/components/Header";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { UserSelect } from "@/components/UserSelect";
 import { PipelineStatsCard } from "@/components/pipeline/PipelineStatsCard";
 import { PipelineBoard } from "@/components/pipeline/PipelineBoard";
 
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 function Pipeline() {
+  const { user: currentUser } = useAppSelector((state) => state.auth);
+  const { stats } = useAppSelector((state) => state.deal);
+  const [selectedUserId, setSelectedUserId] = useState<string>(
+    currentUser?._id || "all",
+  );
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(
+      fetchAllDeals(selectedUserId === "all" ? {} : { userId: selectedUserId }),
+    );
+  }, [selectedUserId, dispatch]);
+
   return (
     <div>
       <section className="w-full max-w-7xl mx-auto">
@@ -18,32 +38,51 @@ function Pipeline() {
           title="Pipeline"
           subTitle="Track deals across all stages"
         >
-          <Select defaultValue="karlee">
-            <SelectTrigger className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer">
-              <SelectValue placeholder="Select Sales Rep" />
-            </SelectTrigger>
-            <SelectContent className="border-border">
-              <SelectItem value="all">All Sales Reps</SelectItem>
-              <SelectItem value="karlee">Karlee Mason</SelectItem>
-              <SelectItem value="jason">Jason Bobay</SelectItem>
-              <SelectItem value="katie">Katie Zerbe</SelectItem>
-              <SelectItem value="zac">Zac Mires</SelectItem>
-            </SelectContent>
-          </Select>
+          <UserSelect
+            value={selectedUserId}
+            onValueChange={setSelectedUserId}
+            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+          />
         </DashboardHeader>
 
         {/* stats */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5 w-full">
-          <PipelineStatsCard value="6" label="My Hospitals" />
-          <PipelineStatsCard value="$183,000" label="HeelPOD ARR" />
-          <PipelineStatsCard value="$859,500" label="MAC System ARR" />
-          <PipelineStatsCard value="$418,000" label="ELEVATE ARR" />
-          <PipelineStatsCard value="0" label="Closed Business" />
+          <PipelineStatsCard
+            value={stats ? String(stats.totalHospitals) : "-"}
+            label="My Hospitals"
+          />
+          {stats?.productRevenue ? (
+            stats.productRevenue.map((prod) => (
+              <PipelineStatsCard
+                key={prod.productId}
+                value={formatCurrency(prod.ARR)}
+                label={`${prod.productName} ARR`}
+              />
+            ))
+          ) : (
+            <>
+              <PipelineStatsCard value="-" label="Loading ARR..." />
+              <PipelineStatsCard value="-" label="Loading ARR..." />
+              <PipelineStatsCard value="-" label="Loading ARR..." />
+            </>
+          )}
+          <PipelineStatsCard
+            value={stats ? stats.closedBusiness : "-"}
+            label="Closed Business"
+          />
         </div>
       </section>
 
       {/* kanban */}
-      <PipelineBoard />
+      <PipelineBoard
+        onStageChange={() => {
+          dispatch(
+            fetchAllDeals(
+              selectedUserId === "all" ? {} : { userId: selectedUserId },
+            ),
+          );
+        }}
+      />
     </div>
   );
 }
