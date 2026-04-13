@@ -1,0 +1,217 @@
+"use client";
+
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { format } from "date-fns";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  createActivity,
+  fetchAllActivities,
+} from "@/store/features/activity/activitySlice";
+import { ActivityType } from "@/store/types";
+import { toast } from "sonner";
+
+const logCallSchema = z.object({
+  Date: z.date(),
+  contact: z.string().optional(),
+  notes: z.string().min(1, "Call notes cannot be empty"),
+});
+
+type LogCallFormValues = z.infer<typeof logCallSchema>;
+
+interface LogCallModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  hospitalId: string;
+  contacts: { _id: string; firstName: string; lastName: string }[];
+}
+
+export function LogCallModal({
+  isOpen,
+  onClose,
+  hospitalId,
+  contacts,
+}: LogCallModalProps) {
+  const dispatch = useAppDispatch();
+  const { isCreateActivityLoading } = useAppSelector((state) => state.activity);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<LogCallFormValues>({
+    resolver: zodResolver(logCallSchema),
+    defaultValues: {
+      Date: new Date(),
+      contact: "",
+      notes: "",
+    },
+  });
+
+  const onSubmit = async (data: LogCallFormValues) => {
+    try {
+      await dispatch(
+        createActivity({
+          type: ActivityType.CALL_LOG,
+          data: {
+            Date: data.Date.toISOString(),
+            contact: data.contact || "",
+            notes: data.notes,
+            hospital: hospitalId,
+          },
+        }),
+      ).unwrap();
+
+      toast.success("Call logged successfully");
+      dispatch(fetchAllActivities({ hospitalId: hospitalId }));
+      reset();
+      onClose();
+    } catch (error: any) {
+      toast.error(error || "Failed to log call");
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px] rounded-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">Log Call</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Record details about a call with this hospital.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-2 mb-4">
+            <Label className="text-sm font-bold">Date</Label>
+            <Controller
+              control={control}
+              name="Date"
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-10 bg-muted border-border rounded-xl px-3",
+                        !field.value && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? (
+                        format(field.value, "dd-MM-yyyy")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+            {errors.Date && (
+              <p className="text-xs text-destructive font-medium">
+                {errors.Date.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 mb-4">
+            <Label className="text-sm font-bold">Contact (Optional)</Label>
+            <Controller
+              control={control}
+              name="contact"
+              render={({ field }) => (
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full h-10 bg-muted border-border rounded-xl px-3">
+                    <SelectValue placeholder="Select a contact" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {contacts.map((contact) => (
+                      <SelectItem key={contact._id} value={contact._id}>
+                        {contact.firstName} {contact.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2 mb-4">
+            <Label htmlFor="call-notes" className="text-sm font-bold">
+              Call Notes
+            </Label>
+            <Textarea
+              id="call-notes"
+              placeholder="Enter details about the call..."
+              className="min-h-[80px] bg-muted border-border rounded-xl resize-none"
+              {...register("notes")}
+            />
+            {errors.notes && (
+              <p className="text-xs text-destructive font-medium">
+                {errors.notes.message}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className="p-2">
+            <Button
+              type="submit"
+              disabled={isCreateActivityLoading}
+              className="bg-black text-white hover:bg-black/90 rounded-lg p-4 cursor-pointer"
+            >
+              {isCreateActivityLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Logging...
+                </>
+              ) : (
+                "Log Call"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

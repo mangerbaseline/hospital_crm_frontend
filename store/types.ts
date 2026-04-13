@@ -556,3 +556,108 @@ export interface DealState {
     productRevenue: ProductRevenue[];
   } | null;
 }
+
+export enum ActivityType {
+  CALL_LOG = "callLog",
+  TASK = "task",
+  NOTE = "note",
+}
+
+export interface CallLogData {
+  Date: string | Date;
+  contact: string;
+  notes: string;
+  hospital: string;
+}
+
+export interface NoteData {
+  notes: string;
+  hospital: string;
+}
+
+export interface TaskData {
+  title: string;
+  description: string;
+  dueDate: string | Date;
+  hospital: string;
+  reminders: ("email" | "push")[];
+}
+
+export interface CreateActivityPayload {
+  type: ActivityType;
+  data: CallLogData | NoteData | TaskData;
+}
+
+export interface DeleteActivityPayload {
+  id: string;
+  type: ActivityType;
+}
+
+export interface ActivityHospital {
+  _id: string;
+  hospitalName: string;
+}
+
+export interface ActivityContact {
+  _id: string;
+  firstName: string;
+}
+
+export interface TaskActivity {
+  _id: string;
+  activityType: ActivityType.TASK;
+  title: string;
+  description: string;
+  dueDate: string;
+  hospital: ActivityHospital;
+  user: string;
+  reminders: ("email" | "push")[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CallLogActivity {
+  _id: string;
+  activityType: ActivityType.CALL_LOG;
+  Date: string;
+  contact: ActivityContact;
+  notes: string;
+  hospital: ActivityHospital;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface NoteActivity {
+  _id: string;
+  activityType: ActivityType.NOTE;
+  notes: string;
+  hospital: ActivityHospital;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ActivityItem = TaskActivity | CallLogActivity | NoteActivity;
+
+export interface FetchActivitiesParams {
+  hospitalId?: string;
+  limit?: number;
+}
+
+export interface FetchAllActivitiesResponse {
+  success: boolean;
+  total: number;
+  data: ActivityItem[];
+}
+
+export interface ActivityState {
+  activities: ActivityItem[];
+  totalActivities: number;
+  isFetchingActivities: boolean;
+  fetchActivitiesError: string | null;
+  isCreateActivityLoading: boolean;
+  createActivityError: string | null;
+  isDeleteActivityLoading: boolean;
+  deleteActivityError: string | null;
+}

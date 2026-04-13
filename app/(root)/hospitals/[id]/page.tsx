@@ -11,6 +11,8 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExpectedARRCard } from "@/components/hospitals/ExpectedARRCard";
+import { RecentActivity } from "@/components/hospitals/activities/RecentActivity";
+import { HospitalContacts } from "@/components/hospitals/HospitalContacts";
 import {
   Building2,
   FileText,
@@ -196,6 +198,16 @@ function HospitalDetails() {
 
       {selectedHospital && !isGetSingleHospitalLoading && (
         <ExpectedARRCard hospital={selectedHospital} />
+      )}
+
+      {selectedHospital && !isGetSingleHospitalLoading && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <RecentActivity
+            hospitalId={selectedHospital._id}
+            hospitalName={selectedHospital.hospitalName}
+          />
+          <HospitalContacts contacts={selectedHospital.contacts || []} />
+        </div>
       )}
     </section>
   );
