@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ExpectedARRCard } from "@/components/hospitals/ExpectedARRCard";
 import { RecentActivity } from "@/components/hospitals/activities/RecentActivity";
 import { HospitalContacts } from "@/components/hospitals/HospitalContacts";
+import { HospitalDocuments } from "@/components/hospitals/HospitalDocuments";
 import {
   Building2,
   FileText,
@@ -207,6 +208,13 @@ function HospitalDetails() {
             hospitalName={selectedHospital.hospitalName}
           />
           <HospitalContacts contacts={selectedHospital.contacts || []} />
+        </div>
+      )}
+
+      {selectedHospital && !isGetSingleHospitalLoading && (
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div></div>
+          <HospitalDocuments hospitalId={selectedHospital._id} />
         </div>
       )}
     </section>

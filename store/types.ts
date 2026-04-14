@@ -661,3 +661,42 @@ export interface ActivityState {
   isDeleteActivityLoading: boolean;
   deleteActivityError: string | null;
 }
+
+export enum DocumentCategory {
+  CONTRACT = "Contract",
+  REPORT = "Report",
+  QUOTE = "Quote",
+  PRESENTATION = "Presentation",
+  OTHER = "Other",
+}
+
+export interface HospitalDocument {
+  _id: string;
+  name: string;
+  category: DocumentCategory;
+  fileUrl: string;
+  filename: string;
+  hospital: string;
+  user: { _id: string; name: string; email: string } | string;
+  fileSize: number;
+  fileType: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UploadDocumentPayload {
+  file: File;
+  name: string;
+  category: DocumentCategory;
+  hospitalId: string;
+}
+
+export interface DocumentState {
+  documents: HospitalDocument[];
+  isFetchingDocuments: boolean;
+  fetchDocumentsError: string | null;
+  isUploadingDocument: boolean;
+  uploadDocumentError: string | null;
+  isDeletingDocument: boolean;
+  deleteDocumentError: string | null;
+}

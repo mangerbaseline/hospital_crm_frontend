@@ -8,6 +8,7 @@ import gpoReducer from "./features/gpo/gpoSlice";
 import idnReducer from "./features/idn/idnSlice";
 import dealReducer from "./features/deal/dealSlice";
 import activityReducer from "./features/activity/activitySlice";
+import documentReducer from "./features/document/documentSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     idn: idnReducer,
     deal: dealReducer,
     activity: activityReducer,
+    document: documentReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });
