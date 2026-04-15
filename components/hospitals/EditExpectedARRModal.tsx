@@ -1,0 +1,363 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Plus, X } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { fetchProducts } from "@/store/features/product/productSlice";
+import {
+  addDealProduct,
+  updateDealProduct,
+  removeDealProduct,
+} from "@/store/features/deal/dealSlice";
+import { getSingleHospital } from "@/store/features/hospital/hospitalSlice";
+import { toast } from "sonner";
+import { Hospital, DealProductStage } from "@/store/types";
+
+interface ProductItem {
+  _id: string;
+  productId: string;
+  productName: string;
+  dealAmount: number;
+  stage: string;
+  expectedCloseDate: string;
+  isNew?: boolean;
+  isRemoved?: boolean;
+  isDirty?: boolean;
+}
+
+interface EditExpectedARRModalProps {
+  hospital: Hospital;
+  children: React.ReactNode;
+}
+
+const stageOptions = Object.values(DealProductStage);
+
+export function EditExpectedARRModal({
+  hospital,
+  children,
+}: EditExpectedARRModalProps) {
+  const dispatch = useAppDispatch();
+  const { products } = useAppSelector((state) => state.product);
+  const { isDealProductLoading } = useAppSelector((state) => state.deal);
+
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<ProductItem[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
+
+      const deals = hospital.deals || [];
+      const allProducts = deals.flatMap((deal) =>
+        (deal.products || []).map((p) => ({
+          _id: p._id,
+          productId:
+            typeof p.product === "object" && p.product !== null
+              ? p.product._id
+              : p.product || "",
+          productName:
+            typeof p.product === "object" && p.product !== null
+              ? p.product.name
+              : "Unknown Product",
+          dealAmount: p.dealAmount || 0,
+          stage: p.stage || DealProductStage.DEMO,
+          expectedCloseDate: p.expectedCloseDate
+            ? new Date(p.expectedCloseDate).toISOString().split("T")[0]
+            : "",
+          isNew: false,
+          isRemoved: false,
+          isDirty: false,
+        })),
+      );
+      setItems(allProducts);
+    }
+  }, [open, hospital, dispatch, products.length]);
+
+  const handleAddProduct = () => {
+    setItems((prev) => [
+      ...prev,
+      {
+        _id: `new-${Date.now()}`,
+        productId: "",
+        productName: "",
+        dealAmount: 0,
+        stage: DealProductStage.DEMO,
+        expectedCloseDate: "",
+        isNew: true,
+        isRemoved: false,
+        isDirty: false,
+      },
+    ]);
+  };
+
+  const handleRemoveProduct = (id: string) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item._id === id ? { ...item, isRemoved: true } : item,
+      ),
+    );
+  };
+
+  const handleFieldChange = (
+    id: string,
+    field: keyof ProductItem,
+    value: any,
+  ) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item._id === id ? { ...item, [field]: value, isDirty: true } : item,
+      ),
+    );
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const promises: Promise<any>[] = [];
+
+      const removedItems = items.filter(
+        (item) => item.isRemoved && !item.isNew,
+      );
+      for (const item of removedItems) {
+        promises.push(
+          dispatch(
+            removeDealProduct({
+              hospitalId: hospital._id,
+              productItemId: item._id,
+            }),
+          ).unwrap(),
+        );
+      }
+
+      const updatedItems = items.filter(
+        (item) => item.isDirty && !item.isNew && !item.isRemoved,
+      );
+      for (const item of updatedItems) {
+        promises.push(
+          dispatch(
+            updateDealProduct({
+              hospitalId: hospital._id,
+              productItemId: item._id,
+              dealAmount: item.dealAmount,
+              stage: item.stage,
+              expectedCloseDate: item.expectedCloseDate || undefined,
+            }),
+          ).unwrap(),
+        );
+      }
+
+      const newItems = items.filter(
+        (item) => item.isNew && !item.isRemoved && item.productId,
+      );
+      for (const item of newItems) {
+        promises.push(
+          dispatch(
+            addDealProduct({
+              hospitalId: hospital._id,
+              product: item.productId,
+              dealAmount: item.dealAmount,
+              stage: item.stage,
+              expectedCloseDate: item.expectedCloseDate || undefined,
+            }),
+          ).unwrap(),
+        );
+      }
+
+      await Promise.all(promises);
+      toast.success("Products updated successfully");
+      dispatch(getSingleHospital(hospital._id));
+      setOpen(false);
+    } catch (error: any) {
+      toast.error(error || "Failed to update products");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const visibleItems = items.filter((item) => !item.isRemoved);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-bold">
+            Edit Expected ARR
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Update product amounts, stages, and expected close dates
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-4 mt-2">
+          {visibleItems.length === 0 && (
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              No products yet. Add one below.
+            </div>
+          )}
+
+          {visibleItems.map((item) => (
+            <div
+              key={item._id}
+              className="rounded-xl border border-border p-4 flex flex-col gap-3 relative"
+            >
+              <div className="flex items-center justify-between">
+                {item.isNew ? (
+                  <Select
+                    value={item.productId}
+                    onValueChange={(val) => {
+                      const prod = products.find((p) => p._id === val);
+                      handleFieldChange(item._id, "productId", val);
+                      handleFieldChange(
+                        item._id,
+                        "productName",
+                        prod?.name || "",
+                      );
+                    }}
+                  >
+                    <SelectTrigger className="w-full text-sm h-9 bg-muted font-semibold">
+                      <SelectValue placeholder="Select Product" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.map((prod) => (
+                        <SelectItem key={prod._id} value={prod._id}>
+                          {prod.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <h4 className="text-sm font-bold">{item.productName}</h4>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRemoveProduct(item._id)}
+                  className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold">Amount</Label>
+                <div className="relative mt-1.5">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-semibold">
+                    $
+                  </span>
+                  <Input
+                    type="number"
+                    value={item.dealAmount}
+                    onChange={(e) =>
+                      handleFieldChange(
+                        item._id,
+                        "dealAmount",
+                        Number(e.target.value),
+                      )
+                    }
+                    className="text-xs h-9 bg-muted pl-7"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold">Deal Stage</Label>
+                <Select
+                  value={item.stage}
+                  onValueChange={(val) =>
+                    handleFieldChange(item._id, "stage", val)
+                  }
+                >
+                  <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
+                    <SelectValue placeholder="Select stage" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stageOptions.map((stage) => (
+                      <SelectItem key={stage} value={stage}>
+                        {stage}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold">
+                  Expected Close Date
+                </Label>
+                <Input
+                  type="date"
+                  value={item.expectedCloseDate}
+                  onChange={(e) =>
+                    handleFieldChange(
+                      item._id,
+                      "expectedCloseDate",
+                      e.target.value,
+                    )
+                  }
+                  className="text-xs h-9 mt-1.5 bg-muted"
+                />
+              </div>
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddProduct}
+            className="w-full h-10 border-dashed border-border text-sm font-medium gap-2 cursor-pointer hover:bg-muted"
+          >
+            <Plus className="h-4 w-4" /> Add Product
+          </Button>
+        </div>
+
+        <DialogFooter className="mt-4 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+            className="cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            disabled={isSaving}
+            onClick={handleSave}
+            className="bg-[#09090b] text-white hover:bg-[#27272a] cursor-pointer font-semibold"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Changes"
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

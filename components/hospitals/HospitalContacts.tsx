@@ -1,5 +1,7 @@
 "use client";
 
+import { AddContactModal } from "@/components/dashboard/AddContactModal";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserPlus, User, Mail, Phone } from "lucide-react";
@@ -17,20 +19,23 @@ interface HospitalContactsProps {
     email: string;
     isPrimary?: boolean;
   }[];
+  hospital?: any;
 }
 
-export function HospitalContacts({ contacts }: HospitalContactsProps) {
+export function HospitalContacts({ contacts, hospital }: HospitalContactsProps) {
   return (
     <Card className="flex flex-col h-full min-h-0 p-6 shadow-md border border-border rounded-xl bg-card">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold text-foreground">Contacts</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-9 px-4 border-border text-foreground font-bold tracking-tight rounded-lg flex items-center gap-2 cursor-pointer"
-        >
-          <UserPlus className="h-4 w-4" /> Add
-        </Button>
+        <AddContactModal hospital={hospital}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-9 px-4 border-border text-foreground font-bold tracking-tight rounded-lg flex items-center gap-2 cursor-pointer"
+          >
+            <UserPlus className="h-4 w-4" /> Add
+          </Button>
+        </AddContactModal>
       </div>
 
       <ScrollArea className="flex-1 px-2 max-h-[400px]">

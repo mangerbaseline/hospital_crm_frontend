@@ -5,6 +5,7 @@ import {
   HospitalState,
   Hospital,
   CreateHospitalPayload,
+  UpdateHospitalPayload,
   FetchHospitalsParams,
   FetchHospitalsDealsParams,
   HospitalForSelection,
@@ -20,10 +21,12 @@ const initialState: HospitalState = {
   isFetchingHospitalsWithDeals: false,
   isGetSingleHospitalLoading: false,
   isCreateHospitalLoading: false,
+  isUpdateHospitalLoading: false,
   fetchHospitalsError: null,
   fetchHospitalsWithDealsError: null,
   getSingleHospitalError: null,
   createHospitalError: null,
+  updateHospitalError: null,
   page: 1,
   limit: 10,
   totalHospitals: 0,
@@ -84,6 +87,23 @@ export const createHospital = createAsyncThunk(
   },
 );
 
+export const updateHospital = createAsyncThunk(
+  "hospital/updateHospital",
+  async ({ id, ...payload }: UpdateHospitalPayload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put<ApiResponse<Hospital>>(
+        `/api/hospital/${id}`,
+        payload,
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update hospital",
+      );
+    }
+  },
+);
+
 export const getSingleHospital = createAsyncThunk(
   "hospital/getSingleHospital",
   async (id: string, { rejectWithValue }) => {
@@ -112,10 +132,12 @@ const hospitalSlice = createSlice({
       state.isFetchingHospitalsWithDeals = false;
       state.isGetSingleHospitalLoading = false;
       state.isCreateHospitalLoading = false;
+      state.isUpdateHospitalLoading = false;
       state.fetchHospitalsError = null;
       state.fetchHospitalsWithDealsError = null;
       state.getSingleHospitalError = null;
       state.createHospitalError = null;
+      state.updateHospitalError = null;
     },
   },
   extraReducers: (builder) => {
@@ -171,6 +193,21 @@ const hospitalSlice = createSlice({
       .addCase(createHospital.rejected, (state, action) => {
         state.isCreateHospitalLoading = false;
         state.createHospitalError = action.payload as string;
+      })
+      .addCase(updateHospital.pending, (state) => {
+        state.isUpdateHospitalLoading = true;
+        state.updateHospitalError = null;
+      })
+      .addCase(
+        updateHospital.fulfilled,
+        (state, action: PayloadAction<Hospital>) => {
+          state.isUpdateHospitalLoading = false;
+          state.selectedHospital = action.payload;
+        },
+      )
+      .addCase(updateHospital.rejected, (state, action) => {
+        state.isUpdateHospitalLoading = false;
+        state.updateHospitalError = action.payload as string;
       })
       .addCase(getSingleHospital.pending, (state) => {
         state.isGetSingleHospitalLoading = true;

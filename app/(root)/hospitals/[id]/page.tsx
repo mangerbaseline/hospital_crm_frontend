@@ -14,6 +14,8 @@ import { ExpectedARRCard } from "@/components/hospitals/ExpectedARRCard";
 import { RecentActivity } from "@/components/hospitals/activities/RecentActivity";
 import { HospitalContacts } from "@/components/hospitals/HospitalContacts";
 import { HospitalDocuments } from "@/components/hospitals/HospitalDocuments";
+import { HospitalDetailsSkeleton } from "@/components/hospitals/HospitalDetailsSkeleton";
+import { EditHospitalModal } from "@/components/hospitals/EditHospitalModal";
 import {
   Building2,
   FileText,
@@ -48,18 +50,22 @@ function HospitalDetails() {
     <section className="max-w-7xl mx-auto w-full">
       <DashboardHeader title="Hospital Details" />
 
+      {isGetSingleHospitalLoading && <HospitalDetailsSkeleton />}
+
       {selectedHospital &&
         !isGetSingleHospitalLoading &&
         !getSingleHospitalError && (
           <Card className="flex flex-col gap-4 p-6 shadow-md border border-border rounded-xl bg-white">
             <div className="flex justify-end w-full">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 shadow-sm text-xs font-semibold rounded-lg flex items-center gap-2 cursor-pointer"
-              >
-                <Edit3 className="h-3.5 w-3.5" /> Edit Details
-              </Button>
+              <EditHospitalModal hospital={selectedHospital}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 shadow-sm text-xs font-semibold rounded-lg flex items-center gap-2 cursor-pointer"
+                >
+                  <Edit3 className="h-3.5 w-3.5" /> Edit Details
+                </Button>
+              </EditHospitalModal>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -81,7 +87,7 @@ function HospitalDetails() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-muted border border-border rounded-xl p-4">
                 <div className="bg-white p-2.5 rounded-lg border border-border shrink-0">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -136,6 +142,20 @@ function HospitalDetails() {
                   </p>
                   <h4 className="text-xl font-extrabold text-emerald-700">
                     {selectedHospital.teamHospital ? "Yes" : "No"}
+                  </h4>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-purple-50 border border-purple-200 rounded-xl p-4">
+                <div className="bg-white p-2.5 rounded-lg border border-purple-200 shrink-0">
+                  <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-[10px] font-extrabold text-purple-600 uppercase tracking-wide">
+                    MAGNET Hospital
+                  </p>
+                  <h4 className="text-xl font-extrabold text-purple-700">
+                    {selectedHospital.magnetHospital ? "Yes" : "No"}
                   </h4>
                 </div>
               </div>
@@ -207,7 +227,10 @@ function HospitalDetails() {
             hospitalId={selectedHospital._id}
             hospitalName={selectedHospital.hospitalName}
           />
-          <HospitalContacts contacts={selectedHospital.contacts || []} />
+          <HospitalContacts
+            contacts={selectedHospital.contacts || []}
+            hospital={selectedHospital}
+          />
         </div>
       )}
 

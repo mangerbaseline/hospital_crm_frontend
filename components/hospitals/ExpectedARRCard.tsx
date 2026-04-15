@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Edit3 } from "lucide-react";
 import { format } from "date-fns";
 import { Hospital } from "@/store/types";
+import { EditExpectedARRModal } from "@/components/hospitals/EditExpectedARRModal";
 
 interface ExpectedARRCardProps {
   hospital: Hospital;
@@ -31,13 +32,15 @@ export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
           <span className="text-2xl font-bold text-emerald-600">
             ${totalArr.toLocaleString()}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2 h-8 px-2 rounded-lg shadow-sm font-semibold border-border hover:bg-muted transition-colors cursor-pointer"
-          >
-            <Edit3 className="h-4 w-4" /> Edit Products
-          </Button>
+          <EditExpectedARRModal hospital={hospital}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 h-8 px-2 rounded-lg shadow-sm font-semibold border-border hover:bg-muted transition-colors cursor-pointer"
+            >
+              <Edit3 className="h-4 w-4" /> Edit Products
+            </Button>
+          </EditExpectedARRModal>
         </div>
       </div>
 

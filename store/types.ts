@@ -172,10 +172,12 @@ export interface HospitalState {
   isFetchingHospitalsWithDeals: boolean;
   isGetSingleHospitalLoading: boolean;
   isCreateHospitalLoading: boolean;
+  isUpdateHospitalLoading: boolean;
   fetchHospitalsError: string | null;
   fetchHospitalsWithDealsError: string | null;
   getSingleHospitalError: string | null;
   createHospitalError: string | null;
+  updateHospitalError: string | null;
   page: number;
   limit: number;
   totalHospitals: number;
@@ -195,6 +197,11 @@ export interface CreateHospitalPayload {
   magnetHospital: boolean;
   bedsWithMac: number;
   ICUBeds: number;
+}
+
+export interface UpdateHospitalPayload extends Partial<CreateHospitalPayload> {
+  id: string;
+  user?: string;
 }
 
 export interface ContactState {
@@ -550,11 +557,34 @@ export interface DealState {
   fetchDealsError: string | null;
   isUpdateDealStageLoading: boolean;
   updateDealStageError: string | null;
+  isDealProductLoading: boolean;
+  dealProductError: string | null;
   stats: {
     totalHospitals: number;
     closedBusiness: number;
     productRevenue: ProductRevenue[];
   } | null;
+}
+
+export interface AddDealProductPayload {
+  hospitalId: string;
+  product: string;
+  dealAmount?: number;
+  stage?: string;
+  expectedCloseDate?: string;
+}
+
+export interface UpdateDealProductPayload {
+  hospitalId: string;
+  productItemId: string;
+  dealAmount?: number;
+  stage?: string;
+  expectedCloseDate?: string;
+}
+
+export interface RemoveDealProductPayload {
+  hospitalId: string;
+  productItemId: string;
 }
 
 export enum ActivityType {

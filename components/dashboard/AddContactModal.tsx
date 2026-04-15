@@ -31,7 +31,10 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchHospitalsForSelection } from "@/store/features/hospital/hospitalSlice";
+import {
+  fetchHospitalsForSelection,
+  getSingleHospital,
+} from "@/store/features/hospital/hospitalSlice";
 import {
   createContact,
   resetContactStatus,
@@ -41,8 +44,15 @@ import {
   CreateContactValues,
 } from "@/validations/contact.validations";
 import { toast } from "sonner";
+import { Hospital } from "@/store/types";
 
-export function AddContactModal({ children }: { children: React.ReactNode }) {
+export function AddContactModal({
+  children,
+  hospital: defaultHospital,
+}: {
+  children: React.ReactNode;
+  hospital?: Hospital | any;
+}) {
   const dispatch = useAppDispatch();
   const { hospitals, isFetchingHospitals } = useAppSelector(
     (state) => state.hospital,
@@ -74,9 +84,13 @@ export function AddContactModal({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (open) {
-      dispatch(fetchHospitalsForSelection({}));
+      if (defaultHospital) {
+        setValue("hospital", defaultHospital._id, { shouldValidate: true });
+      } else {
+        dispatch(fetchHospitalsForSelection({}));
+      }
     }
-  }, [open, dispatch]);
+  }, [open, dispatch, defaultHospital, setValue]);
 
   const onSubmit = async (data: CreateContactValues) => {
     const resultAction = await dispatch(createContact(data));
@@ -85,6 +99,9 @@ export function AddContactModal({ children }: { children: React.ReactNode }) {
       reset();
       setOpen(false);
       dispatch(resetContactStatus());
+      if (defaultHospital) {
+        dispatch(getSingleHospital(defaultHospital._id));
+      }
     } else {
       toast.error(
         (resultAction.payload as string) || "Failed to create contact",
@@ -102,98 +119,121 @@ export function AddContactModal({ children }: { children: React.ReactNode }) {
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px] overflow-y-auto p-6 flex flex-col gap-5">
+      <DialogContent className="sm:max-w-[425px] max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-5">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-lg font-bold">
-            Add New Contact
-          </DialogTitle>
-          <DialogDescription className="text-[13px] mt-1 text-muted-foreground">
-            Add a new contact to a hospital in your pipeline.
+          <DialogTitle className="text-lg font-bold">Add Contact</DialogTitle>
+          <DialogDescription className="text-sm mt-1 text-muted-foreground">
+            {defaultHospital
+              ? `Add a new contact for ${defaultHospital.hospitalName}.`
+              : "Add a new contact to a hospital in your pipeline."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          <div>
-            <Label className="text-xs font-semibold">Select Hospital</Label>
-            <Controller
-              name="hospital"
-              control={control}
-              render={({ field }) => (
-                <Popover open={hospitalOpen} onOpenChange={setHospitalOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={hospitalOpen}
-                      className={cn(
-                        "w-full justify-between mt-1.5 text-xs h-9 bg-muted font-normal border-border",
-                        !field.value && "text-muted-foreground",
-                      )}
-                      disabled={isFetchingHospitals}
+          {defaultHospital ? (
+            <div className="rounded-xl border border-border bg-slate-50/50 p-4 flex flex-col gap-3">
+              <div>
+                <Label className="text-[11px] font-semibold text-muted-foreground">
+                  IDN Name
+                </Label>
+                <h4 className="text-sm font-bold -mt-0.5">
+                  {typeof defaultHospital.idn === "object"
+                    ? defaultHospital.idn.name
+                    : defaultHospital.idn || "Unknown"}
+                </h4>
+              </div>
+              <div>
+                <Label className="text-[11px] font-semibold text-muted-foreground">
+                  Hospital Name
+                </Label>
+                <h4 className="text-sm font-bold -mt-0.5">
+                  {defaultHospital.hospitalName}
+                </h4>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <Label className="text-xs font-semibold">Select Hospital</Label>
+              <Controller
+                name="hospital"
+                control={control}
+                render={({ field }) => (
+                  <Popover open={hospitalOpen} onOpenChange={setHospitalOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={hospitalOpen}
+                        className={cn(
+                          "w-full justify-between mt-1.5 text-xs h-9 bg-muted font-normal border-border",
+                          !field.value && "text-muted-foreground",
+                        )}
+                        disabled={isFetchingHospitals}
+                      >
+                        {field.value
+                          ? hospitals.find((h) => h._id === field.value)
+                              ?.hospitalName
+                          : isFetchingHospitals
+                            ? "Loading hospitals..."
+                            : "Select a hospital..."}
+                        {isFetchingHospitals ? (
+                          <Loader2 className="opacity-50 h-4 w-4 animate-spin ml-auto" />
+                        ) : (
+                          <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-(--radix-popover-trigger-width) p-0 z-100"
+                      align="start"
                     >
-                      {field.value
-                        ? hospitals.find((h) => h._id === field.value)
-                            ?.hospitalName
-                        : isFetchingHospitals
-                          ? "Loading hospitals..."
-                          : "Select a hospital..."}
-                      {isFetchingHospitals ? (
-                        <Loader2 className="opacity-50 h-4 w-4 animate-spin ml-auto" />
-                      ) : (
-                        <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="w-(--radix-popover-trigger-width) p-0 z-100"
-                    align="start"
-                  >
-                    <Command>
-                      <CommandInput
-                        placeholder="Search hospital..."
-                        className="h-9 text-xs w-full"
-                      />
-                      <CommandList>
-                        <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                          No hospital found.
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {hospitals.map((hospital) => (
-                            <CommandItem
-                              key={hospital._id}
-                              value={hospital.hospitalName}
-                              onSelect={() => {
-                                setValue("hospital", hospital._id, {
-                                  shouldValidate: true,
-                                });
-                                setHospitalOpen(false);
-                              }}
-                              className="text-xs"
-                            >
-                              {hospital.hospitalName}
-                              <Check
-                                className={cn(
-                                  "ml-auto h-4 w-4",
-                                  field.value === hospital._id
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                      <Command>
+                        <CommandInput
+                          placeholder="Search hospital..."
+                          className="h-9 text-xs w-full"
+                        />
+                        <CommandList>
+                          <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+                            No hospital found.
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {hospitals.map((hospital) => (
+                              <CommandItem
+                                key={hospital._id}
+                                value={hospital.hospitalName}
+                                onSelect={() => {
+                                  setValue("hospital", hospital._id, {
+                                    shouldValidate: true,
+                                  });
+                                  setHospitalOpen(false);
+                                }}
+                                className="text-xs"
+                              >
+                                {hospital.hospitalName}
+                                <Check
+                                  className={cn(
+                                    "ml-auto h-4 w-4",
+                                    field.value === hospital._id
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.hospital && (
+                <p className="text-[10px] text-destructive mt-1 font-medium">
+                  {errors.hospital.message}
+                </p>
               )}
-            />
-            {errors.hospital && (
-              <p className="text-[10px] text-destructive mt-1 font-medium">
-                {errors.hospital.message}
-              </p>
-            )}
-          </div>
+            </div>
+          )}
 
           <div>
             <Label className="text-xs font-semibold">First Name</Label>
@@ -277,26 +317,28 @@ export function AddContactModal({ children }: { children: React.ReactNode }) {
             />
             <Label
               htmlFor="primary_contact"
-              className="text-[13px] font-medium leading-none cursor-pointer"
+              className="text-xs ml-1 font-medium leading-none cursor-pointer"
             >
               Primary Contact
             </Label>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full mt-2 bg-[#09090b] text-white hover:bg-[#27272a] h-10 rounded-[8px] font-semibold text-sm cursor-pointer disabled:opacity-70"
-            disabled={isCreateContactLoading}
-          >
-            {isCreateContactLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Adding...
-              </>
-            ) : (
-              "Add Contact"
-            )}
-          </Button>
+          <div className="flex justify-end mt-2">
+            <Button
+              type="submit"
+              className="bg-[#09090b] text-white hover:bg-[#27272a] h-10 px-8 rounded-md font-semibold text-sm cursor-pointer disabled:opacity-70"
+              disabled={isCreateContactLoading}
+            >
+              {isCreateContactLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add Contact"
+              )}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
