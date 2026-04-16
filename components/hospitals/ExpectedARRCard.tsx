@@ -17,7 +17,25 @@ export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
 
   const totalArr = allProducts.reduce((acc, p) => acc + (p.dealAmount || 0), 0);
 
-  if (allProducts.length === 0) return null;
+  if (allProducts.length === 0) {
+    return (
+      <Card className="p-10 shadow-sm border border-dashed border-border rounded-xl bg-white mt-4 flex flex-col items-center justify-center min-h-[200px] text-center">
+        <div className="bg-muted p-4 rounded-full mb-4 border border-border">
+          <Edit3 className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-bold mb-1">No Products Added Yet</h3>
+        <p className="text-sm text-muted-foreground mb-5 max-w-sm">
+          Add products to see Expected ARR breakdown and track your deal stages
+          accurately.
+        </p>
+        <EditExpectedARRModal hospital={hospital}>
+          <Button className="flex items-center gap-2 cursor-pointer bg-[#09090b] text-white hover:bg-[#27272a] rounded-lg shadow-sm font-semibold">
+            <Edit3 className="h-4 w-4" /> Add Product
+          </Button>
+        </EditExpectedARRModal>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6 shadow-sm border border-border rounded-xl bg-white mt-4">

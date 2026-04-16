@@ -74,15 +74,7 @@ function Pipeline() {
       </section>
 
       {/* kanban */}
-      <PipelineBoard
-        onStageChange={() => {
-          dispatch(
-            fetchAllDeals(
-              selectedUserId === "all" ? {} : { userId: selectedUserId },
-            ),
-          );
-        }}
-      />
+      <PipelineBoard />
     </div>
   );
 }

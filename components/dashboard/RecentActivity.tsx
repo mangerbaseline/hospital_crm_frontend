@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { NotebookPen, Phone, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchAllActivities } from "@/store/features/activity/activitySlice";
+import { useAppSelector } from "@/lib/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import {
-  ActivityItem as ActivityType,
-  ActivityType as TypeEnum,
-} from "@/store/types";
 import Link from "next/link";
 
 interface ActivityItemProps {
@@ -118,45 +112,45 @@ function ActivitySkeleton() {
 }
 
 export function RecentActivity() {
-  const dispatch = useAppDispatch();
-  const { activities, isFetchingActivities } = useAppSelector(
-    (state) => state.activity,
+  const { dashboardStats, isFetchingDashboardStats } = useAppSelector(
+    (state) => state.dashboard,
   );
 
-  useEffect(() => {
-    dispatch(fetchAllActivities({ limit: 5 }));
-  }, [dispatch]);
+  const activities = dashboardStats?.recentActivity || [];
 
-  const mapActivityToRepo = (activity: ActivityType): ActivityItemProps => {
+  const mapActivityToRepo = (activity: any): ActivityItemProps => {
     let type: ActivityItemProps["type"] = "note";
     let title = "";
     let description = "";
     let user: string[] | undefined = undefined;
 
-    const hospitalName = activity.hospital?.hospitalName || "Unknown Hospital";
-    const hospitalId = activity.hospital?._id;
+    const data = activity.data || {};
+    const hospitalId =
+      typeof data.hospital === "string" ? data.hospital : data.hospital?._id;
+    const hospitalName = data.hospital?.hospitalName
+      ? ` - ${data.hospital.hospitalName}`
+      : "";
 
-    switch (activity.activityType) {
-      case TypeEnum.CALL_LOG:
-        type = "call";
-        title = `Call logged - ${hospitalName}`;
-        description = activity.notes;
-        if (activity.contact?.firstName) {
-          user = [activity.contact.firstName];
-        }
-        break;
-      case TypeEnum.NOTE:
-        type = "note";
-        title = `Note added - ${hospitalName}`;
-        description = activity.notes;
-        break;
-      case TypeEnum.TASK:
-        type = "task";
-        title = `Task: ${activity.title}`;
-        description =
-          activity.description ||
-          `Due: ${format(new Date(activity.dueDate), "MMM d")}`;
-        break;
+    if (activity.type === "callLog") {
+      type = "call";
+      title = `Call logged${hospitalName}`;
+      description = data.notes || "";
+      if (data.contact?.firstName) {
+        user = [
+          data.contact.firstName +
+            (data.contact.lastName ? ` ${data.contact.lastName}` : ""),
+        ];
+      }
+    } else if (activity.type === "note") {
+      type = "note";
+      title = `Note added${hospitalName}`;
+      description = data.notes || "";
+    } else if (activity.type === "task") {
+      type = "task";
+      title = `Task: ${data.title || "Unknown"}`;
+      description =
+        data.description ||
+        (data.dueDate ? `Due: ${format(new Date(data.dueDate), "MMM d")}` : "");
     }
 
     return {
@@ -180,7 +174,7 @@ export function RecentActivity() {
       <CardContent className="p-0 flex-1 min-h-0 w-full overflow-hidden">
         <ScrollArea className="h-full w-full max-w-full">
           <div className="flex flex-col px-2 md:px-4 pb-4">
-            {isFetchingActivities ? (
+            {isFetchingDashboardStats ? (
               Array.from({ length: 5 }).map((_, idx) => (
                 <ActivitySkeleton key={idx} />
               ))
@@ -193,7 +187,7 @@ export function RecentActivity() {
                 const props = mapActivityToRepo(activity);
                 return (
                   <ActivityItem
-                    key={activity._id}
+                    key={activity.data?._id || index}
                     {...props}
                     isLast={index === activities.length - 1}
                   />

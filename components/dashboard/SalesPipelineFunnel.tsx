@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
+import { useAppSelector } from "@/lib/hooks";
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface FunnelStageProps {
   label: string;
   amount: string;
@@ -51,39 +54,39 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-900 hover:bg-blue-950",
     widthClass: "w-full max-w-[800px]",
-    href: "/pipeline?stage=demo",
+    href: "/hospitals?productStage=Demo",
   },
   {
     label: "CPA",
-    amount: "$225",
-    count: 1,
+    amount: "$0",
+    count: 0,
     colorClass: "bg-blue-800 hover:bg-blue-900",
     widthClass: "w-[90%] max-w-[750px]",
-    href: "/pipeline?stage=cpa",
+    href: "/hospitals?productStage=CPA",
   },
   {
     label: "Committee",
-    amount: "$89",
-    count: 1,
+    amount: "$0",
+    count: 0,
     colorClass: "bg-blue-700 hover:bg-blue-800",
     widthClass: "w-[80%] max-w-[700px]",
-    href: "/pipeline?stage=committee",
+    href: "/hospitals?productStage=Committee",
   },
   {
     label: "Trial",
-    amount: "$330",
-    count: 2,
+    amount: "$0",
+    count: 0,
     colorClass: "bg-blue-600 hover:bg-blue-700",
     widthClass: "w-[70%] max-w-[650px]",
-    href: "/pipeline?stage=trial",
+    href: "/hospitals?productStage=Trial",
   },
   {
     label: "Pending Decision",
-    amount: "$95",
-    count: 1,
+    amount: "$0",
+    count: 0,
     colorClass: "bg-blue-500 hover:bg-blue-600",
     widthClass: "w-[60%] max-w-[600px]",
-    href: "/pipeline?stage=pending_decision",
+    href: "/hospitals?productStage=Pending%20Decision",
   },
   {
     label: "Closed Won",
@@ -91,19 +94,34 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-400 hover:bg-blue-500",
     widthClass: "w-[50%] max-w-[550px]",
-    href: "/pipeline?stage=closed_won",
+    href: "/hospitals?productStage=Closed%20Won",
   },
   {
     label: "Implemented",
-    amount: "$283",
-    count: 1,
+    amount: "$0",
+    count: 0,
     colorClass: "bg-blue-300 hover:bg-blue-400",
     widthClass: "w-[40%] max-w-[500px]",
-    href: "/pipeline?stage=implemented",
+    href: "/hospitals?productStage=Implemented",
   },
 ];
 
 export function SalesPipelineFunnel() {
+  const { dashboardStats, isFetchingDashboardStats } = useAppSelector(
+    (state) => state.dashboard,
+  );
+
+  const mergedStages = stages.map((defaultStage) => {
+    const statMatch = dashboardStats?.pipeline?.find(
+      (p) => p.stage.toLowerCase() === defaultStage.label.toLowerCase(),
+    );
+    return {
+      ...defaultStage,
+      amount: statMatch ? `$${statMatch.amount.toLocaleString()}` : "$0",
+      count: statMatch ? statMatch.hospitalCount : 0,
+    };
+  });
+
   return (
     <Card className="shadow-sm shadow-black/5 border-border rounded-xl transition-all hover:shadow-md mt-8 py-0">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-4 pb-6 pt-5 px-4 sm:px-6">
@@ -121,9 +139,17 @@ export function SalesPipelineFunnel() {
       </CardHeader>
       <CardContent className="px-6 pb-8 pt-0 flex flex-col items-center">
         <div className="flex flex-col items-center gap-2 w-full max-w-[800px]">
-          {stages.map((stage, index) => (
-            <FunnelStage key={index} {...stage} />
-          ))}
+          {isFetchingDashboardStats
+            ? Array.from({ length: 7 }).map((_, idx) => (
+                <Skeleton
+                  key={idx}
+                  className="h-[60px] rounded-xl mb-1 mt-1"
+                  style={{ width: `${100 - idx * 10}%` }}
+                />
+              ))
+            : mergedStages.map((stage, index) => (
+                <FunnelStage key={index} {...stage} />
+              ))}
         </div>
         <p className="mt-8 text-[11px] font-medium text-muted-foreground">
           Click any stage to view hospitals in that stage

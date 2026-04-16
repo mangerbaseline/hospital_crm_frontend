@@ -9,6 +9,7 @@ import idnReducer from "./features/idn/idnSlice";
 import dealReducer from "./features/deal/dealSlice";
 import activityReducer from "./features/activity/activitySlice";
 import documentReducer from "./features/document/documentSlice";
+import dashboardReducer from "./features/dashboard/dashboardSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     deal: dealReducer,
     activity: activityReducer,
     document: documentReducer,
+    dashboard: dashboardReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });

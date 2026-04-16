@@ -1,19 +1,81 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock } from "lucide-react";
+import { useAppSelector } from "@/lib/hooks";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 export function UpcomingTasks() {
+  const { dashboardStats, isFetchingDashboardStats } = useAppSelector(
+    (state) => state.dashboard,
+  );
+
   return (
-    <Card className="flex py-0 flex-col h-full shadow-sm shadow-black/5 border-border rounded-xl transition-all hover:shadow-md w-full min-w-0 max-h-[400px] overflow-hidden">
-      <CardHeader className="flex flex-row items-center gap-2 pb-4 pt-5 px-4 sm:px-6 space-y-0">
+    <Card className="flex py-0 flex-col h-full shadow-none border-none sm:shadow-sm sm:border-border sm:border rounded-xl transition-all w-full min-w-0 max-h-[400px] overflow-hidden">
+      <CardHeader className="flex flex-row items-center gap-2 pb-2 pt-5 px-1 sm:px-6 space-y-0">
         <Clock className="h-5 w-5 shrink-0" />
         <CardTitle className="text-[16px] font-medium tracking-tight truncate">
           Upcoming Tasks
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col flex-1 items-center justify-center px-4 sm:px-6 min-h-[200px] w-full min-w-0">
-        <p className="text-xs sm:text-sm text-muted-foreground font-medium text-center">
-          No upcoming tasks in the next 7 days
-        </p>
+      <CardContent className="p-0 flex-1 min-h-0 w-full overflow-hidden">
+        <ScrollArea className="h-full w-full max-w-full">
+          <div className="flex flex-col px-1 sm:px-4 pb-6">
+            {isFetchingDashboardStats ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="mb-3 border border-border rounded-xl p-4"
+                >
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-3 w-1/2 mb-1" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+              ))
+            ) : dashboardStats?.tasks && dashboardStats.tasks.length > 0 ? (
+              dashboardStats.tasks.map((task) => {
+                const hospitalName =
+                  task.hospital && typeof task.hospital === "object"
+                    ? task.hospital.hospitalName || "Unknown Hospital"
+                    : "";
+
+                return (
+                  <div
+                    key={task._id}
+                    className="mb-3 last:mb-0 border border-border/60 hover:border-border rounded-xl p-3 sm:p-4 shadow-sm transition-all bg-muted"
+                  >
+                    <div className="flex justify-between items-start gap-2">
+                      <h4 className="text-[13px] sm:text-sm font-bold truncate leading-tight text-foreground flex-1">
+                        {task.title}
+                      </h4>
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-blue-600 whitespace-nowrap bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shrink-0 tracking-wide">
+                        {format(new Date(task.dueDate), "MMM d")}
+                      </span>
+                    </div>
+
+                    {hospitalName && (
+                      <p className="text-[11px] sm:text-xs text-muted-foreground font-medium mt-1 truncate">
+                        {hospitalName}
+                      </p>
+                    )}
+
+                    {task.description && (
+                      <p className="text-[11px] sm:text-xs text-muted-foreground/80 font-medium mt-1 line-clamp-2 leading-relaxed">
+                        {task.description}
+                      </p>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex items-center justify-center min-h-[100px]">
+                <p className="text-xs sm:text-sm text-muted-foreground font-medium text-center">
+                  No upcoming tasks in the next 7 days
+                </p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

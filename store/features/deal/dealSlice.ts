@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/api/axiosInstance";
 import {
   Deal,
@@ -100,12 +100,12 @@ export const addDealProduct = createAsyncThunk(
 export const updateDealProduct = createAsyncThunk(
   "deal/updateDealProduct",
   async (
-    { hospitalId, productItemId, ...payload }: UpdateDealProductPayload,
+    { dealId, ...payload }: UpdateDealProductPayload,
     { rejectWithValue },
   ) => {
     try {
       const response = await axiosInstance.put(
-        `/api/deal/update/product?hospitalId=${hospitalId}&productItemId=${productItemId}`,
+        `/api/deal/update/product?dealId=${dealId}`,
         payload,
       );
       return response.data;
@@ -119,13 +119,10 @@ export const updateDealProduct = createAsyncThunk(
 
 export const removeDealProduct = createAsyncThunk(
   "deal/removeDealProduct",
-  async (
-    { hospitalId, productItemId }: RemoveDealProductPayload,
-    { rejectWithValue },
-  ) => {
+  async ({ dealId }: RemoveDealProductPayload, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.delete(
-        `/api/deal/delete/product?hospitalId=${hospitalId}&productItemId=${productItemId}`,
+        `/api/deal/delete/product?dealId=${dealId}`,
       );
       return response.data;
     } catch (error: any) {

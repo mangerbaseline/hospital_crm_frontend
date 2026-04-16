@@ -243,6 +243,7 @@ export interface FetchHospitalsDealsParams {
   limit?: number;
   search?: string;
   userId?: string;
+  productStage?: string;
 }
 
 export interface Product {
@@ -572,19 +573,22 @@ export interface AddDealProductPayload {
   dealAmount?: number;
   stage?: string;
   expectedCloseDate?: string;
+  dealDate?: string;
+  idn?: string;
+  gpo?: string;
 }
 
 export interface UpdateDealProductPayload {
-  hospitalId: string;
-  productItemId: string;
+  dealId: string;
+  product?: string;
   dealAmount?: number;
   stage?: string;
   expectedCloseDate?: string;
+  dealDate?: string;
 }
 
 export interface RemoveDealProductPayload {
-  hospitalId: string;
-  productItemId: string;
+  dealId: string;
 }
 
 export enum ActivityType {
@@ -729,4 +733,39 @@ export interface DocumentState {
   uploadDocumentError: string | null;
   isDeletingDocument: boolean;
   deleteDocumentError: string | null;
+}
+
+export interface DashboardStatsResponse {
+  totalHospitals: number;
+  totalHospitalsInDB: number;
+  totalProductsInDB: number;
+  activeDeals: number;
+  totalPipelineAmount: number;
+  closedWon: {
+    amount: number;
+    productsCount: number;
+    hospitals: any[];
+  };
+  implemented: {
+    amount: number;
+    productsCount: number;
+    hospitals: any[];
+  };
+  pipeline: {
+    stage: string;
+    amount: number;
+    hospitalCount: number;
+  }[];
+  tasks: TaskActivity[];
+  recentActivity: {
+    type: string;
+    data: any;
+    createdAt: string;
+  }[];
+}
+
+export interface DashboardState {
+  dashboardStats: DashboardStatsResponse | null;
+  isFetchingDashboardStats: boolean;
+  fetchDashboardError: string | null;
 }

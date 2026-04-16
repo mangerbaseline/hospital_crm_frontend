@@ -17,8 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { X } from "lucide-react";
 
 function Hospitals() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const productStage = searchParams.get("productStage") || "";
+
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const {
@@ -53,13 +61,21 @@ function Hospitals() {
         limit: pageSize,
         search: debouncedSearchQuery,
         userId: selectedUser === "all" ? "" : selectedUser,
+        productStage,
       }),
     );
-  }, [dispatch, currentPage, pageSize, debouncedSearchQuery, selectedUser]);
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    debouncedSearchQuery,
+    selectedUser,
+    productStage,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery, selectedUser]);
+  }, [debouncedSearchQuery, selectedUser, productStage]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -85,12 +101,12 @@ function Hospitals() {
         />
       </DashboardHeader>
 
-      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mt-6">
         <div className="flex-1 w-full">
           <HospitalSearchBar value={searchQuery} onChange={setSearchQuery} />
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto mb-6">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="flex w-full md:w-auto items-center gap-2 text-sm font-medium text-muted-foreground border px-3 py-2 rounded-lg shadow-sm">
             <SlidersHorizontal className="h-4 w-4" />
             <span>Rows:</span>
@@ -109,7 +125,21 @@ function Hospitals() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {productStage && (
+        <div className="mt-4 mb-2">
+          <span className="inline-flex items-center gap-2 bg-blue-100/50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200">
+            Filtering by stage: {productStage}
+            <button
+              onClick={() => router.push(pathname)}
+              className="hover:bg-blue-200/50 rounded-full p-0.5 transition-colors"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {isFetchingHospitalsWithDeals ? (
           Array.from({ length: 6 }).map((_, i) => (
             <HospitalCardSkeleton key={i} />

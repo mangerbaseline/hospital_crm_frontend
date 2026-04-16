@@ -10,8 +10,18 @@ import { SalesPipelineFunnel } from "@/components/dashboard/SalesPipelineFunnel"
 import { DashboardHeader } from "@/components/Header";
 import { AddDealModal } from "@/components/dashboard/AddDealModel";
 import { AddContactModal } from "@/components/dashboard/AddContactModal";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { fetchDashboardStats } from "@/store/features/dashboard/dashboardSlice";
 
 function Home() {
+  const dispatch = useAppDispatch();
+  const { dashboardStats } = useAppSelector((state) => state.dashboard);
+
+  useEffect(() => {
+    dispatch(fetchDashboardStats());
+  }, [dispatch]);
+
   return (
     <section className="w-full max-w-7xl mx-auto">
       {/* Header */}
@@ -36,8 +46,10 @@ function Home() {
           title="My Hospitals"
           icon={Building2}
           iconClassName="text-muted-foreground"
-          value={6}
-          subtitle={<>Total hospitals</>}
+          value={dashboardStats?.totalHospitals || 0}
+          subtitle={
+            <>{dashboardStats?.totalHospitalsInDB || 0} total hospitals in DB</>
+          }
           buttonText="View All"
           href="/hospitals"
         />
@@ -45,8 +57,8 @@ function Home() {
           title="My Pipeline"
           icon={DollarSign}
           iconClassName="text-muted-foreground"
-          value="$1,002"
-          subtitle={<>4 active deals</>}
+          value={`$${(dashboardStats?.totalPipelineAmount || 0).toLocaleString()}`}
+          subtitle={<>{dashboardStats?.activeDeals || 0} active deals</>}
           buttonText="View Pipeline"
           href="/pipeline"
         />
@@ -54,10 +66,10 @@ function Home() {
           title="Closed Business"
           icon={CheckCircle2}
           iconClassName="text-muted-foreground"
-          value="$283"
+          value={`$${(dashboardStats?.closedWon?.amount || 0).toLocaleString()}`}
           subtitle={
             <>
-              1 hospitals
+              {dashboardStats?.closedWon?.hospitals?.length || 0} hospitals
               <br />
               Total Expected ARR
             </>

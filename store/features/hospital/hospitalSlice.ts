@@ -56,9 +56,17 @@ export const fetchHospitalsWithDeals = createAsyncThunk(
   "hospital/fetchHospitalsWithDeals",
   async (params: FetchHospitalsDealsParams, { rejectWithValue }) => {
     try {
-      const { page = 1, limit = 10, search = "", userId = "" } = params;
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        userId = "",
+        productStage = "",
+      } = params;
       let url = `/api/hospital/all-hospitals-deals?page=${page}&limit=${limit}&search=${search}`;
       if (userId) url += `&userId=${userId}`;
+      if (productStage)
+        url += `&productStage=${encodeURIComponent(productStage)}`;
       const response =
         await axiosInstance.get<PaginatedApiResponse<HospitalWithDeals[]>>(url);
       return response.data;
@@ -209,8 +217,10 @@ const hospitalSlice = createSlice({
         state.isUpdateHospitalLoading = false;
         state.updateHospitalError = action.payload as string;
       })
-      .addCase(getSingleHospital.pending, (state) => {
-        state.isGetSingleHospitalLoading = true;
+      .addCase(getSingleHospital.pending, (state, action) => {
+        if (state.selectedHospital?._id !== action.meta.arg) {
+          state.isGetSingleHospitalLoading = true;
+        }
         state.getSingleHospitalError = null;
       })
       .addCase(

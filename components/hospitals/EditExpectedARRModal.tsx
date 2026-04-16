@@ -34,6 +34,7 @@ import { Hospital, DealProductStage } from "@/store/types";
 
 interface ProductItem {
   _id: string;
+  dealId: string;
   productId: string;
   productName: string;
   dealAmount: number;
@@ -71,6 +72,7 @@ export function EditExpectedARRModal({
       const allProducts = deals.flatMap((deal) =>
         (deal.products || []).map((p) => ({
           _id: p._id,
+          dealId: deal._id || "",
           productId:
             typeof p.product === "object" && p.product !== null
               ? p.product._id
@@ -98,6 +100,7 @@ export function EditExpectedARRModal({
       ...prev,
       {
         _id: `new-${Date.now()}`,
+        dealId: "",
         productId: "",
         productName: "",
         dealAmount: 0,
@@ -139,31 +142,37 @@ export function EditExpectedARRModal({
         (item) => item.isRemoved && !item.isNew,
       );
       for (const item of removedItems) {
-        promises.push(
-          dispatch(
-            removeDealProduct({
-              hospitalId: hospital._id,
-              productItemId: item._id,
-            }),
-          ).unwrap(),
-        );
+        if (item.dealId) {
+          promises.push(
+            dispatch(
+              removeDealProduct({
+                dealId: item.dealId,
+              }),
+            ).unwrap(),
+          );
+        }
       }
 
       const updatedItems = items.filter(
         (item) => item.isDirty && !item.isNew && !item.isRemoved,
       );
       for (const item of updatedItems) {
-        promises.push(
-          dispatch(
-            updateDealProduct({
-              hospitalId: hospital._id,
-              productItemId: item._id,
-              dealAmount: item.dealAmount,
-              stage: item.stage,
-              expectedCloseDate: item.expectedCloseDate || undefined,
-            }),
-          ).unwrap(),
-        );
+        if (item.dealId) {
+          promises.push(
+            dispatch(
+              updateDealProduct({
+                dealId: item.dealId,
+                product: item.productId,
+                dealAmount: item.dealAmount,
+                stage: item.stage,
+                expectedCloseDate: item.expectedCloseDate
+                  ? new Date(item.expectedCloseDate).toISOString()
+                  : undefined,
+                dealDate: new Date().toISOString(),
+              }),
+            ).unwrap(),
+          );
+        }
       }
 
       const newItems = items.filter(
@@ -177,7 +186,18 @@ export function EditExpectedARRModal({
               product: item.productId,
               dealAmount: item.dealAmount,
               stage: item.stage,
-              expectedCloseDate: item.expectedCloseDate || undefined,
+              expectedCloseDate: item.expectedCloseDate
+                ? new Date(item.expectedCloseDate).toISOString()
+                : undefined,
+              dealDate: new Date().toISOString(),
+              idn:
+                typeof hospital.idn === "object"
+                  ? hospital.idn._id
+                  : hospital.idn,
+              gpo:
+                typeof hospital.gpo === "object"
+                  ? hospital.gpo._id
+                  : hospital.gpo,
             }),
           ).unwrap(),
         );
