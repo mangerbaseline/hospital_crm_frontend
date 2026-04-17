@@ -526,6 +526,7 @@ export interface PipelineDeal {
 
 export interface FetchAllDealsParams {
   userId?: string;
+  productId?: string;
 }
 
 export interface ProductRevenue {

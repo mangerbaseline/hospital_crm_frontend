@@ -47,9 +47,7 @@ function Home() {
           icon={Building2}
           iconClassName="text-muted-foreground"
           value={dashboardStats?.totalHospitals || 0}
-          subtitle={
-            <>{dashboardStats?.totalHospitalsInDB || 0} total hospitals in DB</>
-          }
+          subtitle={<>Total hospitals</>}
           buttonText="View All"
           href="/hospitals"
         />

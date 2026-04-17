@@ -33,7 +33,11 @@ import { dealSchema, DealFormValues } from "@/validations/deal.validations";
 import { toast } from "sonner";
 import { DealProductStage } from "@/store/types";
 
-function AddDealForm() {
+interface AddDealFormProps {
+  onSuccess?: () => void;
+}
+
+function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const dispatch = useAppDispatch();
   const { idns } = useAppSelector((state) => state.idn);
   const { hospitals, isFetchingHospitals, selectedHospital } = useAppSelector(
@@ -134,6 +138,7 @@ function AddDealForm() {
       toast.success("Deal created successfully");
       reset();
       dispatch(clearSelectedHospital());
+      if (onSuccess) onSuccess();
     } catch (error: any) {
       toast.error(error || "Failed to create deal");
     }

@@ -35,7 +35,7 @@ export function AddDealModal({ children }: { children: React.ReactNode }) {
           <Label className="text-xs font-semibold">Sales Rep</Label>
           <div className="mt-1 text-sm font-medium">{user?.name}</div>
         </div>
-        <AddDealForm />
+        <AddDealForm onSuccess={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );
