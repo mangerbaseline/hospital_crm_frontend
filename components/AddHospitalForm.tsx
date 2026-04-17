@@ -24,7 +24,6 @@ import {
 } from "./ui/select";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchIDNs } from "@/store/features/idn/idnSlice";
 import { fetchGPOs } from "@/store/features/gpo/gpoSlice";
@@ -74,13 +73,9 @@ function AddHospitalForm() {
   const gpoValue = watch("gpo");
 
   useEffect(() => {
-    if (idns.length === 0) {
-      dispatch(fetchIDNs({ limit: 1000 }));
-    }
-    if (gpos.length === 0) {
-      dispatch(fetchGPOs({ limit: 1000 }));
-    }
-  }, [dispatch, idns.length, gpos.length]);
+    dispatch(fetchIDNs({ limit: 1000 }));
+    dispatch(fetchGPOs({ limit: 1000 }));
+  }, [dispatch]);
 
   const onSubmit = async (data: HospitalFormValues) => {
     try {
