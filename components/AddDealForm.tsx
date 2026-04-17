@@ -70,7 +70,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
     formState: { errors },
   } = methods;
 
-  const { fields, append, remove } = useFieldArray({
+  const { append, remove } = useFieldArray({
     control,
     name: "products",
   });
@@ -80,13 +80,9 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const selectedProducts = watch("products");
 
   useEffect(() => {
-    if (idns.length === 0) {
-      dispatch(fetchIDNs({ limit: 1000 }));
-    }
-    if (products.length === 0) {
-      dispatch(fetchProducts({ limit: 1000 }));
-    }
-  }, [dispatch, idns.length, products.length]);
+    dispatch(fetchIDNs({ limit: 1000 }));
+    dispatch(fetchProducts({ limit: 1000 }));
+  }, [dispatch]);
 
   useEffect(() => {
     if (idnValue) {
