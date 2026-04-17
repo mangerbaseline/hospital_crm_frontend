@@ -133,11 +133,11 @@ export default function LoadingScreen({ isExiting }: { isExiting: boolean }) {
 
         <div className="flex flex-col items-center gap-3 mt-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background">
+            {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-background">
               <LayoutDashboard className="h-5 w-5 text-foreground " />
-            </div>
-            <h2 className="text-xl font-bold tracking-tight text-foreground">
-              Hospital CRM
+            </div> */}
+            <h2 className="text-2xl font-extrabold tracking-tight text-foreground">
+              RF HEALTH CRM
             </h2>
           </div>
           {/* <p className="text-sm text-muted-foreground font-medium min-w-[140px] text-center">
