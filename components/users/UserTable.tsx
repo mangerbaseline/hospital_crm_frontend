@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { UserTableProps } from "@/types";
+import { Switch } from "@/components/ui/switch";
 
 const roleColors: Record<UserRole, string> = {
   [UserRole.ADMIN]: "bg-red-100 text-red-700 border-red-200",
@@ -37,6 +38,7 @@ export function UserTable({
   isLoading,
   onEdit,
   onDelete,
+  onToggleStatus,
 }: UserTableProps) {
   if (isLoading) {
     return (
@@ -47,6 +49,7 @@ export function UserTable({
               <TableHead className="w-[80px]">#</TableHead>
               <TableHead>User Details</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -64,6 +67,9 @@ export function UserTable({
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-6 w-[80px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-10 rounded-full ml-auto" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-8 w-8 ml-auto rounded-full" />
@@ -84,6 +90,7 @@ export function UserTable({
             <TableHead className="w-[80px] pl-6">#</TableHead>
             <TableHead>User Details</TableHead>
             <TableHead>Role</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -91,7 +98,7 @@ export function UserTable({
           {users.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={4}
+                colSpan={5}
                 className="h-24 text-center text-muted-foreground font-medium"
               >
                 No users found.
@@ -130,6 +137,15 @@ export function UserTable({
                   >
                     {user.role}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  <Switch
+                    checked={user.active}
+                    onCheckedChange={(checked) =>
+                      onToggleStatus(user._id, checked)
+                    }
+                    className="data-[state=checked]:bg-green-500 cursor-pointer"
+                  />
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>

@@ -10,6 +10,12 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  active: boolean;
+}
+
+export interface UpdateUserStatusPayload {
+  id: string;
+  active: boolean;
 }
 
 export interface ApiResponse<T> {
@@ -47,6 +53,7 @@ export interface UpdateUserPayload extends Partial<CreateUserPayload> {
 
 export interface UserState {
   users: User[];
+  adminUsers: User[];
   selectedUser: User | null;
   isFetchingUsers: boolean;
   isGetSingleUserLoading: boolean;
@@ -58,10 +65,14 @@ export interface UserState {
   createUserError: string | null;
   updateUserError: string | null;
   deleteUserError: string | null;
+  isUpdatingUserStatus: boolean;
+  updateUserStatusError: string | null;
   page: number;
   limit: number;
   totalUsers: number;
   totalPages: number;
+  totalAdminUsers: number;
+  totalAdminPages: number;
 }
 
 export interface FetchUsersParams {

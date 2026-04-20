@@ -22,6 +22,7 @@ export interface UserTableProps {
   isLoading: boolean;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onToggleStatus: (id: string, active: boolean) => void;
 }
 
 export interface ProductModalProps {

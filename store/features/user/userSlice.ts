@@ -8,10 +8,12 @@ import {
   ApiResponse,
   FetchUsersParams,
   PaginatedApiResponse,
+  UpdateUserStatusPayload,
 } from "@/store/types";
 
 const initialState: UserState = {
   users: [],
+  adminUsers: [],
   selectedUser: null,
   isFetchingUsers: false,
   isGetSingleUserLoading: false,
@@ -23,10 +25,14 @@ const initialState: UserState = {
   createUserError: null,
   updateUserError: null,
   deleteUserError: null,
+  isUpdatingUserStatus: false,
+  updateUserStatusError: null,
   page: 1,
   limit: 10,
   totalUsers: 0,
   totalPages: 1,
+  totalAdminUsers: 0,
+  totalAdminPages: 1,
 };
 
 export const fetchUsers = createAsyncThunk(
@@ -46,6 +52,28 @@ export const fetchUsers = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch users",
+      );
+    }
+  },
+);
+
+export const fetchUsersAdmin = createAsyncThunk(
+  "user/fetchUsersAdmin",
+  async (params: FetchUsersParams, { rejectWithValue }) => {
+    try {
+      const { page, limit, search = "" } = params;
+      const queryParams = new URLSearchParams();
+      if (page) queryParams.append("page", page.toString());
+      if (limit) queryParams.append("limit", limit.toString());
+      if (search) queryParams.append("search", search);
+
+      const response = await axiosInstance.get<PaginatedApiResponse<User[]>>(
+        `/api/user/all-users-admin?${queryParams.toString()}`,
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch users (admin)",
       );
     }
   },
@@ -115,6 +143,22 @@ export const deleteUser = createAsyncThunk(
   },
 );
 
+export const updateUserStatus = createAsyncThunk(
+  "user/updateUserStatus",
+  async ({ id, active }: UpdateUserStatusPayload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch<ApiResponse<User>>(
+        `/api/user/status?id=${id}&active=${active}`,
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update user status",
+      );
+    }
+  },
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState,
@@ -133,6 +177,8 @@ const userSlice = createSlice({
       state.createUserError = null;
       state.updateUserError = null;
       state.deleteUserError = null;
+      state.isUpdatingUserStatus = false;
+      state.updateUserStatusError = null;
     },
   },
   extraReducers: (builder) => {
@@ -153,6 +199,25 @@ const userSlice = createSlice({
         },
       )
       .addCase(fetchUsers.rejected, (state, action) => {
+        state.isFetchingUsers = false;
+        state.fetchUsersError = action.payload as string;
+      })
+      .addCase(fetchUsersAdmin.pending, (state) => {
+        state.isFetchingUsers = true;
+        state.fetchUsersError = null;
+      })
+      .addCase(
+        fetchUsersAdmin.fulfilled,
+        (state, action: PayloadAction<PaginatedApiResponse<User[]>>) => {
+          state.isFetchingUsers = false;
+          state.adminUsers = action.payload.data;
+          state.page = action.payload.page;
+          state.limit = action.payload.limit;
+          state.totalAdminUsers = action.payload.totalUsers || 0;
+          state.totalAdminPages = action.payload.totalPages;
+        },
+      )
+      .addCase(fetchUsersAdmin.rejected, (state, action) => {
         state.isFetchingUsers = false;
         state.fetchUsersError = action.payload as string;
       })
@@ -215,6 +280,29 @@ const userSlice = createSlice({
       .addCase(deleteUser.rejected, (state, action) => {
         state.isDeleteUserLoading = false;
         state.deleteUserError = action.payload as string;
+      })
+      .addCase(updateUserStatus.pending, (state) => {
+        state.isUpdatingUserStatus = true;
+        state.updateUserStatusError = null;
+      })
+      .addCase(
+        updateUserStatus.fulfilled,
+        (state, action: PayloadAction<User>) => {
+          state.isUpdatingUserStatus = false;
+          const index = state.users.findIndex(
+            (u) => u._id === action.payload._id,
+          );
+          if (index !== -1) {
+            state.users[index] = action.payload;
+          }
+          if (state.selectedUser?._id === action.payload._id) {
+            state.selectedUser = action.payload;
+          }
+        },
+      )
+      .addCase(updateUserStatus.rejected, (state, action) => {
+        state.isUpdatingUserStatus = false;
+        state.updateUserStatusError = action.payload as string;
       });
   },
 });

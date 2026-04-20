@@ -13,10 +13,11 @@ import {
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
-  fetchUsers,
+  fetchUsersAdmin,
   deleteUser,
   getSingleUser,
   clearSelectedUser,
+  updateUserStatus,
 } from "@/store/features/user/userSlice";
 import { UserTable } from "@/components/users/UserTable";
 import { UserModal } from "@/components/users/UserModal";
@@ -33,13 +34,14 @@ import { debounce } from "lodash";
 function UsersPage() {
   const dispatch = useAppDispatch();
   const {
-    users,
+    adminUsers,
     isFetchingUsers,
     selectedUser,
     page,
     limit,
-    totalUsers,
     totalPages,
+    totalAdminUsers,
+    totalAdminPages,
   } = useAppSelector((state) => state.user);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -52,7 +54,7 @@ function UsersPage() {
   });
 
   useEffect(() => {
-    dispatch(fetchUsers(queryParams));
+    dispatch(fetchUsersAdmin(queryParams));
   }, [dispatch, queryParams]);
 
   const debouncedSearch = useMemo(
@@ -69,7 +71,7 @@ function UsersPage() {
   };
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
+    if (newPage >= 1 && newPage <= totalAdminPages) {
       setQueryParams((prev) => ({ ...prev, page: newPage }));
     }
   };
@@ -91,9 +93,20 @@ function UsersPage() {
     try {
       await dispatch(deleteUser(id)).unwrap();
       toast.success("User deleted successfully");
-      dispatch(fetchUsers(queryParams));
+      dispatch(fetchUsersAdmin(queryParams));
     } catch (error: any) {
       toast.error(error || "Failed to delete user");
+    }
+  };
+
+  const handleToggleStatus = async (id: string, active: boolean) => {
+    try {
+      await dispatch(updateUserStatus({ id, active })).unwrap();
+      toast.success(
+        `User ${active ? "activated" : "deactivated"} successfully`,
+      );
+    } catch (error: any) {
+      toast.error(error || "Failed to update user status");
     }
   };
 
@@ -152,10 +165,11 @@ function UsersPage() {
 
       <div className="mt-3">
         <UserTable
-          users={users}
+          users={adminUsers}
           isLoading={isFetchingUsers}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onToggleStatus={handleToggleStatus}
         />
       </div>
 
@@ -168,9 +182,10 @@ function UsersPage() {
             </span>{" "}
             to{" "}
             <span className="text-foreground font-bold">
-              {Math.min(page * limit, totalUsers)}
+              {Math.min(page * limit, totalAdminUsers)}
             </span>{" "}
-            of <span className="text-foreground font-bold">{totalUsers}</span>{" "}
+            of{" "}
+            <span className="text-foreground font-bold">{totalAdminUsers}</span>{" "}
             users
           </div>
 
@@ -186,11 +201,11 @@ function UsersPage() {
             </Button>
 
             <div className="flex items-center gap-1.5 px-2">
-              {Array.from({ length: totalPages }).map((_, i) => {
+              {Array.from({ length: totalAdminPages }).map((_, i) => {
                 const pageNum = i + 1;
                 if (
                   pageNum === 1 ||
-                  pageNum === totalPages ||
+                  pageNum === totalAdminPages ||
                   (pageNum >= page - 1 && pageNum <= page + 1)
                 ) {
                   return (
@@ -216,7 +231,10 @@ function UsersPage() {
                       ...
                     </span>
                   );
-                if (pageNum === totalPages - 1 && page < totalPages - 2)
+                if (
+                  pageNum === totalAdminPages - 1 &&
+                  page < totalAdminPages - 2
+                )
                   return (
                     <span
                       key="ellipsis-end"
@@ -233,7 +251,7 @@ function UsersPage() {
               variant="outline"
               size="icon"
               onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
+              disabled={page === totalAdminPages}
               className="h-10 w-10 p-0 border shadow-sm transition-all focus-visible:ring-primary cursor-pointer"
             >
               <ChevronRight className="h-5 w-5" />
@@ -248,7 +266,7 @@ function UsersPage() {
           setIsModalOpen(false);
           dispatch(clearSelectedUser());
         }}
-        onSuccess={() => dispatch(fetchUsers(queryParams))}
+        onSuccess={() => dispatch(fetchUsersAdmin(queryParams))}
         user={selectedUser}
       />
     </section>
