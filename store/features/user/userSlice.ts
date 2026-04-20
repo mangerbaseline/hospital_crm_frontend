@@ -259,6 +259,14 @@ const userSlice = createSlice({
         if (index !== -1) {
           state.users[index] = action.payload;
         }
+
+        const adminIndex = state.adminUsers.findIndex(
+          (u) => u._id === action.payload._id,
+        );
+        if (adminIndex !== -1) {
+          state.adminUsers[adminIndex] = action.payload;
+        }
+
         if (state.selectedUser?._id === action.payload._id) {
           state.selectedUser = action.payload;
         }
@@ -273,6 +281,10 @@ const userSlice = createSlice({
       })
       .addCase(deleteUser.fulfilled, (state, action: PayloadAction<string>) => {
         state.isDeleteUserLoading = false;
+        state.users = state.users.filter((u) => u._id !== action.payload);
+        state.adminUsers = state.adminUsers.filter(
+          (u) => u._id !== action.payload,
+        );
         if (state.selectedUser?._id === action.payload) {
           state.selectedUser = null;
         }
@@ -295,6 +307,14 @@ const userSlice = createSlice({
           if (index !== -1) {
             state.users[index] = action.payload;
           }
+
+          const adminIndex = state.adminUsers.findIndex(
+            (u) => u._id === action.payload._id,
+          );
+          if (adminIndex !== -1) {
+            state.adminUsers[adminIndex] = action.payload;
+          }
+
           if (state.selectedUser?._id === action.payload._id) {
             state.selectedUser = action.payload;
           }
