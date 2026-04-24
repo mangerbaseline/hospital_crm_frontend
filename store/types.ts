@@ -92,6 +92,12 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   totalIDNs?: number;
   totalDeals?: number;
   totalPages: number;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export interface HospitalForSelection {
@@ -780,4 +786,51 @@ export interface DashboardState {
   dashboardStats: DashboardStatsResponse | null;
   isFetchingDashboardStats: boolean;
   fetchDashboardError: string | null;
+}
+
+export interface EmailAddress {
+  name: string;
+  address: string;
+}
+
+export interface EmailBody {
+  contentType: string;
+  content: string;
+}
+
+export interface EmailMessage {
+  _id: string;
+  graphId: string;
+  body: EmailBody;
+  bccRecipients: EmailAddress[];
+  bodyPreview: string;
+  ccRecipients: EmailAddress[];
+  conversationId: string;
+  createdAt: string;
+  crmUser: string;
+  from: EmailAddress;
+  hasAttachments: boolean;
+  importance: string;
+  isDraft: boolean;
+  isRead: boolean;
+  receivedDateTime: string;
+  sender: EmailAddress;
+  sentDateTime: string;
+  subject: string;
+  toRecipients: EmailAddress[];
+  updatedAt: string;
+  webLink: string;
+}
+
+export interface MailboxState {
+  receivedEmails: EmailMessage[];
+  sentEmails: EmailMessage[];
+  isFetchingReceived: boolean;
+  isFetchingSent: boolean;
+  fetchReceivedError: string | null;
+  fetchSentError: string | null;
+  pageReceived: number;
+  pageSent: number;
+  totalReceived: number;
+  totalSent: number;
 }

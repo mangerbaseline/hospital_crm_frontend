@@ -16,6 +16,7 @@ import { HospitalContacts } from "@/components/hospitals/HospitalContacts";
 import { HospitalDocuments } from "@/components/hospitals/HospitalDocuments";
 import { HospitalDetailsSkeleton } from "@/components/hospitals/HospitalDetailsSkeleton";
 import { EditHospitalModal } from "@/components/hospitals/EditHospitalModal";
+import { HospitalEmails } from "@/components/hospitals/HospitalEmails";
 import {
   Building2,
   FileText,
@@ -236,7 +237,7 @@ function HospitalDetails() {
 
       {selectedHospital && !isGetSingleHospitalLoading && (
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div></div>
+          <HospitalEmails />
           <HospitalDocuments hospitalId={selectedHospital._id} />
         </div>
       )}

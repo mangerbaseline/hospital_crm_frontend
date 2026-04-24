@@ -128,3 +128,9 @@
     @apply font-sans;
   }
 }
+
+[data-slot="scroll-area-viewport"] > div,
+[data-radix-scroll-area-viewport] > div {
+  display: block !important;
+  min-width: 0 !important;
+}

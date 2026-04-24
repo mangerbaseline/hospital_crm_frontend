@@ -10,6 +10,7 @@ import dealReducer from "./features/deal/dealSlice";
 import activityReducer from "./features/activity/activitySlice";
 import documentReducer from "./features/document/documentSlice";
 import dashboardReducer from "./features/dashboard/dashboardSlice";
+import mailboxReducer from "./features/mailbox/mailboxSlice";
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     activity: activityReducer,
     document: documentReducer,
     dashboard: dashboardReducer,
+    mailbox: mailboxReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });
