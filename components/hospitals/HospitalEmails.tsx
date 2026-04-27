@@ -24,12 +24,16 @@ import {
   ChevronRight,
   Search,
   X,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   fetchReceivedEmails,
   fetchSentEmails,
+  syncEmails,
 } from "@/store/features/mailbox/mailboxSlice";
 import { EmailMessage } from "@/store/types";
 import { format } from "date-fns";
@@ -279,6 +283,7 @@ export function HospitalEmails() {
     totalSent,
     pageReceived,
     pageSent,
+    isSyncing,
   } = useAppSelector((state) => state.mailbox);
 
   const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null);
@@ -315,6 +320,17 @@ export function HospitalEmails() {
       );
     } else {
       dispatch(fetchSentEmails({ page: newPage, limit, search: searchQuery }));
+    }
+  };
+
+  const handleSync = async () => {
+    try {
+      await dispatch(syncEmails()).unwrap();
+      toast.success("Emails synced successfully");
+      dispatch(fetchReceivedEmails({ page: 1, limit, search: searchQuery }));
+      dispatch(fetchSentEmails({ page: 1, limit, search: searchQuery }));
+    } catch (error: any) {
+      toast.error(error || "Failed to sync emails");
     }
   };
 
@@ -360,6 +376,20 @@ export function HospitalEmails() {
             Email Communications
           </h3>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 gap-1.5 text-xs font-semibold rounded-lg cursor-pointer shadow-sm hover:bg-muted transition-all"
+          onClick={handleSync}
+          disabled={isSyncing}
+        >
+          {isSyncing ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
+          {isSyncing ? "Syncing..." : "Sync Mails"}
+        </Button>
       </div>
 
       <div className="relative mt-2">

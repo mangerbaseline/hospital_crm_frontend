@@ -833,4 +833,6 @@ export interface MailboxState {
   pageSent: number;
   totalReceived: number;
   totalSent: number;
+  isSyncing: boolean;
+  syncError: string | null;
 }

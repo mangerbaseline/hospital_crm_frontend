@@ -17,6 +17,8 @@ const initialState: MailboxState = {
   pageSent: 1,
   totalReceived: 0,
   totalSent: 0,
+  isSyncing: false,
+  syncError: null,
 };
 
 export const fetchReceivedEmails = createAsyncThunk(
@@ -69,6 +71,20 @@ export const fetchSentEmails = createAsyncThunk(
   },
 );
 
+export const syncEmails = createAsyncThunk(
+  "mailbox/sync",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/api/graph-app/sync");
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to sync emails",
+      );
+    }
+  },
+);
+
 const mailboxSlice = createSlice({
   name: "mailbox",
   initialState,
@@ -104,6 +120,18 @@ const mailboxSlice = createSlice({
       .addCase(fetchSentEmails.rejected, (state, action) => {
         state.isFetchingSent = false;
         state.fetchSentError = action.payload as string;
+      })
+      .addCase(syncEmails.pending, (state) => {
+        state.isSyncing = true;
+        state.syncError = null;
+      })
+      .addCase(syncEmails.fulfilled, (state) => {
+        state.isSyncing = false;
+      })
+      .addCase(syncEmails.rejected, (state, action) => {
+        state.isFetchingSent = false;
+        state.isSyncing = false;
+        state.syncError = action.payload as string;
       });
   },
 });
