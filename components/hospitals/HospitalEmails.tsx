@@ -26,14 +26,22 @@ import {
   X,
   RefreshCw,
   Loader2,
+  Reply,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import dynamic from "next/dynamic";
+import "suneditor/dist/css/suneditor.min.css";
+
+const SunEditor = dynamic(() => import("suneditor-react"), {
+  ssr: false,
+});
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   fetchReceivedEmails,
   fetchSentEmails,
   syncEmails,
+  replyToEmail,
 } from "@/store/features/mailbox/mailboxSlice";
 import { EmailMessage } from "@/store/types";
 import { format } from "date-fns";
@@ -117,6 +125,18 @@ function EmailDetailModal({
   onClose: () => void;
   type: "received" | "sent";
 }) {
+  const dispatch = useAppDispatch();
+  const { isReplying } = useAppSelector((state) => state.mailbox);
+  const [isReplyingMode, setIsReplyingMode] = useState(false);
+  const [replyText, setReplyText] = useState("");
+
+  useEffect(() => {
+    if (!open) {
+      setIsReplyingMode(false);
+      setReplyText("");
+    }
+  }, [open]);
+
   if (!email) return null;
 
   const isHtml = email.body?.contentType === "html";
@@ -125,10 +145,10 @@ function EmailDetailModal({
     : email.body?.content || email.bodyPreview || "";
 
   if (isHtml && bodyContent) {
-    bodyContent = bodyContent.replace(
-      /<img[^>]+src=["'](cid:|(?!(http|https|data):))[^"']+["'][^>]*>/gi,
-      "",
-    );
+    // bodyContent = bodyContent.replace(
+    //   /<img[^>]+src=["'](cid:|(?!(http|https|data):))[^"']+["'][^>]*>/gi,
+    //   "",
+    // );
   }
 
   return (
@@ -243,18 +263,104 @@ function EmailDetailModal({
               </p>
             )}
           </div>
+
+          {isReplyingMode && (
+            <div className="mt-4 space-y-3 p-4 bg-muted/30 border border-border rounded-lg">
+              <p className="text-xs font-bold text-foreground">
+                Reply to {email.from?.name || email.from?.address}
+              </p>
+              <div className="bg-background rounded-md [&_.sun-editor]:border-border [&_.sun-editor]:rounded-md [&_.se-toolbar]:bg-muted/50 [&_.se-toolbar]:rounded-t-md [&_.se-toolbar]:outline-none [&_.se-resizing-bar]:bg-muted/50 [&_.se-resizing-bar]:border-border">
+                <SunEditor
+                  setOptions={{
+                    buttonList: [
+                      ["undo", "redo"],
+                      ["font", "fontSize", "formatBlock"],
+                      ["bold", "underline", "italic", "strike"],
+                      ["fontColor", "hiliteColor"],
+                      ["removeFormat"],
+                      "/",
+                      [
+                        "outdent",
+                        "indent",
+                        "align",
+                        "horizontalRule",
+                        "list",
+                        "table",
+                      ],
+                      ["link", "image"],
+                      ["fullScreen", "showBlocks", "codeView"],
+                    ],
+                    minHeight: "200px",
+                    placeholder: "Type your reply here...",
+                  }}
+                  onChange={(content) => setReplyText(content)}
+                  defaultValue={replyText}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setIsReplyingMode(false);
+                    setReplyText("");
+                  }}
+                  disabled={isReplying}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    const isReplyEmpty =
+                      !replyText ||
+                      replyText === "<p><br></p>" ||
+                      !replyText.trim();
+                    if (isReplyEmpty) return;
+                    try {
+                      await dispatch(
+                        replyToEmail({
+                          messageId: email.graphId,
+                          comment: replyText,
+                        }),
+                      ).unwrap();
+                      toast.success("Reply sent successfully");
+                      setIsReplyingMode(false);
+                      setReplyText("");
+                    } catch (error: any) {
+                      toast.error(error || "Failed to send reply");
+                    }
+                  }}
+                  disabled={
+                    isReplying ||
+                    !replyText ||
+                    replyText === "<p><br></p>" ||
+                    !replyText.trim()
+                  }
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isReplying ? (
+                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  ) : (
+                    <Send className="h-3.5 w-3.5 mr-1.5" />
+                  )}
+                  {isReplying ? "Sending..." : "Send Reply"}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
-        <DialogFooter className="flex-row gap-2">
-          {email.webLink && (
+        <DialogFooter className="flex-row gap-2 mt-4 pt-4 border-t border-border">
+          {!isReplyingMode && (
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 cursor-pointer"
-              onClick={() => window.open(email.webLink, "_blank")}
+              className="flex-1 cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200"
+              onClick={() => setIsReplyingMode(true)}
             >
-              <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-              Open in Outlook
+              <Reply className="h-3.5 w-3.5 mr-1.5" />
+              Reply
             </Button>
           )}
           <DialogClose asChild>

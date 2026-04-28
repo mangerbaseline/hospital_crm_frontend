@@ -4,6 +4,7 @@ import {
   MailboxState,
   EmailMessage,
   PaginatedApiResponse,
+  ReplyEmailPayload,
 } from "@/store/types";
 
 const initialState: MailboxState = {
@@ -19,6 +20,8 @@ const initialState: MailboxState = {
   totalSent: 0,
   isSyncing: false,
   syncError: null,
+  isReplying: false,
+  replyError: null,
 };
 
 export const fetchReceivedEmails = createAsyncThunk(
@@ -85,6 +88,23 @@ export const syncEmails = createAsyncThunk(
   },
 );
 
+export const replyToEmail = createAsyncThunk(
+  "mailbox/reply",
+  async (payload: ReplyEmailPayload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        "/api/graph-app/reply",
+        payload,
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to reply to email",
+      );
+    }
+  },
+);
+
 const mailboxSlice = createSlice({
   name: "mailbox",
   initialState,
@@ -132,6 +152,17 @@ const mailboxSlice = createSlice({
         state.isFetchingSent = false;
         state.isSyncing = false;
         state.syncError = action.payload as string;
+      })
+      .addCase(replyToEmail.pending, (state) => {
+        state.isReplying = true;
+        state.replyError = null;
+      })
+      .addCase(replyToEmail.fulfilled, (state) => {
+        state.isReplying = false;
+      })
+      .addCase(replyToEmail.rejected, (state, action) => {
+        state.isReplying = false;
+        state.replyError = action.payload as string;
       });
   },
 });

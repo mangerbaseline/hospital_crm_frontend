@@ -822,6 +822,11 @@ export interface EmailMessage {
   webLink: string;
 }
 
+export interface ReplyEmailPayload {
+  messageId: string;
+  comment: string;
+}
+
 export interface MailboxState {
   receivedEmails: EmailMessage[];
   sentEmails: EmailMessage[];
@@ -835,4 +840,6 @@ export interface MailboxState {
   totalSent: number;
   isSyncing: boolean;
   syncError: string | null;
+  isReplying: boolean;
+  replyError: string | null;
 }
