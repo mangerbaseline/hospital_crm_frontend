@@ -12,6 +12,7 @@ import {
   SidebarGroupContent,
   SidebarSeparator,
   SidebarGroupLabel,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   Home,
@@ -106,6 +107,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { setOpenMobile } = useSidebar();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -118,7 +120,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem className="py-2">
-            <Link href="/" className="flex items-center gap-1 px-2">
+            <Link
+              href="/"
+              className="flex items-center gap-1 px-2"
+              onClick={() => setOpenMobile(false)}
+            >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-background">
                 <LayoutDashboard className="h-8 w-8 text-foreground" />
               </div>
@@ -154,7 +160,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         }
                       `}
                     >
-                      <Link href={item.url} className="flex items-center gap-4">
+                      <Link
+                        href={item.url}
+                        className="flex items-center gap-4"
+                        onClick={() => setOpenMobile(false)}
+                      >
                         <item.icon
                           className={`h-3 w-3 ${isActive ? "text-white" : "text-[#1e293b]"}`}
                         />
@@ -190,7 +200,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         }
                       `}
                     >
-                      <Link href={item.url} className="flex items-center gap-4">
+                      <Link
+                        href={item.url}
+                        className="flex items-center gap-4"
+                        onClick={() => setOpenMobile(false)}
+                      >
                         <item.icon
                           className={`h-3 w-3 ${isActive ? "text-white" : "text-[#1e293b]"}`}
                         />
@@ -230,6 +244,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <Link
                           href={item.url}
                           className="flex items-center gap-4"
+                          onClick={() => setOpenMobile(false)}
                         >
                           <item.icon
                             className={`h-3 w-3 ${isActive ? "text-white" : "text-[#1e293b]"}`}
