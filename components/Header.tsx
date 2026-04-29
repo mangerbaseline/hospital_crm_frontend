@@ -25,7 +25,7 @@ export function DashboardHeader({
       <header className="flex items-center justify-between mb-8">
         <div className="flex flex-col items-start gap-1">
           <div className="flex gap-4 items-center justify-center">
-            {isMobile && <SidebarTrigger className="h-2 w-2" />}
+            {isMobile && <SidebarTrigger className="h-2 w-2 p-2" />}
             <h1 className="text-2xl md:text-3xl font-bold">{displayTitle}</h1>
           </div>
           {subTitle && (
