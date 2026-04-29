@@ -810,6 +810,13 @@ export interface EmailMessage {
   crmUser: string;
   from: EmailAddress;
   hasAttachments: boolean;
+  attachments?: {
+    name: string;
+    contentType: string;
+    contentId: string;
+    fileUrl: string;
+    isInline: boolean;
+  }[];
   importance: string;
   isDraft: boolean;
   isRead: boolean;
@@ -825,6 +832,8 @@ export interface EmailMessage {
 export interface ReplyEmailPayload {
   messageId: string;
   comment: string;
+  ccEmails?: string[];
+  bccEmails?: string[];
 }
 
 export interface MailboxState {

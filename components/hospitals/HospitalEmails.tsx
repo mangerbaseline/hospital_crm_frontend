@@ -27,6 +27,13 @@ import {
   RefreshCw,
   Loader2,
   Reply,
+  Paperclip,
+  Download,
+  FileText,
+  FileImage,
+  FileArchive,
+  FileSpreadsheet,
+  File as FileIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -129,11 +136,15 @@ function EmailDetailModal({
   const { isReplying } = useAppSelector((state) => state.mailbox);
   const [isReplyingMode, setIsReplyingMode] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const [ccEmails, setCcEmails] = useState("");
+  const [bccEmails, setBccEmails] = useState("");
 
   useEffect(() => {
     if (!open) {
       setIsReplyingMode(false);
       setReplyText("");
+      setCcEmails("");
+      setBccEmails("");
     }
   }, [open]);
 
@@ -143,13 +154,6 @@ function EmailDetailModal({
   let bodyContent = isHtml
     ? email.body.content
     : email.body?.content || email.bodyPreview || "";
-
-  if (isHtml && bodyContent) {
-    // bodyContent = bodyContent.replace(
-    //   /<img[^>]+src=["'](cid:|(?!(http|https|data):))[^"']+["'][^>]*>/gi,
-    //   "",
-    // );
-  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -195,14 +199,12 @@ function EmailDetailModal({
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 From:
               </p>
-              <p className="text-sm font-semibold text-foreground">
-                {email.from?.name || email.from?.address}
+              <p className="text-sm font-medium text-foreground">
+                {email.from?.name}{" "}
+                <span className="text-xs text-muted-foreground">
+                  &lt;{email.from.address}&gt;
+                </span>
               </p>
-              {email.from?.name && (
-                <p className="text-xs text-muted-foreground">
-                  {email.from.address}
-                </p>
-              )}
             </div>
 
             <div>
@@ -211,7 +213,10 @@ function EmailDetailModal({
               </p>
               {email.toRecipients?.map((r, i) => (
                 <p key={i} className="text-sm font-medium text-foreground">
-                  {r.name || r.address}
+                  {r.name}{" "}
+                  <span className="text-xs text-muted-foreground">
+                    &lt;{r.address}&gt;
+                  </span>
                 </p>
               ))}
             </div>
@@ -223,7 +228,10 @@ function EmailDetailModal({
                 </p>
                 {email.ccRecipients.map((r, i) => (
                   <p key={i} className="text-sm font-medium text-foreground">
-                    {r.name || r.address}
+                    {r.name}{" "}
+                    <span className="text-xs text-muted-foreground">
+                      &lt;{r.address}&gt;
+                    </span>
                   </p>
                 ))}
               </div>
@@ -264,11 +272,135 @@ function EmailDetailModal({
             )}
           </div>
 
+          {email.attachments &&
+            email.attachments.filter(
+              (att) =>
+                !att.isInline &&
+                (!att.contentId ||
+                  !bodyContent.includes(`cid:${att.contentId}`)),
+            ).length > 0 && (
+              <div className="mt-6 border-t border-border/50 pt-4">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                  <Paperclip className="h-3.5 w-3.5" />
+                  Attachments (
+                  {
+                    email.attachments.filter(
+                      (att) =>
+                        !att.isInline &&
+                        (!att.contentId ||
+                          !bodyContent.includes(`cid:${att.contentId}`)),
+                    ).length
+                  }
+                  )
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {email.attachments
+                    .filter(
+                      (att) =>
+                        !att.isInline &&
+                        (!att.contentId ||
+                          !bodyContent.includes(`cid:${att.contentId}`)),
+                    )
+                    .map((att, i) => {
+                      const ext =
+                        (att.name || "").split(".").pop()?.toLowerCase() || "";
+                      let Icon = FileIcon;
+                      let iconColor = "text-blue-500";
+                      let bgColor = "bg-blue-50";
+
+                      if (["pdf"].includes(ext)) {
+                        Icon = FileText;
+                        iconColor = "text-red-500";
+                        bgColor = "bg-red-50";
+                      } else if (
+                        ["jpg", "jpeg", "png", "gif", "svg"].includes(ext)
+                      ) {
+                        Icon = FileImage;
+                        iconColor = "text-purple-500";
+                        bgColor = "bg-purple-50";
+                      } else if (["zip", "rar", "tar", "gz"].includes(ext)) {
+                        Icon = FileArchive;
+                        iconColor = "text-amber-500";
+                        bgColor = "bg-amber-50";
+                      } else if (["xls", "xlsx", "csv"].includes(ext)) {
+                        Icon = FileSpreadsheet;
+                        iconColor = "text-emerald-500";
+                        bgColor = "bg-emerald-50";
+                      } else if (["doc", "docx"].includes(ext)) {
+                        Icon = FileText;
+                        iconColor = "text-blue-600";
+                        bgColor = "bg-blue-50";
+                      }
+
+                      return (
+                        <a
+                          key={i}
+                          href={att.fileUrl}
+                          download={att.name || "attachment"}
+                          className="flex items-center justify-between p-3 rounded-xl border border-border/60 bg-linear-to-br from-background to-muted/20 hover:border-primary/30 hover:shadow-sm transition-all group overflow-hidden relative"
+                        >
+                          <div className="absolute inset-0 bg-linear-to-r from-transparent via-primary/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+                          <div className="flex items-center gap-3 overflow-hidden relative z-10">
+                            <div
+                              className={`p-2.5 rounded-lg ${bgColor} border border-border/50`}
+                            >
+                              <Icon className={`h-5 w-5 ${iconColor}`} />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <p
+                                className="text-sm font-semibold text-foreground truncate"
+                                title={att.name}
+                              >
+                                {att.name || "Attachment"}
+                              </p>
+                              <p className="text-[10px] font-medium text-muted-foreground uppercase">
+                                {ext || "FILE"}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-all group-hover:scale-105 ml-2 shrink-0 relative z-10 shadow-sm"
+                          >
+                            <Download className="h-4 w-4 text-primary" />
+                          </Button>
+                        </a>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
           {isReplyingMode && (
             <div className="mt-4 space-y-3 p-4 bg-muted/30 border border-border rounded-lg">
               <p className="text-xs font-bold text-foreground">
                 Reply to {email.from?.name || email.from?.address}
               </p>
+
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 block">
+                  CC Emails
+                </label>
+                <Input
+                  placeholder="Separate multiple emails with commas"
+                  value={ccEmails}
+                  onChange={(e) => setCcEmails(e.target.value)}
+                  className="h-8 text-sm bg-background border-border"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 block">
+                  BCC Emails
+                </label>
+                <Input
+                  placeholder="Separate multiple emails with commas"
+                  value={bccEmails}
+                  onChange={(e) => setBccEmails(e.target.value)}
+                  className="h-8 text-sm bg-background border-border"
+                />
+              </div>
+
               <div className="bg-background rounded-md [&_.sun-editor]:border-border [&_.sun-editor]:rounded-md [&_.se-toolbar]:bg-muted/50 [&_.se-toolbar]:rounded-t-md [&_.se-toolbar]:outline-none [&_.se-resizing-bar]:bg-muted/50 [&_.se-resizing-bar]:border-border">
                 <SunEditor
                   setOptions={{
@@ -304,6 +436,8 @@ function EmailDetailModal({
                   onClick={() => {
                     setIsReplyingMode(false);
                     setReplyText("");
+                    setCcEmails("");
+                    setBccEmails("");
                   }}
                   disabled={isReplying}
                 >
@@ -317,16 +451,27 @@ function EmailDetailModal({
                       replyText === "<p><br></p>" ||
                       !replyText.trim();
                     if (isReplyEmpty) return;
+
+                    const parseEmails = (emailsStr: string) =>
+                      emailsStr
+                        .split(",")
+                        .map((e) => e.trim())
+                        .filter((e) => e !== "");
+
                     try {
                       await dispatch(
                         replyToEmail({
                           messageId: email.graphId,
                           comment: replyText,
+                          ccEmails: parseEmails(ccEmails),
+                          bccEmails: parseEmails(bccEmails),
                         }),
                       ).unwrap();
                       toast.success("Reply sent successfully");
                       setIsReplyingMode(false);
                       setReplyText("");
+                      setCcEmails("");
+                      setBccEmails("");
                     } catch (error: any) {
                       toast.error(error || "Failed to send reply");
                     }
