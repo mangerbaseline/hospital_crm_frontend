@@ -1,20 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchUsers } from "@/store/features/user/userSlice";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
+import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface MentionTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
@@ -38,7 +36,7 @@ export function MentionTextarea({
     left: 0,
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (users.length === 0) {
       dispatch(fetchUsers({ limit: 1000 }));
     }
@@ -54,7 +52,6 @@ export function MentionTextarea({
 
     if (lastAtSymbolIndex !== -1) {
       const textAfterAt = textBeforeCursor.substring(lastAtSymbolIndex + 1);
-      // Only trigger if @ is at start of word or start of line
       const charBeforeAt = textBeforeCursor[lastAtSymbolIndex - 1];
       if (!charBeforeAt || /\s/.test(charBeforeAt)) {
         if (!/\s/.test(textAfterAt)) {
@@ -74,18 +71,10 @@ export function MentionTextarea({
   const calculatePopoverPosition = (index: number) => {
     if (!textareaRef.current) return;
 
-    // Use a simpler approach: anchor the popover to the textarea but adjust its offset
-    // or just show it below the line.
-    // Since implementing a full mirror div is complex, we'll use the cursor position
-    // to estimate if it's near the top or bottom.
-
-    // For now, let's stick to a robust below-textarea position or a fixed relative position
-    // that doesn't break.
     const { offsetTop, offsetLeft, clientHeight } = textareaRef.current;
 
-    // We'll anchor the PopoverContent relative to the Textarea
     setPopoverPosition({
-      top: 40, // Offset from the top of the container
+      top: 40,
       left: 0,
     });
   };
@@ -110,7 +99,6 @@ export function MentionTextarea({
     onChange(newEvent);
     setOpen(false);
 
-    // Focus back and set cursor position
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
@@ -122,29 +110,31 @@ export function MentionTextarea({
 
   return (
     <div className="relative w-full">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverAnchor asChild>
-          <Textarea
-            {...props}
-            ref={textareaRef}
-            value={value}
-            onChange={handleInput}
-            className={cn("relative z-0", className)}
-          />
-        </PopoverAnchor>
+      <Textarea
+        {...props}
+        ref={textareaRef}
+        value={value}
+        onChange={handleInput}
+        className={cn("relative z-0", className)}
+      />
 
+      <Popover open={open} onOpenChange={setOpen}>
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: popoverPosition.top,
+            left: popoverPosition.left,
+            visibility: "hidden",
+          }}
+        ></div>
         <PopoverContent
           className="p-0 w-64 shadow-xl border-border rounded-xl z-50"
           align="start"
-          side="bottom"
-          sideOffset={-40}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <Command className="rounded-xl">
-            <CommandList className="max-h-48 overflow-y-auto no-scrollbar">
-              <CommandEmpty className="py-4 text-xs text-muted-foreground text-center">
-                No coworkers found.
-              </CommandEmpty>
+            <CommandList className="max-h-48 overflow-y-auto">
+              <CommandEmpty>No coworkers found.</CommandEmpty>
               <CommandGroup heading="Mention Coworker">
                 {users
                   .filter((user) =>
@@ -155,19 +145,9 @@ export function MentionTextarea({
                       key={user._id}
                       value={user.name}
                       onSelect={() => handleSelect(user.name)}
-                      className="text-xs py-2 px-3 cursor-pointer flex items-center gap-2"
+                      className="text-xs py-2 cursor-pointer"
                     >
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback className="text-[10px]">
-                          {user.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-muted-foreground">
-                        @{user.name}
-                      </span>
+                      @{user.name}
                     </CommandItem>
                   ))}
               </CommandGroup>
