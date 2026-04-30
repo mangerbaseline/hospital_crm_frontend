@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import PushNotificationManager from "@/components/PushNotificationManager";
+import { NotificationBanner } from "@/components/NotificationBanner";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -35,7 +37,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ReduxProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <PushNotificationManager />
+            <NotificationBanner />
+            {children}
+          </TooltipProvider>
           <Toaster richColors position="top-right" />
         </ReduxProvider>
       </body>

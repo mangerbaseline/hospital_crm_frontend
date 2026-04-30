@@ -112,10 +112,7 @@ export const sendEmail = createAsyncThunk(
   "mailbox/send",
   async (payload: SendEmailPayload, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(
-        "/api/graph-app/send",
-        payload,
-      );
+      const response = await axiosInstance.post("/api/graph-app/send", payload);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
