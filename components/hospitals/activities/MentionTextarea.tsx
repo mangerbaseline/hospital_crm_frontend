@@ -1,40 +1,36 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchUsers } from "@/store/features/user/userSlice";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Popover, PopoverContent } from "@/components/ui/popover";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-interface MentionTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface MentionTextareaProps {
+  id?: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange: (value: string) => void;
+  onBlur?: () => void;
+  placeholder?: string;
+  className?: string;
+  name?: string;
 }
 
 export function MentionTextarea({
   value,
   onChange,
+  onBlur,
   className,
   ...props
 }: MentionTextareaProps) {
   const dispatch = useAppDispatch();
   const { users } = useAppSelector((state) => state.user);
-  const [open, setOpen] = React.useState(false);
-  const [query, setQuery] = React.useState("");
-  const [cursorPos, setCursorPos] = React.useState(0);
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
-  const [popoverPosition, setPopoverPosition] = React.useState({
-    top: 0,
-    left: 0,
-  });
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [cursorPos, setCursorPos] = useState(0);
+  const [atIndex, setAtIndex] = useState(-1);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     if (users.length === 0) {
@@ -42,119 +38,157 @@ export function MentionTextarea({
     }
   }, [dispatch, users.length]);
 
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
-    const selectionStart = e.target.selectionStart;
-    setCursorPos(selectionStart);
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        textareaRef.current &&
+        !textareaRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    const textBeforeCursor = newValue.substring(0, selectionStart);
-    const lastAtSymbolIndex = textBeforeCursor.lastIndexOf("@");
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(query.toLowerCase()),
+  );
 
-    if (lastAtSymbolIndex !== -1) {
-      const textAfterAt = textBeforeCursor.substring(lastAtSymbolIndex + 1);
-      const charBeforeAt = textBeforeCursor[lastAtSymbolIndex - 1];
-      if (!charBeforeAt || /\s/.test(charBeforeAt)) {
-        if (!/\s/.test(textAfterAt)) {
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [query]);
+
+  const handleInput = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newValue = e.target.value;
+      const selectionStart = e.target.selectionStart;
+      setCursorPos(selectionStart);
+
+      const textBeforeCursor = newValue.substring(0, selectionStart);
+      const lastAtIndex = textBeforeCursor.lastIndexOf("@");
+
+      if (lastAtIndex !== -1) {
+        const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+        const charBeforeAt = textBeforeCursor[lastAtIndex - 1];
+        if (
+          (lastAtIndex === 0 || !charBeforeAt || /\s/.test(charBeforeAt)) &&
+          !/\s/.test(textAfterAt)
+        ) {
           setQuery(textAfterAt);
+          setAtIndex(lastAtIndex);
           setOpen(true);
-          calculatePopoverPosition(selectionStart);
-          onChange(e);
+          onChange(newValue);
           return;
         }
       }
-    }
 
-    setOpen(false);
-    onChange(e);
-  };
+      setOpen(false);
+      setAtIndex(-1);
+      onChange(newValue);
+    },
+    [onChange],
+  );
 
-  const calculatePopoverPosition = (index: number) => {
-    if (!textareaRef.current) return;
+  const handleSelect = useCallback(
+    (userName: string) => {
+      if (atIndex === -1) return;
 
-    const { offsetTop, offsetLeft, clientHeight } = textareaRef.current;
+      const textBefore = value.substring(0, atIndex);
+      const textAfter = value.substring(cursorPos);
+      const newValue = `${textBefore}@${userName} ${textAfter}`;
 
-    setPopoverPosition({
-      top: 40,
-      left: 0,
-    });
-  };
+      onChange(newValue);
+      setOpen(false);
+      setAtIndex(-1);
 
-  const handleSelect = (userName: string) => {
-    if (!textareaRef.current) return;
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          const newPos = textBefore.length + userName.length + 2;
+          textareaRef.current.setSelectionRange(newPos, newPos);
+          setCursorPos(newPos);
+        }
+      }, 0);
+    },
+    [value, atIndex, cursorPos, onChange],
+  );
 
-    const textBeforeAt = value.substring(
-      0,
-      value.lastIndexOf("@", cursorPos - 1),
-    );
-    const textAfterCursor = value.substring(cursorPos);
-    const newValue = `${textBeforeAt}@${userName} ${textAfterCursor}`;
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (!open || filteredUsers.length === 0) return;
 
-    const newEvent = {
-      target: {
-        ...textareaRef.current,
-        value: newValue,
-      },
-    } as React.ChangeEvent<HTMLTextAreaElement>;
-
-    onChange(newEvent);
-    setOpen(false);
-
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        const newPos = textBeforeAt.length + userName.length + 2;
-        textareaRef.current.setSelectionRange(newPos, newPos);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev < filteredUsers.length - 1 ? prev + 1 : 0,
+        );
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev > 0 ? prev - 1 : filteredUsers.length - 1,
+        );
+      } else if (e.key === "Enter" && open) {
+        e.preventDefault();
+        handleSelect(filteredUsers[selectedIndex].name);
+      } else if (e.key === "Escape") {
+        setOpen(false);
       }
-    }, 0);
-  };
+    },
+    [open, filteredUsers, selectedIndex, handleSelect],
+  );
 
   return (
     <div className="relative w-full">
-      <Textarea
+      <textarea
         {...props}
         ref={textareaRef}
         value={value}
         onChange={handleInput}
-        className={cn("relative z-0", className)}
+        onBlur={onBlur}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          "flex field-sizing-content min-h-16 w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-base transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30",
+          className,
+        )}
       />
 
-      <Popover open={open} onOpenChange={setOpen}>
+      {open && filteredUsers.length > 0 && (
         <div
-          className="absolute pointer-events-none"
-          style={{
-            top: popoverPosition.top,
-            left: popoverPosition.left,
-            visibility: "hidden",
-          }}
-        ></div>
-        <PopoverContent
-          className="p-0 w-64 shadow-xl border-border rounded-xl z-50"
-          align="start"
-          onOpenAutoFocus={(e) => e.preventDefault()}
+          ref={dropdownRef}
+          className="absolute left-0 z-50 mt-1 w-64 overflow-hidden rounded-xl border border-border bg-popover shadow-xl animate-in fade-in-0 zoom-in-95 duration-100"
         >
-          <Command className="rounded-xl">
-            <CommandList className="max-h-48 overflow-y-auto">
-              <CommandEmpty>No coworkers found.</CommandEmpty>
-              <CommandGroup heading="Mention Coworker">
-                {users
-                  .filter((user) =>
-                    user.name.toLowerCase().includes(query.toLowerCase()),
-                  )
-                  .map((user) => (
-                    <CommandItem
-                      key={user._id}
-                      value={user.name}
-                      onSelect={() => handleSelect(user.name)}
-                      className="text-xs py-2 cursor-pointer"
-                    >
-                      @{user.name}
-                    </CommandItem>
-                  ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+          <div className="max-h-48 overflow-y-auto py-1">
+            {filteredUsers.map((user, index) => (
+              <button
+                key={user._id}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  handleSelect(user.name);
+                }}
+                onMouseEnter={() => setSelectedIndex(index)}
+                className={cn(
+                  "flex w-full items-center gap-2 px-3 py-2 text-xs cursor-pointer transition-colors",
+                  index === selectedIndex
+                    ? "bg-muted text-foreground"
+                    : "text-foreground hover:bg-muted/50",
+                )}
+              >
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                  {user.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}
+                </div>
+                <span className="font-medium">@{user.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
