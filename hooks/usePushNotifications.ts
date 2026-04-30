@@ -7,10 +7,20 @@ export const usePushNotifications = () => {
   const [permission, setPermission] = useState<
     NotificationPermission | "loading"
   >("loading");
+  const [supported, setSupported] = useState(true);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && "Notification" in window) {
-      setPermission(Notification.permission);
+    if (typeof window !== "undefined") {
+      const isSupported =
+        "Notification" in window &&
+        "serviceWorker" in navigator &&
+        "PushManager" in window;
+      setSupported(isSupported);
+      if (isSupported) {
+        setPermission(Notification.permission);
+      } else {
+        setPermission("denied"); // Treat unsupported as denied for the UI
+      }
     }
   }, []);
 
@@ -18,6 +28,7 @@ export const usePushNotifications = () => {
     if (!("Notification" in window)) return;
 
     try {
+      console.log("Push Notifications: Requesting permission via banner...");
       const result = await Notification.requestPermission();
       setPermission(result);
 
