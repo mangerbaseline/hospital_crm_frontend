@@ -19,7 +19,7 @@ export const usePushNotifications = () => {
       if (isSupported) {
         setPermission(Notification.permission);
       } else {
-        setPermission("denied"); // Treat unsupported as denied for the UI
+        setPermission("default");
       }
     }
   }, []);
@@ -45,6 +45,7 @@ export const usePushNotifications = () => {
 
   return {
     permission,
+    supported,
     requestPermission: handleRequestPermission,
   };
 };
