@@ -1,6 +1,7 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
+import { MentionTextarea } from "./MentionTextarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -12,7 +13,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
@@ -44,8 +44,8 @@ export function AddNoteModal({
   const { isCreateActivityLoading } = useAppSelector((state) => state.activity);
 
   const {
-    register,
     handleSubmit,
+    control,
     reset,
     formState: { errors },
   } = useForm<NoteFormValues>({
@@ -91,11 +91,17 @@ export function AddNoteModal({
             <Label htmlFor="notes" className="text-sm font-bold">
               Note
             </Label>
-            <Textarea
-              id="notes"
-              placeholder="Enter your note here..."
-              className="min-h-[80px] bg-muted border-border rounded-xl resize-none "
-              {...register("notes")}
+            <Controller
+              control={control}
+              name="notes"
+              render={({ field }) => (
+                <MentionTextarea
+                  id="notes"
+                  placeholder="Enter your note here..."
+                  className="min-h-[80px] bg-muted border-border rounded-xl resize-none "
+                  {...field}
+                />
+              )}
             />
             {errors.notes && (
               <p className="text-xs text-destructive font-medium">
