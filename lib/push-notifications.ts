@@ -60,6 +60,7 @@ export const subscribeUser = async () => {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       },
     );
 
