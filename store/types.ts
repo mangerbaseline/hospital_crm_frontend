@@ -836,6 +836,15 @@ export interface ReplyEmailPayload {
   bccEmails?: string[];
 }
 
+export interface SendEmailPayload {
+  fromEmail: string;
+  toEmail: string;
+  subject: string;
+  content: string;
+  ccEmails?: string[];
+  bccEmails?: string[];
+}
+
 export interface MailboxState {
   receivedEmails: EmailMessage[];
   sentEmails: EmailMessage[];
@@ -851,4 +860,7 @@ export interface MailboxState {
   syncError: string | null;
   isReplying: boolean;
   replyError: string | null;
+  isSending: boolean;
+  sendError: string | null;
 }
+

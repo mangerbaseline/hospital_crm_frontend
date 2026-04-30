@@ -19,7 +19,6 @@ import {
   Mail,
   Send,
   Inbox,
-  ExternalLink,
   ChevronLeft,
   ChevronRight,
   Search,
@@ -49,10 +48,17 @@ import {
   fetchSentEmails,
   syncEmails,
   replyToEmail,
+  sendEmail,
 } from "@/store/features/mailbox/mailboxSlice";
 import { EmailMessage } from "@/store/types";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  composeEmailSchema,
+  ComposeEmailFormValues,
+} from "@/validations/email.validations";
 
 function EmailItem({
   email,
@@ -523,6 +529,272 @@ function EmailDetailModal({
   );
 }
 
+function ComposeEmailModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const dispatch = useAppDispatch();
+  const { isSending } = useAppSelector((state) => state.mailbox);
+  const authUser = useAppSelector((state) => state.auth.user);
+  const [showCc, setShowCc] = useState(false);
+  const [showBcc, setShowBcc] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<ComposeEmailFormValues>({
+    resolver: zodResolver(composeEmailSchema),
+    defaultValues: {
+      toEmail: "",
+      subject: "",
+      content: "",
+      ccEmails: "",
+      bccEmails: "",
+    },
+  });
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+      setShowCc(false);
+      setShowBcc(false);
+    }
+  }, [open, reset]);
+
+  const parseEmails = (str: string = "") =>
+    str
+      .split(",")
+      .map((e) => e.trim())
+      .filter((e) => e !== "");
+
+  const onSubmit = async (data: ComposeEmailFormValues) => {
+    try {
+      await dispatch(
+        sendEmail({
+          fromEmail: authUser?.email || "",
+          toEmail: data.toEmail.trim(),
+          subject: data.subject.trim(),
+          content: data.content,
+          ccEmails: parseEmails(data.ccEmails),
+          bccEmails: parseEmails(data.bccEmails),
+        }),
+      ).unwrap();
+      toast.success("Email sent successfully");
+      onClose();
+    } catch (error: any) {
+      toast.error(error || "Failed to send email");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="text-base font-bold flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Compose Email
+          </DialogTitle>
+          <DialogDescription>
+            Send a new email from {authUser?.email || "your account"}
+          </DialogDescription>
+        </DialogHeader>
+
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            <div>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 block">
+                To
+              </label>
+              <Input
+                placeholder="recipient@example.com"
+                {...register("toEmail")}
+                className="h-8 text-sm bg-muted/30 border-border"
+              />
+              {errors.toEmail && (
+                <p className="text-xs text-destructive mt-1">
+                  {errors.toEmail.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {!showCc && (
+                <button
+                  type="button"
+                  onClick={() => setShowCc(true)}
+                  className="text-[10px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider cursor-pointer"
+                >
+                  + CC
+                </button>
+              )}
+              {!showBcc && (
+                <button
+                  type="button"
+                  onClick={() => setShowBcc(true)}
+                  className="text-[10px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider cursor-pointer"
+                >
+                  + BCC
+                </button>
+              )}
+            </div>
+
+            {showCc && (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    CC
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCc(false)}
+                    className="cursor-pointer"
+                  >
+                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  </button>
+                </div>
+                <Input
+                  placeholder="Separate multiple emails with commas"
+                  {...register("ccEmails")}
+                  className="h-8 text-sm bg-muted/30 border-border"
+                />
+                {errors.ccEmails && (
+                  <p className="text-xs text-destructive mt-1">
+                    {errors.ccEmails.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {showBcc && (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    BCC
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowBcc(false)}
+                    className="cursor-pointer"
+                  >
+                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  </button>
+                </div>
+                <Input
+                  placeholder="Separate multiple emails with commas"
+                  {...register("bccEmails")}
+                  className="h-8 text-sm bg-muted/30 border-border"
+                />
+                {errors.bccEmails && (
+                  <p className="text-xs text-destructive mt-1">
+                    {errors.bccEmails.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 block">
+                Subject
+              </label>
+              <Input
+                placeholder="Email subject"
+                {...register("subject")}
+                className="h-8 text-sm bg-muted/30 border-border"
+              />
+              {errors.subject && (
+                <p className="text-xs text-destructive mt-1">
+                  {errors.subject.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 block">
+                Content
+              </label>
+              <Controller
+                control={control}
+                name="content"
+                render={({ field }) => (
+                  <div className="bg-background rounded-md [&_.sun-editor]:border-border [&_.sun-editor]:rounded-md [&_.se-toolbar]:bg-muted/50 [&_.se-toolbar]:rounded-t-md [&_.se-toolbar]:outline-none [&_.se-resizing-bar]:bg-muted/50 [&_.se-resizing-bar]:border-border">
+                    <SunEditor
+                      setOptions={{
+                        buttonList: [
+                          ["undo", "redo"],
+                          ["font", "fontSize", "formatBlock"],
+                          ["bold", "underline", "italic", "strike"],
+                          ["fontColor", "hiliteColor"],
+                          ["removeFormat"],
+                          "/",
+                          [
+                            "outdent",
+                            "indent",
+                            "align",
+                            "horizontalRule",
+                            "list",
+                            "table",
+                          ],
+                          ["link", "image"],
+                          ["fullScreen", "showBlocks", "codeView"],
+                        ],
+                        minHeight: "200px",
+                        placeholder: "Type your email here...",
+                      }}
+                      onChange={(val) => field.onChange(val)}
+                      defaultValue={field.value}
+                    />
+                  </div>
+                )}
+              />
+              {errors.content && (
+                <p className="text-xs text-destructive mt-1">
+                  {errors.content.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="flex-row gap-2 mt-4 pt-4 border-t border-border">
+            <DialogClose asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex-1 cursor-pointer"
+                disabled={isSending}
+              >
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isSending}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+            >
+              {isSending ? (
+                <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+              ) : (
+                <Send className="h-3.5 w-3.5 mr-1.5" />
+              )}
+              {isSending ? "Sending..." : "Send Email"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function HospitalEmails() {
   const dispatch = useAppDispatch();
   const {
@@ -540,6 +812,7 @@ export function HospitalEmails() {
   const [selectedEmail, setSelectedEmail] = useState<EmailMessage | null>(null);
   const [emailType, setEmailType] = useState<"received" | "sent">("received");
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isComposeOpen, setIsComposeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const limit = 10;
@@ -627,20 +900,32 @@ export function HospitalEmails() {
             Email Communications
           </h3>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5 text-xs font-semibold rounded-lg cursor-pointer shadow-sm hover:bg-muted transition-all"
-          onClick={handleSync}
-          disabled={isSyncing}
-        >
-          {isSyncing ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <RefreshCw className="h-3.5 w-3.5" />
-          )}
-          {isSyncing ? "Syncing..." : "Sync Mails"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            className="h-8 gap-1.5 text-xs font-semibold rounded-lg cursor-pointer bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all"
+            onClick={() => setIsComposeOpen(true)}
+          >
+            <Send className="h-3.5 w-3.5" />
+            <span className="hidden sm:block ">Compose</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs font-semibold rounded-lg cursor-pointer shadow-sm hover:bg-muted transition-all"
+            onClick={handleSync}
+            disabled={isSyncing}
+          >
+            {isSyncing ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:block">
+              {isSyncing ? "Syncing..." : "Sync Mails"}
+            </span>
+          </Button>
+        </div>
       </div>
 
       <div className="relative mt-2">
@@ -777,6 +1062,11 @@ export function HospitalEmails() {
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         type={emailType}
+      />
+
+      <ComposeEmailModal
+        open={isComposeOpen}
+        onClose={() => setIsComposeOpen(false)}
       />
     </Card>
   );

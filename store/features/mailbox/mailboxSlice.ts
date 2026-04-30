@@ -5,6 +5,7 @@ import {
   EmailMessage,
   PaginatedApiResponse,
   ReplyEmailPayload,
+  SendEmailPayload,
 } from "@/store/types";
 
 const initialState: MailboxState = {
@@ -22,6 +23,8 @@ const initialState: MailboxState = {
   syncError: null,
   isReplying: false,
   replyError: null,
+  isSending: false,
+  sendError: null,
 };
 
 export const fetchReceivedEmails = createAsyncThunk(
@@ -105,6 +108,23 @@ export const replyToEmail = createAsyncThunk(
   },
 );
 
+export const sendEmail = createAsyncThunk(
+  "mailbox/send",
+  async (payload: SendEmailPayload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        "/api/graph-app/send",
+        payload,
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to send email",
+      );
+    }
+  },
+);
+
 const mailboxSlice = createSlice({
   name: "mailbox",
   initialState,
@@ -163,6 +183,17 @@ const mailboxSlice = createSlice({
       .addCase(replyToEmail.rejected, (state, action) => {
         state.isReplying = false;
         state.replyError = action.payload as string;
+      })
+      .addCase(sendEmail.pending, (state) => {
+        state.isSending = true;
+        state.sendError = null;
+      })
+      .addCase(sendEmail.fulfilled, (state) => {
+        state.isSending = false;
+      })
+      .addCase(sendEmail.rejected, (state, action) => {
+        state.isSending = false;
+        state.sendError = action.payload as string;
       });
   },
 });
