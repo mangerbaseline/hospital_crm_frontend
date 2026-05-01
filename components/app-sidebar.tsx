@@ -29,7 +29,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { logout } from "@/store/features/auth/authSlice";
+import { logoutUser } from "@/store/features/auth/authSlice";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -109,9 +109,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAppSelector((state) => state.auth);
   const { setOpenMobile } = useSidebar();
 
-  const handleLogout = () => {
-    dispatch(logout());
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
     router.push("/auth/sign-in");
   };
 

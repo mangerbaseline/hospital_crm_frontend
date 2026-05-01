@@ -46,13 +46,25 @@ export const fetchMe = createAsyncThunk(
   },
 );
 
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      await axiosInstance.post("/api/auth/logout");
+      document.cookie =
+        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    } catch (error: any) {
+      document.cookie =
+        "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      return rejectWithValue(error.response?.data?.message || "Logout failed");
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    logout: (state) => {
-      state.user = null;
-    },
     clearError: (state) => {
       state.error = null;
     },
@@ -84,9 +96,17 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isInitialized = true;
         state.user = null;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isInitialized = false;
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        state.user = null;
+        state.isInitialized = false;
       });
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 export default authSlice.reducer;
