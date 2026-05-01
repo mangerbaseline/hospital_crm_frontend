@@ -5,21 +5,26 @@ import { Bell, X } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAppSelector } from "@/lib/hooks";
 
 export const NotificationBanner = () => {
+  const { user } = useAppSelector((state) => state.auth);
   const { permission, supported, requestPermission } = usePushNotifications();
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    if (permission === "default") {
+    if (permission === "default" && user) {
       const timer = setTimeout(() => {
         setIsVisible(true);
         setTimeout(() => setIsAnimating(true), 100);
       }, 1500);
       return () => clearTimeout(timer);
+    } else if (!user) {
+      setIsVisible(false);
+      setIsAnimating(false);
     }
-  }, [permission]);
+  }, [permission, user]);
 
   const handleEnable = async () => {
     if (!supported) {
