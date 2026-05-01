@@ -50,7 +50,7 @@ export const logoutUser = createAsyncThunk(
   "auth/logoutUser",
   async (_, { rejectWithValue }) => {
     try {
-      await axiosInstance.post("/api/auth/logout");
+      await axiosInstance.get("/api/auth/logout");
       document.cookie =
         "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     } catch (error: any) {
