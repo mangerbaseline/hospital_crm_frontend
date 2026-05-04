@@ -79,9 +79,9 @@ export const fetchSentEmails = createAsyncThunk(
 
 export const syncEmails = createAsyncThunk(
   "mailbox/sync",
-  async (_, { rejectWithValue }) => {
+  async (payload: { hospitalId: string }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("/api/graph-app/sync");
+      const response = await axiosInstance.post("/api/graph-app/sync", payload);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

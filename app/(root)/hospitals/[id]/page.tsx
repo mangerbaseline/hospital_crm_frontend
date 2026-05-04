@@ -237,7 +237,7 @@ function HospitalDetails() {
 
       {selectedHospital && !isGetSingleHospitalLoading && (
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <HospitalEmails />
+          <HospitalEmails hospitalId={selectedHospital._id} />
           <HospitalDocuments hospitalId={selectedHospital._id} />
         </div>
       )}

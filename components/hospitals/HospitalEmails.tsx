@@ -795,7 +795,7 @@ function ComposeEmailModal({
   );
 }
 
-export function HospitalEmails() {
+export function HospitalEmails({ hospitalId }: { hospitalId: string }) {
   const dispatch = useAppDispatch();
   const {
     receivedEmails,
@@ -849,7 +849,7 @@ export function HospitalEmails() {
 
   const handleSync = async () => {
     try {
-      await dispatch(syncEmails()).unwrap();
+      await dispatch(syncEmails({ hospitalId })).unwrap();
       toast.success("Emails synced successfully");
       dispatch(fetchReceivedEmails({ page: 1, limit, search: searchQuery }));
       dispatch(fetchSentEmails({ page: 1, limit, search: searchQuery }));
