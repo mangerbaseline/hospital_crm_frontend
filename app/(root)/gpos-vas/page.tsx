@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { GPOWithDealsList } from "@/components/gpo/GPOWithDealsList";
 import { GPOHospitalDetailsModal } from "@/components/gpo/GPOHospitalDetailsModal";
+import { SearchBar } from "@/components/SearchBar";
 import { GPOWithDeals } from "@/store/types";
 
 function GposVasPage() {
@@ -39,20 +40,30 @@ function GposVasPage() {
   const [selectedGPO, setSelectedGPO] = useState<GPOWithDeals | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   useEffect(() => {
     dispatch(
       fetchGPOsWithDeals({
         page: currentPage,
         limit: pageSize,
-        search: "",
+        search: debouncedSearchQuery,
         userId: selectedUser === "all" ? "" : selectedUser,
       }),
     );
-  }, [dispatch, currentPage, pageSize, selectedUser]);
+  }, [dispatch, currentPage, pageSize, selectedUser, debouncedSearchQuery]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedUser]);
+  }, [selectedUser, debouncedSearchQuery]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -83,7 +94,14 @@ function GposVasPage() {
         />
       </DashboardHeader>
 
-      <div className="flex flex-col md:flex-row gap-4 justify-end mb-6"></div>
+      <div className="mt-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search GPOs by name..."
+          className="mb-6"
+        />
+      </div>
 
       <GPOWithDealsList
         gposWithDeals={gposWithDeals}

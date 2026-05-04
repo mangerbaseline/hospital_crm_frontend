@@ -17,6 +17,7 @@ import {
 import { IDNCard } from "@/components/idn/IDNCard";
 import { IDNCardSkeleton } from "@/components/idn/IDNCardSkeleton";
 import { IDNDetailsModal } from "@/components/idn/IDNDetailsModal";
+import { SearchBar } from "@/components/SearchBar";
 import { IDNWithDeals } from "@/store/types";
 
 function IDNs() {
@@ -40,20 +41,30 @@ function IDNs() {
   const [selectedIDN, setSelectedIDN] = useState<IDNWithDeals | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   useEffect(() => {
     dispatch(
       fetchIDNsWithDeals({
         page: currentPage,
         limit: pageSize,
-        search: "",
+        search: debouncedSearchQuery,
         userId: selectedUser === "all" ? "" : selectedUser,
       }),
     );
-  }, [dispatch, currentPage, pageSize, selectedUser]);
+  }, [dispatch, currentPage, pageSize, selectedUser, debouncedSearchQuery]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedUser]);
+  }, [selectedUser, debouncedSearchQuery]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -84,7 +95,14 @@ function IDNs() {
         />
       </DashboardHeader>
 
-      <div className="flex flex-col md:flex-row gap-4 justify-end mb-6"></div>
+      <div className="mt-6">
+        <SearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search IDNs by name..."
+          className="mb-6"
+        />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isFetchingIDNsWithDeals ? (
