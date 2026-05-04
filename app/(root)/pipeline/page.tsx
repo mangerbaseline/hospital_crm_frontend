@@ -5,7 +5,8 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchAllDeals } from "@/store/features/deal/dealSlice";
 import { DashboardHeader } from "@/components/Header";
 import { UserSelect } from "@/components/UserSelect";
-import { ProductSelect } from "@/components/products/ProductSelect";
+import { MultiProductSelect } from "@/components/products/MultiProductSelect";
+import { GPOSelect } from "@/components/gpo/GPOSelect";
 import { PipelineStatsCard } from "@/components/pipeline/PipelineStatsCard";
 import { PipelineBoard } from "@/components/pipeline/PipelineBoard";
 
@@ -23,17 +24,21 @@ function Pipeline() {
   const [selectedUserId, setSelectedUserId] = useState<string>(
     currentUser?._id || "all",
   );
-  const [selectedProductId, setSelectedProductId] = useState<string>("all");
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [selectedGpoId, setSelectedGpoId] = useState<string>("all");
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(
       fetchAllDeals({
         ...(selectedUserId !== "all" && { userId: selectedUserId }),
-        ...(selectedProductId !== "all" && { productId: selectedProductId }),
+        ...(selectedProductIds.length > 0 && {
+          productIds: selectedProductIds.join(","),
+        }),
+        ...(selectedGpoId !== "all" && { gpoId: selectedGpoId }),
       }),
     );
-  }, [selectedUserId, selectedProductId, dispatch]);
+  }, [selectedUserId, selectedProductIds, selectedGpoId, dispatch]);
 
   return (
     <div>
@@ -43,29 +48,39 @@ function Pipeline() {
           title="Pipeline"
           subTitle="Track deals across all stages"
         >
-          <div className="hidden gap-2 w-full sm:w-auto md:flex">
+          <div className="hidden gap-2 w-full sm:w-auto lg:flex">
             <UserSelect
               value={selectedUserId}
               onValueChange={setSelectedUserId}
-              className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+              className="w-full sm:w-[150px] bg-muted border-border shadow-sm cursor-pointer"
             />
-            <ProductSelect
-              value={selectedProductId}
-              onValueChange={setSelectedProductId}
-              className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+            <GPOSelect
+              value={selectedGpoId}
+              onValueChange={setSelectedGpoId}
+              className="w-full sm:w-[150px] bg-muted border-border shadow-sm cursor-pointer"
+            />
+            <MultiProductSelect
+              value={selectedProductIds}
+              onValueChange={setSelectedProductIds}
+              className="w-full sm:w-[200px] bg-muted border-border shadow-sm cursor-pointer"
             />
           </div>
         </DashboardHeader>
 
-        <div className="flex gap-2 w-full sm:w-auto md:hidden -mt-4 mb-4">
+        <div className="flex flex-col gap-2 w-full sm:w-auto lg:hidden -mt-4 mb-4">
           <UserSelect
             value={selectedUserId}
             onValueChange={setSelectedUserId}
             className="w-full bg-muted border-border shadow-sm cursor-pointer"
           />
-          <ProductSelect
-            value={selectedProductId}
-            onValueChange={setSelectedProductId}
+          <GPOSelect
+            value={selectedGpoId}
+            onValueChange={setSelectedGpoId}
+            className="w-full bg-muted border-border shadow-sm cursor-pointer"
+          />
+          <MultiProductSelect
+            value={selectedProductIds}
+            onValueChange={setSelectedProductIds}
             className="w-full bg-muted border-border shadow-sm cursor-pointer"
           />
         </div>

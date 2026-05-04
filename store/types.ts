@@ -543,7 +543,8 @@ export interface PipelineDeal {
 
 export interface FetchAllDealsParams {
   userId?: string;
-  productId?: string;
+  productIds?: string;
+  gpoId?: string;
 }
 
 export interface ProductRevenue {
@@ -863,4 +864,3 @@ export interface MailboxState {
   isSending: boolean;
   sendError: string | null;
 }
-
