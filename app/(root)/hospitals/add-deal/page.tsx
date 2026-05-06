@@ -21,7 +21,7 @@ function AddDealPage() {
       <Card className="mb-5">
         <div className="flex gap-2 items-center">
           {isMobile && <SidebarTrigger className="h-2 w-2 ml-3 p-2" />}
-          <CardHeader>
+          <CardHeader className="w-full">
             <CardTitle className="text-sm">Sales Rep</CardTitle>
             <CardDescription className="text-lg text-primary font-semibold">
               {user?.name}
