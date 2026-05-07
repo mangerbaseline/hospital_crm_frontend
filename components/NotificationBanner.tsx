@@ -113,49 +113,49 @@ export const NotificationBanner = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
 
-  // ✅ Fetch subscription status
+  const checkBrowserSubscription = async () => {
+    
+    if (typeof window === "undefined") return false;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+
+    try {
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) return false;
+      const subscription = await registration.pushManager.getSubscription();
+      return Boolean(subscription);
+    } catch (error) {
+      console.error("Failed to check browser push subscription:", error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const checkSubscription = async () => {
       if (!user) return;
-
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/push/user-subscription`,
-          {
-            credentials: "include",
-          },
-        );
-
-        const data = await res.json();
-        setIsSubscribed(data.isSubscribed);
-      } catch (err) {
-        console.error("Subscription check failed:", err);
-      }
+      const browserSubscribed = await checkBrowserSubscription();
+      setIsSubscribed(browserSubscribed);
     };
 
     checkSubscription();
   }, [user]);
 
-  // ✅ Control banner visibility
   useEffect(() => {
     if (!user) {
       setIsVisible(false);
       return;
     }
 
-    // wait until API response comes
     if (isSubscribed === null) return;
 
-    if (!isSubscribed) {
+    if (!isSubscribed && permission !== "denied") {
       const timer = setTimeout(() => {
         setIsVisible(true);
         setTimeout(() => setIsAnimating(true), 100);
       }, 1500);
-
       return () => clearTimeout(timer);
-    } else {
-      setIsVisible(false);
     }
+
+    setIsVisible(false);
   }, [user, permission, isSubscribed]);
 
   const handleEnable = async () => {
@@ -166,9 +166,9 @@ export const NotificationBanner = () => {
 
     const result = await requestPermission();
 
-    // After permission, you should also create subscription in backend
     if (result === "granted") {
-      setIsSubscribed(true); // optimistic update
+      const browserSubscribed = await checkBrowserSubscription();
+      setIsSubscribed(browserSubscribed);
     }
 
     if (result !== "default") {
