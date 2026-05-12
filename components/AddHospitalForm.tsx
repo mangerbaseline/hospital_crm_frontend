@@ -95,7 +95,7 @@ function AddHospitalForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label className="text-xs font-semibold">IDN Name</Label>
-            <Popover open={idnOpen} onOpenChange={setIdnOpen}>
+            <Popover open={idnOpen} onOpenChange={setIdnOpen} modal={false}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -104,17 +104,19 @@ function AddHospitalForm() {
                   aria-expanded={idnOpen}
                   className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted"
                 >
-                  {idnValue
-                    ? idns.find((idn) => idn._id === idnValue)?.name
-                    : "Select IDN"}
-                  <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
+                  <span className="truncate text-left flex-1">
+                    {idnValue
+                      ? idns.find((idn) => idn._id === idnValue)?.name
+                      : "Select IDN"}
+                  </span>
+                  <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent
                 className="w-(--radix-popover-trigger-width) p-0 z-100"
                 align="start"
               >
-                <Command>
+                <Command onWheel={(e) => e.stopPropagation()}>
                   <CommandInput
                     placeholder="Search IDN..."
                     className="h-9 text-xs"
@@ -235,7 +237,7 @@ function AddHospitalForm() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-xs font-semibold">GPO</Label>
-            <Popover open={gpoOpen} onOpenChange={setGpoOpen}>
+            <Popover open={gpoOpen} onOpenChange={setGpoOpen} modal={false}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -244,17 +246,19 @@ function AddHospitalForm() {
                   aria-expanded={gpoOpen}
                   className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted"
                 >
-                  {gpoValue
-                    ? gpos.find((gpo) => gpo._id === gpoValue)?.name
-                    : "Select GPO"}
-                  <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
+                  <span className="truncate text-left flex-1">
+                    {gpoValue
+                      ? gpos.find((gpo) => gpo._id === gpoValue)?.name
+                      : "Select GPO"}
+                  </span>
+                  <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent
                 className="w-(--radix-popover-trigger-width) p-0 z-100"
                 align="start"
               >
-                <Command>
+                <Command onWheel={(e) => e.stopPropagation()}>
                   <CommandInput
                     placeholder="Search GPO..."
                     className="h-9 text-xs"

@@ -407,7 +407,7 @@ function EmailDetailModal({
                 />
               </div>
 
-              <div className="bg-background rounded-md [&_.sun-editor]:border-border [&_.sun-editor]:rounded-md [&_.se-toolbar]:bg-muted/50 [&_.se-toolbar]:rounded-t-md [&_.se-toolbar]:outline-none [&_.se-resizing-bar]:bg-muted/50 [&_.se-resizing-bar]:border-border">
+              <div className="bg-background rounded-md [&_.sun-editor]:border-border [&_.sun-editor]:rounded-md [&_.se-toolbar]:bg-muted/50 [&_.se-toolbar]:rounded-t-md [&_.se-toolbar]:outline-none [&_.se-resizing-bar]:bg-muted/50 [&_.se-resizing-bar]:border-border [&_.se-list-layer]:max-h-[200px]! [&_.se-list-layer]:overflow-y-auto! [&_.se-list-layer]:top-full! [&_.se-list-layer]:bottom-auto!">
                 <SunEditor
                   setOptions={{
                     buttonList: [
@@ -428,7 +428,7 @@ function EmailDetailModal({
                       ["link", "image"],
                       ["fullScreen", "showBlocks", "codeView"],
                     ],
-                    minHeight: "200px",
+                    minHeight: "250px",
                     placeholder: "Type your reply here...",
                   }}
                   onChange={(content) => setReplyText(content)}
@@ -725,7 +725,7 @@ function ComposeEmailModal({
                 control={control}
                 name="content"
                 render={({ field }) => (
-                  <div className="bg-background rounded-md [&_.sun-editor]:border-border [&_.sun-editor]:rounded-md [&_.se-toolbar]:bg-muted/50 [&_.se-toolbar]:rounded-t-md [&_.se-toolbar]:outline-none [&_.se-resizing-bar]:bg-muted/50 [&_.se-resizing-bar]:border-border">
+                  <div className="bg-background rounded-md [&_.sun-editor]:border-border [&_.sun-editor]:rounded-md [&_.se-toolbar]:bg-muted/50 [&_.se-toolbar]:rounded-t-md [&_.se-toolbar]:outline-none [&_.se-resizing-bar]:bg-muted/50 [&_.se-resizing-bar]:border-border [&_.se-list-layer]:max-h-[200px]! [&_.se-list-layer]:overflow-y-auto! [&_.se-list-layer]:top-full! [&_.se-list-layer]:bottom-auto!">
                     <SunEditor
                       setOptions={{
                         buttonList: [
@@ -746,7 +746,7 @@ function ComposeEmailModal({
                           ["link", "image"],
                           ["fullScreen", "showBlocks", "codeView"],
                         ],
-                        minHeight: "200px",
+                        minHeight: "250px",
                         placeholder: "Type your email here...",
                       }}
                       onChange={(val) => field.onChange(val)}
