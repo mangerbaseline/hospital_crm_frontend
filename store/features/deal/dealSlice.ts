@@ -24,6 +24,10 @@ const initialState: DealState = {
   isDealProductLoading: false,
   dealProductError: null,
   stats: null,
+  page: 1,
+  limit: 10,
+  totalDeals: 0,
+  totalPages: 1,
 };
 
 export const createDeal = createAsyncThunk(
@@ -171,6 +175,10 @@ const dealSlice = createSlice({
           closedBusiness: action.payload.closedBusiness,
           productRevenue: action.payload.productRevenue,
         };
+        state.page = action.payload.page || 1;
+        state.limit = action.payload.limit || 10;
+        state.totalDeals = action.payload.totalDeals || 0;
+        state.totalPages = action.payload.totalPages || 1;
       })
       .addCase(fetchAllDeals.rejected, (state, action) => {
         state.isFetchingDeals = false;

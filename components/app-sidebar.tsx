@@ -25,6 +25,7 @@ import {
   LogOut,
   Package,
   Handshake,
+  Briefcase,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -44,6 +45,11 @@ const data = {
       title: "Pipeline",
       url: "/pipeline",
       icon: Kanban,
+    },
+    {
+      title: "Deals",
+      url: "/deals",
+      icon: Briefcase,
     },
     {
       title: "Hospitals",

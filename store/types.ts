@@ -545,6 +545,9 @@ export interface FetchAllDealsParams {
   userId?: string;
   productIds?: string;
   gpoId?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
 }
 
 export interface ProductRevenue {
@@ -560,6 +563,9 @@ export interface FetchAllDealsResponse {
   closedBusiness: number;
   productRevenue: ProductRevenue[];
   data: PipelineDeal[];
+  page?: number;
+  limit?: number;
+  totalPages?: number;
 }
 
 export interface UpdateDealStagePayload {
@@ -584,6 +590,10 @@ export interface DealState {
     closedBusiness: number;
     productRevenue: ProductRevenue[];
   } | null;
+  page: number;
+  limit: number;
+  totalDeals: number;
+  totalPages: number;
 }
 
 export interface AddDealProductPayload {
