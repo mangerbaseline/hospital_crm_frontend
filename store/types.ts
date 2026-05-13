@@ -540,6 +540,7 @@ export interface PipelineDeal {
     updatedAt: string;
   };
   dealAmount: number;
+  quantity?: number;
   stage: string | DealProductStage;
   expectedCloseDate: string;
   dealDate?: string;
@@ -620,6 +621,7 @@ export interface UpdateDealProductPayload {
   stage?: string;
   expectedCloseDate?: string;
   dealDate?: string;
+  userId?: string;
 }
 
 export interface RemoveDealProductPayload {

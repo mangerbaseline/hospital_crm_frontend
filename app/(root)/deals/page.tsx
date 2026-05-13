@@ -89,6 +89,21 @@ export default function DealsPage() {
     setCurrentPage(1);
   };
 
+  const refetchDeals = () => {
+    dispatch(
+      fetchAllDeals({
+        page: currentPage,
+        limit: pageSize,
+        search: debouncedSearchQuery,
+        ...(selectedUserId !== "all" && { userId: selectedUserId }),
+        ...(selectedProductIds.length > 0 && {
+          productIds: selectedProductIds.join(","),
+        }),
+        ...(selectedGpoId !== "all" && { gpoId: selectedGpoId }),
+      }),
+    );
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto mb-10">
       <DashboardHeader
@@ -166,7 +181,9 @@ export default function DealsPage() {
         {isFetchingDeals ? (
           Array.from({ length: 6 }).map((_, i) => <DealCardSkeleton key={i} />)
         ) : deals.length > 0 ? (
-          deals.map((deal) => <DealCard key={deal._id} deal={deal} />)
+          deals.map((deal) => (
+            <DealCard key={deal._id} deal={deal} onDealUpdated={refetchDeals} />
+          ))
         ) : (
           <div className="col-span-full py-20 text-center bg-muted/30 rounded-3xl border border-dashed border-border">
             <h3 className="text-lg font-semibold text-muted-foreground">

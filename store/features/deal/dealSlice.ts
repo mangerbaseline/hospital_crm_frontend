@@ -108,10 +108,10 @@ export const updateDealProduct = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      const response = await axiosInstance.put(
-        `/api/deal/update/product?dealId=${dealId}`,
-        payload,
-      );
+      const response = await axiosInstance.put(`/api/deal/update`, {
+        ...payload,
+        dealId,
+      });
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
