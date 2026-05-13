@@ -62,7 +62,7 @@ const data = {
       icon: Network,
     },
     {
-      title: "GPOs & VAs",
+      title: "GPOs & Gov",
       url: "/gpos-vas",
       icon: ShoppingCart,
     },
@@ -183,61 +183,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Create</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-2">
-              {data.create.map((item) => {
-                const isActive =
-                  pathname === item.url ||
-                  (item.title === "Dashboard" && pathname === "/");
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      className={`
-                        h-9 w-full justify-start gap-4 rounded-lg px-3 text-base font-medium transition-colors
-                        ${
-                          isActive
-                            ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
-                            : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
-                        }
-                      `}
-                    >
-                      <Link
-                        href={item.url}
-                        className="flex items-center gap-4"
-                        onClick={() => setOpenMobile(false)}
-                      >
-                        <item.icon
-                          className={`h-3 w-3 ${isActive ? "text-white" : "text-[#1e293b]"}`}
-                        />
-                        <span className="text-sm">{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         {user?.role === "Admin" && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-2">
-                {data.navAdmin.map((item) => {
-                  const isActive =
-                    pathname === item.url ||
-                    (item.title === "Dashboard" && pathname === "/");
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        className={`
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>Create</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="gap-2">
+                  {data.create.map((item) => {
+                    const isActive =
+                      pathname === item.url ||
+                      (item.title === "Dashboard" && pathname === "/");
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          className={`
                         h-9 w-full justify-start gap-4 rounded-lg px-3 text-base font-medium transition-colors
                         ${
                           isActive
@@ -245,24 +206,65 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
                         }
                       `}
-                      >
-                        <Link
-                          href={item.url}
-                          className="flex items-center gap-4"
-                          onClick={() => setOpenMobile(false)}
                         >
-                          <item.icon
-                            className={`h-3 w-3 ${isActive ? "text-white" : "text-[#1e293b]"}`}
-                          />
-                          <span className="text-sm">{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+                          <Link
+                            href={item.url}
+                            className="flex items-center gap-4"
+                            onClick={() => setOpenMobile(false)}
+                          >
+                            <item.icon
+                              className={`h-3 w-3 ${isActive ? "text-white" : "text-[#1e293b]"}`}
+                            />
+                            <span className="text-sm">{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Admin</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu className="gap-2">
+                  {data.navAdmin.map((item) => {
+                    const isActive =
+                      pathname === item.url ||
+                      (item.title === "Dashboard" && pathname === "/");
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          className={`
+                        h-9 w-full justify-start gap-4 rounded-lg px-3 text-base font-medium transition-colors
+                        ${
+                          isActive
+                            ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
+                            : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
+                        }
+                      `}
+                        >
+                          <Link
+                            href={item.url}
+                            className="flex items-center gap-4"
+                            onClick={() => setOpenMobile(false)}
+                          >
+                            <item.icon
+                              className={`h-3 w-3 ${isActive ? "text-white" : "text-[#1e293b]"}`}
+                            />
+                            <span className="text-sm">{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
         )}
       </SidebarContent>
       <SidebarSeparator />

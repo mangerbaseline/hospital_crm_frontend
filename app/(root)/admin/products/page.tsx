@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { debounce } from "lodash";
+import AdminGuard from "@/components/providers/AdminGuard";
 
 function ProductsPage() {
   const dispatch = useAppDispatch();
@@ -103,7 +104,8 @@ function ProductsPage() {
   };
 
   return (
-    <section className="w-full max-w-7xl mx-auto">
+    <AdminGuard>
+      <section className="w-full max-w-7xl mx-auto">
       <DashboardHeader
         title="Product Management"
         subTitle="Manage products, pricing, and details."
@@ -255,6 +257,7 @@ function ProductsPage() {
         product={selectedProduct}
       />
     </section>
+    </AdminGuard>
   );
 }
 

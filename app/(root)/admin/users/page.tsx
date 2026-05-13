@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { debounce } from "lodash";
+import AdminGuard from "@/components/providers/AdminGuard";
 
 function UsersPage() {
   const dispatch = useAppDispatch();
@@ -116,7 +117,8 @@ function UsersPage() {
   };
 
   return (
-    <section className="w-full max-w-7xl mx-auto">
+    <AdminGuard>
+      <section className="w-full max-w-7xl mx-auto">
       <DashboardHeader
         title="User Management"
         subTitle="Manage roles and monitor system access."
@@ -270,6 +272,7 @@ function UsersPage() {
         user={selectedUser}
       />
     </section>
+    </AdminGuard>
   );
 }
 

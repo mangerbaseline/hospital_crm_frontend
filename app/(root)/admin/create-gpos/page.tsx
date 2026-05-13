@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { debounce } from "lodash";
+import AdminGuard from "@/components/providers/AdminGuard";
 
 function CreateGPOsPage() {
   const dispatch = useAppDispatch();
@@ -103,7 +104,8 @@ function CreateGPOsPage() {
   };
 
   return (
-    <section className="w-full max-w-7xl mx-auto">
+    <AdminGuard>
+      <section className="w-full max-w-7xl mx-auto">
       <DashboardHeader
         title="GPO Management"
         subTitle="Manage Group Purchasing Organizations"
@@ -254,6 +256,7 @@ function CreateGPOsPage() {
         gpo={selectedGPO}
       />
     </section>
+    </AdminGuard>
   );
 }
 

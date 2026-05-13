@@ -7,7 +7,6 @@ import { DashboardHeader } from "@/components/Header";
 import { UserSelect } from "@/components/UserSelect";
 import { MultiProductSelect } from "@/components/products/MultiProductSelect";
 import { GPOSelect } from "@/components/gpo/GPOSelect";
-import { PipelineStatsCard } from "@/components/pipeline/PipelineStatsCard";
 import {
   SlidersHorizontal,
   ChevronLeft,
@@ -23,27 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { format } from "date-fns";
-
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
-};
+import { DealCard } from "@/components/deals/DealCard";
+import { DealCardSkeleton } from "@/components/deals/DealCardSkeleton";
 
 export default function DealsPage() {
   const { user: currentUser } = useAppSelector((state) => state.auth);
-  const { deals, stats, isFetchingDeals, page, limit, totalDeals, totalPages } =
+  const { deals, isFetchingDeals, page, limit, totalDeals, totalPages } =
     useAppSelector((state) => state.deal);
 
   const dispatch = useAppDispatch();
@@ -89,8 +73,6 @@ export default function DealsPage() {
     selectedProductIds,
     selectedGpoId,
   ]);
-
-  console.log("deals", deals);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -180,88 +162,21 @@ export default function DealsPage() {
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="w-[250px] font-semibold">
-                  Hospital
-                </TableHead>
-                <TableHead className="font-semibold">Product</TableHead>
-                <TableHead className="font-semibold text-right">
-                  Amount
-                </TableHead>
-                <TableHead className="font-semibold">Stage</TableHead>
-                <TableHead className="font-semibold">Expected Close</TableHead>
-                <TableHead className="font-semibold">Rep</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isFetchingDeals ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-center py-10 text-muted-foreground"
-                  >
-                    Loading deals...
-                  </TableCell>
-                </TableRow>
-              ) : deals.length > 0 ? (
-                deals.map((deal) => (
-                  <TableRow
-                    key={deal._id}
-                    className="hover:bg-muted/50 transition-colors"
-                  >
-                    <TableCell>
-                      <div className="font-medium text-foreground">
-                        {deal.hospital?.hospitalName}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        {deal.hospital?.city}, {deal.hospital?.state}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-medium">{deal.product?.name}</span>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatCurrency(deal.dealAmount || 0)}
-                    </TableCell>
-                    <TableCell>
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                        {deal.stage}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {deal.expectedCloseDate
-                        ? format(
-                            new Date(deal.expectedCloseDate),
-                            "MMM dd, yyyy",
-                          )
-                        : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm font-medium">
-                        {deal.user?.name}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-16">
-                    <div className="flex flex-col items-center justify-center text-muted-foreground">
-                      <p className="text-lg font-medium">No deals found</p>
-                      <p className="text-sm mt-1">
-                        Try adjusting your search or filters.
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        {isFetchingDeals ? (
+          Array.from({ length: 6 }).map((_, i) => <DealCardSkeleton key={i} />)
+        ) : deals.length > 0 ? (
+          deals.map((deal) => <DealCard key={deal._id} deal={deal} />)
+        ) : (
+          <div className="col-span-full py-20 text-center bg-muted/30 rounded-3xl border border-dashed border-border">
+            <h3 className="text-lg font-semibold text-muted-foreground">
+              No deals found
+            </h3>
+            <p className="text-sm text-muted-foreground/60 mt-1">
+              Try adjusting your search or filters
+            </p>
+          </div>
+        )}
       </div>
 
       {totalPages > 0 && (

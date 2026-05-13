@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { debounce } from "lodash";
+import AdminGuard from "@/components/providers/AdminGuard";
 
 function CreateIDNsPage() {
   const dispatch = useAppDispatch();
@@ -103,7 +104,8 @@ function CreateIDNsPage() {
   };
 
   return (
-    <section className="w-full max-w-7xl mx-auto">
+    <AdminGuard>
+      <section className="w-full max-w-7xl mx-auto">
       <DashboardHeader
         title="IDN Management"
         subTitle="Manage Integrated Delivery Networks"
@@ -254,6 +256,7 @@ function CreateIDNsPage() {
         idn={selectedIDN}
       />
     </section>
+    </AdminGuard>
   );
 }
 
