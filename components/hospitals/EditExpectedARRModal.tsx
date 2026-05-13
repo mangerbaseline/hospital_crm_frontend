@@ -38,6 +38,7 @@ interface ProductItem {
   productId: string;
   productName: string;
   dealAmount: number;
+  quantity: number;
   stage: string;
   expectedCloseDate: string;
   isNew?: boolean;
@@ -82,6 +83,7 @@ export function EditExpectedARRModal({
               ? p.product.name
               : "Unknown Product",
           dealAmount: p.dealAmount || 0,
+          quantity: p.quantity || 1,
           stage: p.stage || DealProductStage.DEMO,
           expectedCloseDate: p.expectedCloseDate
             ? new Date(p.expectedCloseDate).toISOString().split("T")[0]
@@ -104,6 +106,7 @@ export function EditExpectedARRModal({
         productId: "",
         productName: "",
         dealAmount: 0,
+        quantity: 1,
         stage: DealProductStage.DEMO,
         expectedCloseDate: "",
         isNew: true,
@@ -164,6 +167,7 @@ export function EditExpectedARRModal({
                 dealId: item.dealId,
                 product: item.productId,
                 dealAmount: item.dealAmount,
+                quantity: item.quantity,
                 stage: item.stage,
                 expectedCloseDate: item.expectedCloseDate
                   ? new Date(item.expectedCloseDate).toISOString()
@@ -185,6 +189,7 @@ export function EditExpectedARRModal({
               hospitalId: hospital._id,
               product: item.productId,
               dealAmount: item.dealAmount,
+              quantity: item.quantity,
               stage: item.stage,
               expectedCloseDate: item.expectedCloseDate
                 ? new Date(item.expectedCloseDate).toISOString()
@@ -259,11 +264,19 @@ export function EditExpectedARRModal({
                       <SelectValue placeholder="Select Product" />
                     </SelectTrigger>
                     <SelectContent>
-                      {products.map((prod) => (
-                        <SelectItem key={prod._id} value={prod._id}>
-                          {prod.name}
-                        </SelectItem>
-                      ))}
+                      {products
+                        .filter(
+                          (prod) =>
+                            !visibleItems.some(
+                              (v) =>
+                                v.productId === prod._id && v._id !== item._id,
+                            ),
+                        )
+                        .map((prod) => (
+                          <SelectItem key={prod._id} value={prod._id}>
+                            {prod.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 ) : (
@@ -299,6 +312,23 @@ export function EditExpectedARRModal({
                     className="text-xs h-9 bg-muted pl-7"
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold">Quantity</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={item.quantity}
+                  onChange={(e) =>
+                    handleFieldChange(
+                      item._id,
+                      "quantity",
+                      Number(e.target.value),
+                    )
+                  }
+                  className="text-xs h-9 bg-muted mt-1.5"
+                />
               </div>
 
               <div>
@@ -342,14 +372,16 @@ export function EditExpectedARRModal({
             </div>
           ))}
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleAddProduct}
-            className="w-full h-10 border-dashed border-border text-sm font-medium gap-2 cursor-pointer hover:bg-muted"
-          >
-            <Plus className="h-4 w-4" /> Add Product
-          </Button>
+          {visibleItems.length < products.length && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddProduct}
+              className="w-full h-10 border-dashed border-border text-sm font-medium gap-2 cursor-pointer hover:bg-muted"
+            >
+              <Plus className="h-4 w-4" /> Add Product
+            </Button>
+          )}
         </div>
 
         <DialogFooter className="mt-4 gap-2">

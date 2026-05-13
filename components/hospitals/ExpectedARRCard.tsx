@@ -97,9 +97,16 @@ export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
                 >
                   {productName}
                 </h4>
-                <p className={`text-xl font-extrabold ${themeStyle.amount}`}>
-                  ${p.dealAmount?.toLocaleString()}
-                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className={`text-xl font-extrabold ${themeStyle.amount}`}>
+                    ${p.dealAmount?.toLocaleString()}
+                  </p>
+                  {p.quantity && p.quantity > 1 && (
+                    <span className={`text-xs font-bold ${themeStyle.label}`}>
+                      x{p.quantity}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-col gap-2">

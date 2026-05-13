@@ -122,6 +122,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
       append({
         product: productId,
         dealAmount: 0,
+        quantity: 1,
         stage: DealProductStage.DEMO,
         expectedCloseDate: undefined,
       });

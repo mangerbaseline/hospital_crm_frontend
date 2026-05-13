@@ -31,26 +31,45 @@ export function ProductFields({ index }: ProductFieldsProps) {
 
   return (
     <div className="pl-6 space-y-3 mt-3 mb-2">
-      <div>
-        <Label className="text-[11px] font-semibold">Deal Amount</Label>
-        <div className="relative mt-1.5 flex items-center">
-          <span className="absolute left-3 text-xs text-muted-foreground font-medium">
-            $
-          </span>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-[11px] font-semibold">Deal Amount</Label>
+          <div className="relative mt-1.5 flex items-center">
+            <span className="absolute left-3 text-xs text-muted-foreground font-medium">
+              $
+            </span>
+            <Input
+              type="number"
+              placeholder="0.00"
+              className="pl-7 text-xs h-9 bg-muted border-border"
+              {...register(`products.${index}.dealAmount`, {
+                valueAsNumber: true,
+              })}
+            />
+          </div>
+          {productErrors?.dealAmount && (
+            <p className="text-[10px] text-destructive mt-1">
+              {productErrors.dealAmount.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Label className="text-[11px] font-semibold">Quantity</Label>
           <Input
             type="number"
-            placeholder="0.00"
-            className="pl-7 text-xs h-9 bg-muted border-border"
-            {...register(`products.${index}.dealAmount`, {
+            min={1}
+            className="mt-1.5 text-xs h-9 bg-muted border-border"
+            {...register(`products.${index}.quantity`, {
               valueAsNumber: true,
             })}
           />
+          {productErrors?.quantity && (
+            <p className="text-[10px] text-destructive mt-1">
+              {productErrors.quantity.message}
+            </p>
+          )}
         </div>
-        {productErrors?.dealAmount && (
-          <p className="text-[10px] text-destructive mt-1">
-            {productErrors.dealAmount.message}
-          </p>
-        )}
       </div>
 
       <div>
