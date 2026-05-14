@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, Calendar, User, Target, Pencil } from "lucide-react";
+import {
+  Building2,
+  Calendar,
+  User,
+  Target,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -13,8 +20,11 @@ import { Button } from "@/components/ui/button";
 import { PipelineDeal, UserRole } from "@/store/types";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { EditDealModal } from "./EditDealModal";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { removeDealProduct } from "@/store/features/deal/dealSlice";
+import { toast } from "sonner";
 
 interface DealCardProps {
   deal: PipelineDeal;
@@ -30,8 +40,20 @@ const formatCurrency = (value: number) => {
 };
 
 export function DealCard({ deal, onDealUpdated }: DealCardProps) {
-  const { user: currentUser } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const [editOpen, setEditOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      await dispatch(removeDealProduct({ dealId: deal.dealId })).unwrap();
+      toast.success("Deal deleted successfully");
+      if (onDealUpdated) {
+        onDealUpdated();
+      }
+    } catch (error: any) {
+      toast.error(error || "Failed to delete deal");
+    }
+  };
 
   const productName = deal.product?.name || "Unknown Product";
   const isMacSystem = productName.toLowerCase().includes("mac");
@@ -39,14 +61,29 @@ export function DealCard({ deal, onDealUpdated }: DealCardProps) {
   return (
     <>
       <Card className="overflow-hidden border-none shadow-sm hover:drop-shadow-lg transition-all p-0 rounded-xl hover:bg-muted group relative">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setEditOpen(true)}
-          className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-border hover:bg-white shadow-sm transition-all cursor-pointer"
-        >
-          <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-        </Button>
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setEditOpen(true)}
+            className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-border hover:bg-white shadow-sm transition-all cursor-pointer"
+          >
+            <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+          </Button>
+          <ConfirmDialog
+            title="Delete Deal"
+            description="Are you sure you want to delete this deal? This action cannot be undone."
+            onConfirm={handleDelete}
+          >
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-border hover:bg-destructive hover:text-white text-muted-foreground shadow-sm transition-all cursor-pointer"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </ConfirmDialog>
+        </div>
 
         <CardHeader className="p-5 pb-3">
           <div className="flex items-start gap-3">

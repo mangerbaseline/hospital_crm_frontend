@@ -36,6 +36,7 @@ import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchUsers } from "@/store/features/user/userSlice";
+import { fetchProducts } from "@/store/features/product/productSlice";
 import { updateDealProduct } from "@/store/features/deal/dealSlice";
 import { toast } from "sonner";
 import { PipelineDeal, DealProductStage, UserRole } from "@/store/types";
@@ -57,6 +58,7 @@ export function EditDealModal({
 }: EditDealModalProps) {
   const dispatch = useAppDispatch();
   const { users } = useAppSelector((state) => state.user);
+  const { products } = useAppSelector((state) => state.product);
   const { user: currentUser } = useAppSelector((state) => state.auth);
 
   const isAdmin = currentUser?.role === UserRole.ADMIN;
@@ -65,8 +67,12 @@ export function EditDealModal({
   const [isSaving, setIsSaving] = useState(false);
 
   const [selectedUserId, setSelectedUserId] = useState(deal.user?._id || "");
+  const [selectedProductId, setSelectedProductId] = useState(
+    deal.product?._id || "",
+  );
   const [dealAmount, setDealAmount] = useState(deal.dealAmount || 0);
   const [quantity, setQuantity] = useState(deal.quantity || 1);
+  const [beds, setBeds] = useState(deal.beds || "");
   const [stage, setStage] = useState(deal.stage || DealProductStage.DEMO);
   const [expectedCloseDate, setExpectedCloseDate] = useState(
     deal.expectedCloseDate
@@ -77,10 +83,13 @@ export function EditDealModal({
   useEffect(() => {
     if (open) {
       dispatch(fetchUsers({ limit: 1000 }));
+      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
 
       setSelectedUserId(deal.user?._id || "");
+      setSelectedProductId(deal.product?._id || "");
       setDealAmount(deal.dealAmount || 0);
       setQuantity(deal.quantity || 1);
+      setBeds(deal.beds || "");
       setStage(deal.stage || DealProductStage.DEMO);
       setExpectedCloseDate(
         deal.expectedCloseDate
@@ -88,7 +97,7 @@ export function EditDealModal({
           : "",
       );
     }
-  }, [open, deal, dispatch, users.length]);
+  }, [open, deal, dispatch, users.length, products.length]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -96,8 +105,13 @@ export function EditDealModal({
       await dispatch(
         updateDealProduct({
           dealId: deal.dealId,
+          product:
+            selectedProductId !== deal.product?._id
+              ? selectedProductId
+              : undefined,
           dealAmount,
           quantity,
+          beds: beds || undefined,
           stage: stage as string,
           expectedCloseDate: expectedCloseDate
             ? new Date(expectedCloseDate).toISOString()
@@ -201,6 +215,25 @@ export function EditDealModal({
           )}
 
           <div>
+            <Label className="text-xs font-semibold">Product</Label>
+            <Select
+              value={selectedProductId}
+              onValueChange={(val) => setSelectedProductId(val)}
+            >
+              <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
+                <SelectValue placeholder="Select product" />
+              </SelectTrigger>
+              <SelectContent>
+                {products.map((prod) => (
+                  <SelectItem key={prod._id} value={prod._id}>
+                    {prod.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <Label className="text-xs font-semibold">Deal Amount</Label>
             <div className="relative mt-1.5">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-semibold">
@@ -215,15 +248,28 @@ export function EditDealModal({
             </div>
           </div>
 
-          <div>
-            <Label className="text-xs font-semibold">Quantity</Label>
-            <Input
-              type="number"
-              min={1}
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              className="text-xs h-9 bg-muted mt-1.5"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-semibold">Quantity</Label>
+              <Input
+                type="number"
+                min={1}
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                className="text-xs h-9 bg-muted mt-1.5"
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-semibold">Beds</Label>
+              <Input
+                type="number"
+                min={0}
+                value={beds}
+                onChange={(e) => setBeds(e.target.value)}
+                placeholder="No. of beds"
+                className="text-xs h-9 bg-muted mt-1.5"
+              />
+            </div>
           </div>
 
           <div>

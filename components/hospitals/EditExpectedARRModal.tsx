@@ -39,6 +39,7 @@ interface ProductItem {
   productName: string;
   dealAmount: number;
   quantity: number;
+  beds: string;
   stage: string;
   expectedCloseDate: string;
   isNew?: boolean;
@@ -84,6 +85,7 @@ export function EditExpectedARRModal({
               : "Unknown Product",
           dealAmount: p.dealAmount || 0,
           quantity: p.quantity || 1,
+          beds: (p as any).beds || "",
           stage: p.stage || DealProductStage.DEMO,
           expectedCloseDate: p.expectedCloseDate
             ? new Date(p.expectedCloseDate).toISOString().split("T")[0]
@@ -107,6 +109,7 @@ export function EditExpectedARRModal({
         productName: "",
         dealAmount: 0,
         quantity: 1,
+        beds: "",
         stage: DealProductStage.DEMO,
         expectedCloseDate: "",
         isNew: true,
@@ -168,6 +171,7 @@ export function EditExpectedARRModal({
                 product: item.productId,
                 dealAmount: item.dealAmount,
                 quantity: item.quantity,
+                beds: item.beds || undefined,
                 stage: item.stage,
                 expectedCloseDate: item.expectedCloseDate
                   ? new Date(item.expectedCloseDate).toISOString()
@@ -280,7 +284,29 @@ export function EditExpectedARRModal({
                     </SelectContent>
                   </Select>
                 ) : (
-                  <h4 className="text-sm font-bold">{item.productName}</h4>
+                  <Select
+                    value={item.productId}
+                    onValueChange={(val) => {
+                      const prod = products.find((p) => p._id === val);
+                      handleFieldChange(item._id, "productId", val);
+                      handleFieldChange(
+                        item._id,
+                        "productName",
+                        prod?.name || "",
+                      );
+                    }}
+                  >
+                    <SelectTrigger className="w-full text-sm h-9 bg-muted font-semibold">
+                      <SelectValue placeholder="Select Product" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.map((prod) => (
+                        <SelectItem key={prod._id} value={prod._id}>
+                          {prod.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
                 <Button
                   type="button"
@@ -327,6 +353,20 @@ export function EditExpectedARRModal({
                       Number(e.target.value),
                     )
                   }
+                  className="text-xs h-9 bg-muted mt-1.5"
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold">Beds</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={item.beds}
+                  onChange={(e) =>
+                    handleFieldChange(item._id, "beds", e.target.value)
+                  }
+                  placeholder="No. of beds"
                   className="text-xs h-9 bg-muted mt-1.5"
                 />
               </div>

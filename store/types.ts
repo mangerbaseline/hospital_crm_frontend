@@ -544,6 +544,7 @@ export interface PipelineDeal {
   stage: string | DealProductStage;
   expectedCloseDate: string;
   dealDate?: string;
+  beds?: string;
 }
 
 export interface FetchAllDealsParams {
@@ -599,6 +600,8 @@ export interface DealState {
   limit: number;
   totalDeals: number;
   totalPages: number;
+  isDeleteDealLoading: boolean;
+  deleteDealError: string | null;
 }
 
 export interface AddDealProductPayload {
@@ -621,6 +624,7 @@ export interface UpdateDealProductPayload {
   stage?: string;
   expectedCloseDate?: string;
   dealDate?: string;
+  beds?: string;
   userId?: string;
 }
 

@@ -28,6 +28,8 @@ const initialState: DealState = {
   limit: 10,
   totalDeals: 0,
   totalPages: 1,
+  isDeleteDealLoading: false,
+  deleteDealError: null,
 };
 
 export const createDeal = createAsyncThunk(
@@ -148,6 +150,8 @@ const dealSlice = createSlice({
       state.updateDealStageError = null;
       state.isDealProductLoading = false;
       state.dealProductError = null;
+      state.isDeleteDealLoading = false;
+      state.deleteDealError = null;
     },
   },
   extraReducers: (builder) => {
@@ -221,8 +225,12 @@ const dealSlice = createSlice({
         state.isDealProductLoading = true;
         state.dealProductError = null;
       })
-      .addCase(removeDealProduct.fulfilled, (state) => {
+      .addCase(removeDealProduct.fulfilled, (state, action) => {
         state.isDealProductLoading = false;
+        state.deals = state.deals.filter(
+          (deal) => deal.dealId !== action.meta.arg.dealId,
+        );
+        state.totalDeals = Math.max(0, state.totalDeals - 1);
       })
       .addCase(removeDealProduct.rejected, (state, action) => {
         state.isDealProductLoading = false;

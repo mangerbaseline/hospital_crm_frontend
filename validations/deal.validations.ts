@@ -4,7 +4,11 @@ import { DealProductStage } from "@/store/types";
 export const dealProductSchema = z.object({
   product: z.string().min(1, "Product is required"),
   dealAmount: z.number().min(0, "Amount must be 0 or more").optional(),
-  quantity: z.number().min(1, "Quantity must be at least 1").default(1).optional(),
+  quantity: z
+    .number()
+    .min(1, "Quantity must be at least 1")
+    .default(1)
+    .optional(),
   stage: z.enum(DealProductStage).default(DealProductStage.DEMO).optional(),
   expectedCloseDate: z.union([z.date(), z.string()]).optional(),
 });
