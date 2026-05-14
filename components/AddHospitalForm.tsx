@@ -61,11 +61,11 @@ function AddHospitalForm() {
       state: "",
       zip: "",
       gpo: "",
-      teamHospital: false,
-      magnetHospital: false,
-      bedsWithMac: 0,
-      ICUBeds: 0,
-      competitiveProduct: "",
+      // teamHospital: false,
+      // magnetHospital: false,
+      // bedsWithMac: 0,
+      // ICUBeds: 0,
+      // competitiveProduct: "",
     },
   });
 
@@ -305,17 +305,17 @@ function AddHospitalForm() {
             )}
           </div>
 
-          <div>
+          {/* <div>
             <Label className="text-xs font-semibold">Competitive Product</Label>
             <Input
               placeholder="Enter competitive product"
               className="text-xs mt-1.5 h-9 bg-muted"
               {...register("competitiveProduct")}
             />
-          </div>
+          </div> */}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-xs font-semibold">Beds with MAC</Label>
             <Input
@@ -390,7 +390,7 @@ function AddHospitalForm() {
               )}
             />
           </div>
-        </div>
+        </div> */}
 
         <Button
           type="submit"

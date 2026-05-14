@@ -46,7 +46,7 @@ import {
   hospitalSchema,
   HospitalFormValues,
 } from "@/validations/hospital.validations";
-import { Hospital } from "@/store/types";
+import { Hospital, UserRole } from "@/store/types";
 
 interface EditHospitalModalProps {
   hospital: Hospital;
@@ -61,6 +61,9 @@ export function EditHospitalModal({
   const { idns } = useAppSelector((state) => state.idn);
   const { gpos } = useAppSelector((state) => state.gpo);
   const { users } = useAppSelector((state) => state.user);
+  const { user } = useAppSelector((state) => state.auth);
+  const isAdmin = user?.role === UserRole.ADMIN;
+
   const { isUpdateHospitalLoading } = useAppSelector((state) => state.hospital);
 
   const [open, setOpen] = useState(false);
@@ -96,11 +99,11 @@ export function EditHospitalModal({
         typeof hospital.gpo === "object"
           ? (hospital.gpo as any)?._id || ""
           : hospital.gpo || "",
-      teamHospital: hospital.teamHospital ?? false,
-      magnetHospital: hospital.magnetHospital ?? false,
-      bedsWithMac: hospital.bedsWithMac ?? 0,
-      ICUBeds: hospital.ICUBeds ?? 0,
-      competitiveProduct: hospital.competitiveProduct || "",
+      // teamHospital: hospital.teamHospital ?? false,
+      // magnetHospital: hospital.magnetHospital ?? false,
+      // bedsWithMac: hospital.bedsWithMac ?? 0,
+      // ICUBeds: hospital.ICUBeds ?? 0,
+      // competitiveProduct: hospital.competitiveProduct || "",
     },
   });
 
@@ -131,11 +134,11 @@ export function EditHospitalModal({
           typeof hospital.gpo === "object"
             ? (hospital.gpo as any)?._id || ""
             : hospital.gpo || "",
-        teamHospital: hospital.teamHospital ?? false,
-        magnetHospital: hospital.magnetHospital ?? false,
-        bedsWithMac: hospital.bedsWithMac ?? 0,
-        ICUBeds: hospital.ICUBeds ?? 0,
-        competitiveProduct: hospital.competitiveProduct || "",
+        // teamHospital: hospital.teamHospital ?? false,
+        // magnetHospital: hospital.magnetHospital ?? false,
+        // bedsWithMac: hospital.bedsWithMac ?? 0,
+        // ICUBeds: hospital.ICUBeds ?? 0,
+        // competitiveProduct: hospital.competitiveProduct || "",
       });
       setSelectedUser(
         typeof hospital.user === "object"
@@ -178,21 +181,23 @@ export function EditHospitalModal({
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 mt-2"
         >
-          <div>
-            <Label className="text-xs font-semibold">Sales Rep</Label>
-            <Select value={selectedUser} onValueChange={setSelectedUser}>
-              <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
-                <SelectValue placeholder="Select Sales Rep" />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((user) => (
-                  <SelectItem key={user._id} value={user._id}>
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {isAdmin && (
+            <div>
+              <Label className="text-xs font-semibold">Sales Rep</Label>
+              <Select value={selectedUser} onValueChange={setSelectedUser}>
+                <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
+                  <SelectValue placeholder="Select Sales Rep" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user._id} value={user._id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4 flex flex-col gap-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -416,7 +421,7 @@ export function EditHospitalModal({
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-xs font-semibold">ICU Beds</Label>
               <Input
@@ -500,7 +505,7 @@ export function EditHospitalModal({
               className="text-xs mt-1.5 h-9 bg-muted"
               {...register("competitiveProduct")}
             />
-          </div>
+          </div> */}
 
           <div className="flex justify-end mt-2">
             <Button

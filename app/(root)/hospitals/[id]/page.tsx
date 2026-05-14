@@ -88,7 +88,45 @@ function HospitalDetails() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-start gap-4 border border-border rounded-xl p-5">
+                <div className="bg-muted p-2.5 rounded-lg border border-border shrink-0 mt-0.5">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider mb-1">
+                    Location
+                  </p>
+                  {selectedHospital.address && (
+                    <p className="text-sm font-semibold text-slate-700 leading-snug">
+                      {selectedHospital.address}
+                    </p>
+                  )}
+                  <p className="text-sm font-semibold text-slate-700 leading-snug">
+                    {selectedHospital.city}, {selectedHospital.state}{" "}
+                    {selectedHospital.zip}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 border border-border rounded-xl p-5">
+                <div className="bg-muted p-2.5 rounded-lg border border-border shrink-0 mt-0.5">
+                  <Briefcase className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider mb-1">
+                    Group Purchasing Organization
+                  </p>
+                  <p className="text-sm font-semibold text-slate-700">
+                    {typeof selectedHospital.gpo === "object"
+                      ? selectedHospital.gpo?.name
+                      : selectedHospital.gpo || "N/A"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-muted border border-border rounded-xl p-4">
                 <div className="bg-white p-2.5 rounded-lg border border-border shrink-0">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -98,14 +136,15 @@ function HospitalDetails() {
                     Total Beds
                   </p>
                   <h4 className="text-xl font-extrabold">
-                    {selectedHospital.ICUBeds &&
+                    {/* {selectedHospital.ICUBeds &&
                       selectedHospital.bedsWithMac &&
-                      selectedHospital.ICUBeds + selectedHospital?.bedsWithMac}
+                      selectedHospital.ICUBeds + selectedHospital?.bedsWithMac} */}
+                    {selectedHospital?.beds || "N/A"}
                   </h4>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-orange-50/50 border border-orange-200 rounded-xl p-4">
+              {/* <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-orange-50/50 border border-orange-200 rounded-xl p-4">
                 <div className="bg-white p-2.5 rounded-lg border border-orange-200 shrink-0">
                   <FileText className="h-4 w-4 text-orange-500" />
                 </div>
@@ -159,48 +198,10 @@ function HospitalDetails() {
                     {selectedHospital.magnetHospital ? "Yes" : "No"}
                   </h4>
                 </div>
-              </div>
+              </div> */}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-              <div className="flex items-start gap-4 border border-border rounded-xl p-5">
-                <div className="bg-muted p-2.5 rounded-lg border border-border shrink-0 mt-0.5">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider mb-1">
-                    Location
-                  </p>
-                  {selectedHospital.address && (
-                    <p className="text-sm font-semibold text-slate-700 leading-snug">
-                      {selectedHospital.address}
-                    </p>
-                  )}
-                  <p className="text-sm font-semibold text-slate-700 leading-snug">
-                    {selectedHospital.city}, {selectedHospital.state}{" "}
-                    {selectedHospital.zip}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4 border border-border rounded-xl p-5">
-                <div className="bg-muted p-2.5 rounded-lg border border-border shrink-0 mt-0.5">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider mb-1">
-                    Group Purchasing Organization
-                  </p>
-                  <p className="text-sm font-semibold text-slate-700">
-                    {typeof selectedHospital.gpo === "object"
-                      ? selectedHospital.gpo?.name
-                      : selectedHospital.gpo || "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {selectedHospital.competitiveProduct && (
+            {/* {selectedHospital.competitiveProduct && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4 mt-2">
                 <div className="bg-white p-2.5 rounded-lg border border-red-100 shrink-0">
                   <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -214,7 +215,7 @@ function HospitalDetails() {
                   </p>
                 </div>
               </div>
-            )}
+            )} */}
           </Card>
         )}
 

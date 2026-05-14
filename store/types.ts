@@ -131,6 +131,7 @@ export interface Hospital {
   _id: string;
   idn: { _id: string; name: string };
   hospitalName: string;
+  beds: string;
   address: string;
   user: string;
   city: string;
@@ -211,11 +212,11 @@ export interface CreateHospitalPayload {
   state: string;
   zip: string;
   gpo: string;
-  competitiveProduct: string;
-  teamHospital: boolean;
-  magnetHospital: boolean;
-  bedsWithMac: number;
-  ICUBeds: number;
+  // competitiveProduct: string;
+  // teamHospital: boolean;
+  // magnetHospital: boolean;
+  // bedsWithMac: number;
+  // ICUBeds: number;
 }
 
 export interface UpdateHospitalPayload extends Partial<CreateHospitalPayload> {
