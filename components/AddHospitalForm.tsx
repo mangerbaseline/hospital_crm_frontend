@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "./ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
+import { DialogTitle } from "./ui/dialog";
+import { CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { Check, ChevronsUpDown, Plus, Loader2 } from "lucide-react";
 import {
   Command,
@@ -34,8 +36,14 @@ import {
   HospitalFormValues,
 } from "@/validations/hospital.validations";
 
-function AddHospitalForm() {
+interface AddHospitalFormProps {
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}
+
+function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const { idns } = useAppSelector((state) => state.idn);
   const { gpos } = useAppSelector((state) => state.gpo);
   const { isCreateHospitalLoading } = useAppSelector((state) => state.hospital);
@@ -82,20 +90,28 @@ function AddHospitalForm() {
       await dispatch(createHospital(data)).unwrap();
       toast.success("Hospital created successfully");
       reset();
+      onSuccess?.();
     } catch (error: any) {
       toast.error(error || "Failed to create hospital");
     }
   };
 
   return (
-    <div className="rounded-xl border border-border p-5 flex flex-col gap-4">
-      <h3 className="text-sm font-bold mb-2">Add New Hospital</h3>
+    <div className="rounded-xl border border-border bg-background p-5 flex flex-col gap-4">
+      <DialogTitle asChild>
+        <CardHeader className="w-full bg-muted rounded-xl p-4 border border-border mt-2">
+          <CardTitle className="text-sm">Sales Rep</CardTitle>
+          <CardDescription className="text-lg text-primary font-semibold">
+            {user?.name}
+          </CardDescription>
+        </CardHeader>
+      </DialogTitle>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label className="text-xs font-semibold">IDN Name</Label>
-            <Popover open={idnOpen} onOpenChange={setIdnOpen} modal={false}>
+            <Popover open={idnOpen} onOpenChange={setIdnOpen} modal={true}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -237,7 +253,7 @@ function AddHospitalForm() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-xs font-semibold">GPO</Label>
-            <Popover open={gpoOpen} onOpenChange={setGpoOpen} modal={false}>
+            <Popover open={gpoOpen} onOpenChange={setGpoOpen} modal={true}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -392,18 +408,31 @@ function AddHospitalForm() {
           </div>
         </div> */}
 
-        <Button
-          type="submit"
-          disabled={isCreateHospitalLoading}
-          className="w-full mt-2 bg-[#09090b] text-white hover:bg-[#27272a] h-10 rounded-lg cursor-pointer"
-        >
-          {isCreateHospitalLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="mr-1 h-4 w-4" />
+        <div className={`flex ${onCancel ? "gap-2" : "flex-col"} w-full mt-2`}>
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isCreateHospitalLoading}
+              className="flex-1 h-10 rounded-lg cursor-pointer"
+            >
+              Cancel
+            </Button>
           )}
-          {isCreateHospitalLoading ? "Creating..." : "Add Hospital"}
-        </Button>
+          <Button
+            type="submit"
+            disabled={isCreateHospitalLoading}
+            className={`${onCancel ? "flex-1" : "w-full"} bg-[#09090b] text-white hover:bg-[#27272a] h-10 rounded-lg cursor-pointer`}
+          >
+            {isCreateHospitalLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="mr-1 h-4 w-4" />
+            )}
+            {isCreateHospitalLoading ? "Creating..." : "Add Hospital"}
+          </Button>
+        </div>
       </form>
     </div>
   );
