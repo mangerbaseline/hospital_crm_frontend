@@ -111,7 +111,7 @@ export function EditDealModal({
               : undefined,
           dealAmount,
           quantity,
-          beds: beds || undefined,
+          beds: beds === "" ? undefined : Number(beds),
           stage: stage as string,
           expectedCloseDate: expectedCloseDate
             ? new Date(expectedCloseDate).toISOString()

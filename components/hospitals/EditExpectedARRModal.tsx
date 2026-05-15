@@ -171,7 +171,7 @@ export function EditExpectedARRModal({
                 product: item.productId,
                 dealAmount: item.dealAmount,
                 quantity: item.quantity,
-                beds: item.beds || undefined,
+                beds: item.beds === "" ? undefined : Number(item.beds),
                 stage: item.stage,
                 expectedCloseDate: item.expectedCloseDate
                   ? new Date(item.expectedCloseDate).toISOString()
