@@ -31,18 +31,25 @@ const initialState: HospitalState = {
   limit: 10,
   totalHospitals: 0,
   totalPages: 1,
+  selectionPage: 1,
+  selectionTotalPages: 1,
+  hasMoreSelection: true,
 };
 
 export const fetchHospitalsForSelection = createAsyncThunk(
   "hospital/fetchHospitalsForSelection",
   async (params: FetchHospitalsParams, { rejectWithValue }) => {
     try {
-      const { idn } = params;
-      let url = "/api/hospital/all-hospitals";
-      if (idn) url += `?idn=${idn}`;
+      const { idn, page = 1, limit = 10, search = "" } = params;
+      let url = `/api/hospital/all-hospitals?page=${page}&limit=${limit}`;
+      if (idn) url += `&idn=${idn}`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+
       const response =
-        await axiosInstance.get<ApiResponse<HospitalForSelection[]>>(url);
-      return response.data.data;
+        await axiosInstance.get<PaginatedApiResponse<HospitalForSelection[]>>(
+          url,
+        );
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message ||
@@ -147,18 +154,38 @@ const hospitalSlice = createSlice({
       state.createHospitalError = null;
       state.updateHospitalError = null;
     },
+    resetHospitalsForSelection: (state) => {
+      state.hospitals = [];
+      state.selectionPage = 1;
+      state.selectionTotalPages = 1;
+      state.hasMoreSelection = true;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchHospitalsForSelection.pending, (state) => {
+      .addCase(fetchHospitalsForSelection.pending, (state, action) => {
         state.isFetchingHospitals = true;
         state.fetchHospitalsError = null;
+        if (action.meta.arg.page === 1 || !action.meta.arg.page) {
+          state.hospitals = [];
+        }
       })
       .addCase(
         fetchHospitalsForSelection.fulfilled,
-        (state, action: PayloadAction<HospitalForSelection[]>) => {
+        (
+          state,
+          action: PayloadAction<PaginatedApiResponse<HospitalForSelection[]>>,
+        ) => {
           state.isFetchingHospitals = false;
-          state.hospitals = action.payload;
+          if (action.payload.page === 1) {
+            state.hospitals = action.payload.data;
+          } else {
+            state.hospitals = [...state.hospitals, ...action.payload.data];
+          }
+          state.selectionPage = action.payload.page;
+          state.selectionTotalPages = action.payload.totalPages;
+          state.hasMoreSelection =
+            action.payload.page < action.payload.totalPages;
         },
       )
       .addCase(fetchHospitalsForSelection.rejected, (state, action) => {
@@ -237,6 +264,9 @@ const hospitalSlice = createSlice({
   },
 });
 
-export const { clearSelectedHospital, resetHospitalStatus } =
-  hospitalSlice.actions;
+export const {
+  clearSelectedHospital,
+  resetHospitalStatus,
+  resetHospitalsForSelection,
+} = hospitalSlice.actions;
 export default hospitalSlice.reducer;

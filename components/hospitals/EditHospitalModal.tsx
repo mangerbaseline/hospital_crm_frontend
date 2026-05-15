@@ -227,7 +227,7 @@ export function EditHospitalModal({
                     className="w-(--radix-popover-trigger-width) p-0 z-100"
                     align="start"
                   >
-                    <Command>
+                    <Command onWheel={(e) => e.stopPropagation()}>
                       <CommandInput
                         placeholder="Search IDN..."
                         className="h-9 text-xs"
@@ -374,7 +374,7 @@ export function EditHospitalModal({
                 className="w-(--radix-popover-trigger-width) p-0 z-100"
                 align="start"
               >
-                <Command>
+                <Command onWheel={(e) => e.stopPropagation()}>
                   <CommandInput
                     placeholder="Search GPO..."
                     className="h-9 text-xs"

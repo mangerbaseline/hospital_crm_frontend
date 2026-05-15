@@ -73,7 +73,7 @@ export function MultiProductSelect({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0" align="start">
-        <Command>
+        <Command onWheel={(e) => e.stopPropagation()}>
           <CommandInput placeholder="Search products..." />
           <CommandList>
             <CommandEmpty>No product found.</CommandEmpty>

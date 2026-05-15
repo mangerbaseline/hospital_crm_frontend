@@ -26,9 +26,15 @@ export const fetchContacts = createAsyncThunk(
   "contact/fetchContacts",
   async (params: FetchContactsParams, { rejectWithValue }) => {
     try {
-      const { page = 1, limit = 10, search = "", userId = "" } = params;
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        userId = "",
+        productId = "",
+      } = params;
       const response = await axiosInstance.get<PaginatedApiResponse<Contact[]>>(
-        `/api/contact/all-contacts?page=${page}&limit=${limit}&search=${search}${userId ? `&userId=${userId}` : ""}`,
+        `/api/contact/all-contacts?page=${page}&limit=${limit}&search=${search}${userId ? `&userId=${userId}` : ""}${productId ? `&productId=${productId}` : ""}`,
       );
       return response.data;
     } catch (error: any) {

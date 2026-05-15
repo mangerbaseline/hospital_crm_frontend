@@ -23,11 +23,9 @@ export function AddDealModal({ children }: { children: React.ReactNode }) {
 
       <DialogContent className="sm:max-w-[425px] md:max-w-[500px] h-auto max-h-[75vh] overflow-y-auto p-6 flex flex-col gap-6">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-lg font-bold">
-            Add New Hospital
-          </DialogTitle>
+          <DialogTitle className="text-lg font-bold">Add New Deal</DialogTitle>
           <DialogDescription className="text-sm mt-1 text-muted-foreground">
-            Add a new hospital to your pipeline.
+            Add a new deal to your pipeline.
           </DialogDescription>
         </DialogHeader>
 

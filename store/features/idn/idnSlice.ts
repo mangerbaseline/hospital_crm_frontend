@@ -32,6 +32,9 @@ const initialState: IDNState = {
   limit: 10,
   totalIDNs: 0,
   totalPages: 1,
+  selectionPage: 1,
+  selectionTotalPages: 1,
+  hasMoreSelection: true,
 };
 
 export const fetchIDNs = createAsyncThunk(
@@ -154,24 +157,40 @@ const idnSlice = createSlice({
       state.updateIDNError = null;
       state.deleteIDNError = null;
     },
+    resetIDNsForSelection: (state) => {
+      state.idns = [];
+      state.selectionPage = 1;
+      state.selectionTotalPages = 1;
+      state.hasMoreSelection = true;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchIDNs.pending, (state) => {
+      .addCase(fetchIDNs.pending, (state, action) => {
         state.isFetchingIDNs = true;
         state.fetchIDNsError = null;
+        if (action.meta.arg.page === 1 || !action.meta.arg.page) {
+          state.idns = [];
+        }
       })
       .addCase(
         fetchIDNs.fulfilled,
         (state, action: PayloadAction<PaginatedApiResponse<IDN[]>>) => {
           state.isFetchingIDNs = false;
-          state.idns = action.payload.data;
-          const pagination =
-            (action.payload as any).pagination || action.payload;
-          state.page = pagination.page || 1;
-          state.limit = pagination.limit || 10;
-          state.totalIDNs = pagination.total || pagination.totalIDNs || 0;
-          state.totalPages = pagination.totalPages || 1;
+          const { data, page, totalPages } = action.payload;
+
+          if (page === 1) {
+            state.idns = data;
+          } else {
+            state.idns = [...state.idns, ...data];
+          }
+
+          state.selectionPage = page;
+          state.selectionTotalPages = totalPages;
+          state.hasMoreSelection = page < totalPages;
+
+          state.page = page;
+          state.totalPages = totalPages;
         },
       )
       .addCase(fetchIDNs.rejected, (state, action) => {
@@ -264,5 +283,6 @@ const idnSlice = createSlice({
   },
 });
 
-export const { clearSelectedIDN, resetIDNStatus } = idnSlice.actions;
+export const { clearSelectedIDN, resetIDNStatus, resetIDNsForSelection } =
+  idnSlice.actions;
 export default idnSlice.reducer;

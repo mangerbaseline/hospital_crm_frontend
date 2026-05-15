@@ -202,6 +202,9 @@ export interface HospitalState {
   limit: number;
   totalHospitals: number;
   totalPages: number;
+  selectionPage: number;
+  selectionTotalPages: number;
+  hasMoreSelection: boolean;
 }
 
 export interface CreateHospitalPayload {
@@ -252,10 +255,14 @@ export interface FetchContactsParams {
   limit?: number;
   search?: string;
   userId?: string;
+  productId?: string;
 }
 
 export interface FetchHospitalsParams {
   idn?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
 }
 
 export interface FetchHospitalsDealsParams {
@@ -443,6 +450,9 @@ export interface IDNState {
   limit: number;
   totalIDNs: number;
   totalPages: number;
+  selectionPage: number;
+  selectionTotalPages: number;
+  hasMoreSelection: boolean;
 }
 
 export interface CreateIDNPayload {
@@ -508,6 +518,7 @@ export interface CreateDealPayload {
     quantity?: number;
     stage?: DealProductStage;
     expectedCloseDate?: string | Date;
+    beds?: number;
   }[];
   notes?: string;
 }
@@ -545,7 +556,7 @@ export interface PipelineDeal {
   stage: string | DealProductStage;
   expectedCloseDate: string;
   dealDate?: string;
-  beds?: string;
+  beds?: number;
 }
 
 export interface FetchAllDealsParams {
@@ -613,6 +624,7 @@ export interface AddDealProductPayload {
   stage?: string;
   expectedCloseDate?: string;
   dealDate?: string;
+  beds?: number;
   idn?: string;
   gpo?: string;
 }
@@ -625,7 +637,7 @@ export interface UpdateDealProductPayload {
   stage?: string;
   expectedCloseDate?: string;
   dealDate?: string;
-  beds?: string;
+  beds?: number;
   userId?: string;
 }
 

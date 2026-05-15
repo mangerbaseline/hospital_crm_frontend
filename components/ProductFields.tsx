@@ -31,7 +31,7 @@ export function ProductFields({ index }: ProductFieldsProps) {
 
   return (
     <div className="pl-6 space-y-3 mt-3 mb-2">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <div>
           <Label className="text-[11px] font-semibold">Deal Amount</Label>
           <div className="relative mt-1.5 flex items-center">
@@ -67,6 +67,23 @@ export function ProductFields({ index }: ProductFieldsProps) {
           {productErrors?.quantity && (
             <p className="text-[10px] text-destructive mt-1">
               {productErrors.quantity.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <Label className="text-[11px] font-semibold">Beds</Label>
+          <Input
+            type="number"
+            min={0}
+            className="mt-1.5 text-xs h-9 bg-muted border-border"
+            {...register(`products.${index}.beds`, {
+              valueAsNumber: true,
+            })}
+          />
+          {productErrors?.beds && (
+            <p className="text-[10px] text-destructive mt-1">
+              {productErrors.beds.message}
             </p>
           )}
         </div>

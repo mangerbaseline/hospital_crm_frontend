@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -54,13 +54,13 @@ export function AddContactModal({
   hospital?: Hospital | any;
 }) {
   const dispatch = useAppDispatch();
-  const { hospitals, isFetchingHospitals } = useAppSelector(
-    (state) => state.hospital,
-  );
+  const { hospitals, isFetchingHospitals, selectionPage, hasMoreSelection } =
+    useAppSelector((state) => state.hospital);
   const { isCreateContactLoading } = useAppSelector((state) => state.contact);
 
   const [open, setOpen] = useState(false);
   const [hospitalOpen, setHospitalOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const {
     register,
@@ -87,10 +87,64 @@ export function AddContactModal({
       if (defaultHospital) {
         setValue("hospital", defaultHospital._id, { shouldValidate: true });
       } else {
-        dispatch(fetchHospitalsForSelection({}));
+        dispatch(
+          fetchHospitalsForSelection({ page: 1, limit: 10, search: "" }),
+        );
       }
+    } else {
+      setSearch("");
     }
   }, [open, dispatch, defaultHospital, setValue]);
+
+  useEffect(() => {
+    if (!open || defaultHospital) return;
+
+    const timer = setTimeout(() => {
+      dispatch(fetchHospitalsForSelection({ page: 1, limit: 10, search }));
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search, dispatch, open, defaultHospital]);
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const loadMore = () => {
+    if (hasMoreSelection && !isFetchingHospitals) {
+      dispatch(
+        fetchHospitalsForSelection({
+          page: selectionPage + 1,
+          limit: 10,
+          search,
+        }),
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasMoreSelection &&
+          !isFetchingHospitals
+        ) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, [hospitals, isFetchingHospitals, hasMoreSelection]);
 
   const onSubmit = async (data: CreateContactValues) => {
     const resultAction = await dispatch(createContact(data));
@@ -168,39 +222,39 @@ export function AddContactModal({
                           "w-full justify-between mt-1.5 text-xs h-9 bg-muted font-normal border-border",
                           !field.value && "text-muted-foreground",
                         )}
-                        disabled={isFetchingHospitals}
                       >
                         {field.value
                           ? hospitals.find((h) => h._id === field.value)
                               ?.hospitalName
-                          : isFetchingHospitals
-                            ? "Loading hospitals..."
-                            : "Select a hospital..."}
-                        {isFetchingHospitals ? (
-                          <Loader2 className="opacity-50 h-4 w-4 animate-spin ml-auto" />
-                        ) : (
-                          <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
-                        )}
+                          : "Select a hospital..."}
+                        <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent
                       className="w-(--radix-popover-trigger-width) p-0 z-100"
                       align="start"
                     >
-                      <Command>
+                      <Command
+                        shouldFilter={false}
+                        onWheel={(e) => e.stopPropagation()}
+                      >
                         <CommandInput
                           placeholder="Search hospital..."
                           className="h-9 text-xs w-full"
+                          value={search}
+                          onValueChange={setSearch}
                         />
                         <CommandList>
-                          <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                            No hospital found.
-                          </CommandEmpty>
+                          {hospitals.length === 0 && !isFetchingHospitals ? (
+                            <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+                              No hospital found.
+                            </CommandEmpty>
+                          ) : null}
                           <CommandGroup>
                             {hospitals.map((hospital) => (
                               <CommandItem
                                 key={hospital._id}
-                                value={hospital.hospitalName}
+                                value={hospital._id}
                                 onSelect={() => {
                                   setValue("hospital", hospital._id, {
                                     shouldValidate: true,
@@ -221,6 +275,16 @@ export function AddContactModal({
                               </CommandItem>
                             ))}
                           </CommandGroup>
+                          {hasMoreSelection && (
+                            <div
+                              ref={sentinelRef}
+                              className="h-4 flex items-center justify-center py-2"
+                            >
+                              {isFetchingHospitals && (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              )}
+                            </div>
+                          )}
                         </CommandList>
                       </Command>
                     </PopoverContent>

@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm, useFieldArray, FormProvider } from "react-hook-form";
+import {
+  useForm,
+  useFieldArray,
+  FormProvider,
+  SubmitHandler,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "./ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -21,17 +26,24 @@ import { Checkbox } from "./ui/checkbox";
 import { ProductFields } from "./ProductFields";
 import { Textarea } from "./ui/textarea";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchIDNs } from "@/store/features/idn/idnSlice";
+import {
+  fetchIDNs,
+  getSingleIDN,
+  clearSelectedIDN,
+  resetIDNsForSelection,
+} from "@/store/features/idn/idnSlice";
 import { fetchProducts } from "@/store/features/product/productSlice";
 import {
   fetchHospitalsForSelection,
   getSingleHospital,
   clearSelectedHospital,
+  resetHospitalsForSelection,
 } from "@/store/features/hospital/hospitalSlice";
 import { createDeal } from "@/store/features/deal/dealSlice";
 import { dealSchema, DealFormValues } from "@/validations/deal.validations";
 import { toast } from "sonner";
 import { DealProductStage } from "@/store/types";
+import { useRef } from "react";
 
 interface AddDealFormProps {
   onSuccess?: () => void;
@@ -39,15 +51,27 @@ interface AddDealFormProps {
 
 function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const dispatch = useAppDispatch();
-  const { idns } = useAppSelector((state) => state.idn);
-  const { hospitals, isFetchingHospitals, selectedHospital } = useAppSelector(
-    (state) => state.hospital,
-  );
+  const {
+    idns,
+    isFetchingIDNs,
+    selectionPage: idnSelectionPage,
+    hasMoreSelection: idnHasMoreSelection,
+    selectedIDN,
+  } = useAppSelector((state) => state.idn);
+  const {
+    hospitals,
+    isFetchingHospitals,
+    selectedHospital,
+    selectionPage: hospitalSelectionPage,
+    hasMoreSelection: hospitalHasMoreSelection,
+  } = useAppSelector((state) => state.hospital);
   const { products } = useAppSelector((state) => state.product);
   const { isCreateDealLoading } = useAppSelector((state) => state.deal);
 
   const [idnOpen, setIdnOpen] = useState(false);
+  const [idnSearch, setIdnSearch] = useState("");
   const [hospitalOpen, setHospitalOpen] = useState(false);
+  const [hospitalSearch, setHospitalSearch] = useState("");
 
   const methods = useForm<DealFormValues>({
     resolver: zodResolver(dealSchema),
@@ -79,14 +103,119 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const hospitalValue = watch("hospital");
   const selectedProducts = watch("products");
 
+  const idnObserverRef = useRef<IntersectionObserver | null>(null);
+  const idnSentinelRef = useRef<HTMLDivElement | null>(null);
+  const hospitalObserverRef = useRef<IntersectionObserver | null>(null);
+  const hospitalSentinelRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    dispatch(fetchIDNs({ limit: 1000 }));
+    dispatch(fetchIDNs({ page: 1, limit: 10, search: "" }));
     dispatch(fetchProducts({ limit: 1000 }));
+
+    return () => {
+      dispatch(clearSelectedHospital());
+      dispatch(clearSelectedIDN());
+      dispatch(resetHospitalsForSelection());
+      dispatch(resetIDNsForSelection());
+    };
   }, [dispatch]);
 
   useEffect(() => {
+    if (!idnOpen) return;
+    const timer = setTimeout(() => {
+      dispatch(fetchIDNs({ page: 1, limit: 10, search: idnSearch }));
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [idnSearch, dispatch, idnOpen]);
+
+  const loadMoreIDNs = () => {
+    if (idnHasMoreSelection && !isFetchingIDNs) {
+      dispatch(
+        fetchIDNs({
+          page: idnSelectionPage + 1,
+          limit: 10,
+          search: idnSearch,
+        }),
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (idnObserverRef.current) idnObserverRef.current.disconnect();
+    idnObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          idnHasMoreSelection &&
+          !isFetchingIDNs
+        ) {
+          loadMoreIDNs();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    if (idnSentinelRef.current)
+      idnObserverRef.current.observe(idnSentinelRef.current);
+    return () => idnObserverRef.current?.disconnect();
+  }, [idns, isFetchingIDNs, idnHasMoreSelection]);
+
+  useEffect(() => {
+    if (!hospitalOpen || !idnValue) return;
+    const timer = setTimeout(() => {
+      dispatch(
+        fetchHospitalsForSelection({
+          page: 1,
+          limit: 10,
+          search: hospitalSearch,
+          idn: idnValue,
+        }),
+      );
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [hospitalSearch, dispatch, hospitalOpen, idnValue]);
+
+  const loadMoreHospitals = () => {
+    if (hospitalHasMoreSelection && !isFetchingHospitals) {
+      dispatch(
+        fetchHospitalsForSelection({
+          page: hospitalSelectionPage + 1,
+          limit: 10,
+          search: hospitalSearch,
+          idn: idnValue,
+        }),
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (hospitalObserverRef.current) hospitalObserverRef.current.disconnect();
+    hospitalObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hospitalHasMoreSelection &&
+          !isFetchingHospitals
+        ) {
+          loadMoreHospitals();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    if (hospitalSentinelRef.current)
+      hospitalObserverRef.current.observe(hospitalSentinelRef.current);
+    return () => hospitalObserverRef.current?.disconnect();
+  }, [hospitals, isFetchingHospitals, hospitalHasMoreSelection]);
+
+  useEffect(() => {
     if (idnValue) {
-      dispatch(fetchHospitalsForSelection({ idn: idnValue }));
+      dispatch(
+        fetchHospitalsForSelection({
+          page: 1,
+          limit: 10,
+          search: "",
+          idn: idnValue,
+        }),
+      );
       setValue("hospital", "");
       dispatch(clearSelectedHospital());
     }
@@ -102,6 +231,17 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
       );
     }
   }, [selectedHospital, setValue]);
+
+  const handleIDNSelect = (idnId: string) => {
+    if (idnId === idnValue) {
+      setValue("idn", "");
+      dispatch(clearSelectedIDN());
+    } else {
+      setValue("idn", idnId, { shouldValidate: true });
+      dispatch(getSingleIDN(idnId));
+    }
+    setIdnOpen(false);
+  };
 
   const handleHospitalSelect = (hospitalId: string) => {
     if (hospitalId === hospitalValue) {
@@ -123,18 +263,20 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
         product: productId,
         dealAmount: 0,
         quantity: 1,
+        beds: 0,
         stage: DealProductStage.DEMO,
         expectedCloseDate: undefined,
       });
     }
   };
 
-  const onSubmit = async (data: DealFormValues) => {
+  const onSubmit: SubmitHandler<DealFormValues> = async (data) => {
     try {
       await dispatch(createDeal(data)).unwrap();
       toast.success("Deal created successfully");
       reset();
       dispatch(clearSelectedHospital());
+      dispatch(clearSelectedIDN());
       if (onSuccess) onSuccess();
     } catch (error: any) {
       toast.error(error || "Failed to create deal");
@@ -161,7 +303,8 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                   >
                     <span className="truncate text-left flex-1">
                       {idnValue
-                        ? idns.find((idn) => idn._id === idnValue)?.name
+                        ? selectedIDN?.name ||
+                          idns.find((idn) => idn._id === idnValue)?.name
                         : "Select IDN"}
                     </span>
                     <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
@@ -171,10 +314,15 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                   className="w-(--radix-popover-trigger-width) p-0 z-100"
                   align="start"
                 >
-                  <Command onWheel={(e) => e.stopPropagation()}>
+                  <Command
+                    shouldFilter={false}
+                    onWheel={(e) => e.stopPropagation()}
+                  >
                     <CommandInput
                       placeholder="Search IDN..."
                       className="h-9 text-xs"
+                      value={idnSearch}
+                      onValueChange={setIdnSearch}
                     />
                     <CommandList>
                       <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
@@ -184,15 +332,8 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                         {idns.map((idn) => (
                           <CommandItem
                             key={idn._id}
-                            value={idn.name}
-                            onSelect={() => {
-                              setValue(
-                                "idn",
-                                idn._id === idnValue ? "" : idn._id,
-                                { shouldValidate: true },
-                              );
-                              setIdnOpen(false);
-                            }}
+                            value={idn._id}
+                            onSelect={() => handleIDNSelect(idn._id)}
                             className="text-xs"
                           >
                             {idn.name}
@@ -207,6 +348,16 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                           </CommandItem>
                         ))}
                       </CommandGroup>
+                      {idnHasMoreSelection && (
+                        <div
+                          ref={idnSentinelRef}
+                          className="h-4 flex items-center justify-center py-2"
+                        >
+                          {isFetchingIDNs && (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          )}
+                        </div>
+                      )}
                     </CommandList>
                   </Command>
                 </PopoverContent>
@@ -241,6 +392,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                           Loading...
                         </span>
                       ) : hospitalValue ? (
+                        selectedHospital?.hospitalName ||
                         hospitals.find((h) => h._id === hospitalValue)
                           ?.hospitalName
                       ) : idnValue ? (
@@ -256,10 +408,15 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                   className="w-(--radix-popover-trigger-width) p-0 z-100"
                   align="start"
                 >
-                  <Command onWheel={(e) => e.stopPropagation()}>
+                  <Command
+                    shouldFilter={false}
+                    onWheel={(e) => e.stopPropagation()}
+                  >
                     <CommandInput
                       placeholder="Search hospital..."
                       className="h-9 text-xs"
+                      value={hospitalSearch}
+                      onValueChange={setHospitalSearch}
                     />
                     <CommandList>
                       <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
@@ -269,7 +426,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                         {hospitals.map((hospital) => (
                           <CommandItem
                             key={hospital._id}
-                            value={hospital.hospitalName}
+                            value={hospital._id}
                             onSelect={() => handleHospitalSelect(hospital._id)}
                             className="text-xs"
                           >
@@ -285,6 +442,16 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                           </CommandItem>
                         ))}
                       </CommandGroup>
+                      {hospitalHasMoreSelection && (
+                        <div
+                          ref={hospitalSentinelRef}
+                          className="h-4 flex items-center justify-center py-2"
+                        >
+                          {isFetchingHospitals && (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          )}
+                        </div>
+                      )}
                     </CommandList>
                   </Command>
                 </PopoverContent>
@@ -337,7 +504,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <Label className="text-xs font-semibold">GPO</Label>
               <Input
@@ -354,7 +521,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label className="text-xs font-semibold">
                 Competitive Product
               </Label>
@@ -364,10 +531,10 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                 value={selectedHospital?.competitiveProduct || ""}
                 readOnly
               />
-            </div>
+            </div> */}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-xs font-semibold">TEAM Hospital</Label>
               <Input
@@ -397,7 +564,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                 readOnly
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="mt-1">
             <Label className="text-xs font-semibold block">

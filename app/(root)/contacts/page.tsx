@@ -17,6 +17,14 @@ import {
   ContactCardSkeleton,
 } from "@/components/contacts/ContactCard";
 import { fetchContacts } from "@/store/features/contact/contactSlice";
+import { fetchProducts } from "@/store/features/product/productSlice";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function Contacts() {
   const dispatch = useAppDispatch();
@@ -24,9 +32,15 @@ function Contacts() {
   const { contacts, isFetchingContacts } = useAppSelector(
     (state) => state.contact,
   );
+  const { products } = useAppSelector((state) => state.product);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"my" | "all">("my");
+  const [selectedProductId, setSelectedProductId] = useState<string>("all");
+
+  useEffect(() => {
+    dispatch(fetchProducts({ limit: 100 }));
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(
@@ -35,9 +49,10 @@ function Contacts() {
         limit: 50,
         search: searchQuery,
         userId: activeFilter === "my" ? user?._id : "",
+        productId: selectedProductId === "all" ? "" : selectedProductId,
       }),
     );
-  }, [dispatch, searchQuery, activeFilter, user?._id]);
+  }, [dispatch, searchQuery, activeFilter, user?._id, selectedProductId]);
 
   return (
     <section className="max-w-7xl mx-auto w-full">
@@ -50,12 +65,46 @@ function Contacts() {
             : "All contacts across the organization"
         }
       >
+        <div className="hidden sm:flex w-full sm:w-[180px]">
+          <Select
+            value={selectedProductId}
+            onValueChange={setSelectedProductId}
+          >
+            <SelectTrigger className="w-full bg-muted border-border shadow-sm cursor-pointer">
+              <SelectValue placeholder="Filter by product" />
+            </SelectTrigger>
+            <SelectContent className="z-110">
+              <SelectItem value="all">All Products</SelectItem>
+              {products.map((product) => (
+                <SelectItem key={product._id} value={product._id}>
+                  {product.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <AddContactModal>
           <Button className="flex gap-3 p-3 md:p-[18px] text-sm bg-black text-white border border-border cursor-pointer hover:bg-black/80 shadow-xl shadow-muted transition-all duration-200">
             <Plus className="h-4 w-4" /> Add Contact
           </Button>
         </AddContactModal>
       </DashboardHeader>
+
+      <div className="flex flex-col gap-2 w-full sm:hidden -mt-4 mb-4 px-2">
+        <Select value={selectedProductId} onValueChange={setSelectedProductId}>
+          <SelectTrigger className="w-full bg-muted border-border shadow-sm cursor-pointer">
+            <SelectValue placeholder="Filter by product" />
+          </SelectTrigger>
+          <SelectContent className="z-110">
+            <SelectItem value="all">All Products</SelectItem>
+            {products.map((product) => (
+              <SelectItem key={product._id} value={product._id}>
+                {product.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* search and filters */}
       <div className="flex flex-col md:flex-row items-center gap-4 w-full px-2 md:px-0">
