@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,8 +9,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Building2 } from "lucide-react";
-import { useAppSelector } from "@/lib/hooks";
+import { Button } from "@/components/ui/button";
+import { Building2, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  fetchClosedWon,
+  fetchImplemented,
+} from "@/store/features/dashboard/dashboardSlice";
 import Link from "next/link";
 
 export function ClosedBusinessModal({
@@ -19,18 +24,27 @@ export function ClosedBusinessModal({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const { dashboardStats } = useAppSelector((state) => state.dashboard);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [implementedPage, setImplementedPage] = useState(1);
+  const dispatch = useAppDispatch();
+  const {
+    closedWonData,
+    isFetchingClosedWon,
+    implementedData,
+    isFetchingImplemented,
+  } = useAppSelector((state) => state.dashboard);
 
-  const closedWon = dashboardStats?.closedWon || {
-    amount: 0,
-    productsCount: 0,
-    hospitals: [],
-  };
-  const implemented = dashboardStats?.implemented || {
-    amount: 0,
-    productsCount: 0,
-    hospitals: [],
-  };
+  useEffect(() => {
+    if (open) {
+      dispatch(fetchClosedWon({ page: currentPage, limit: 5 }));
+    }
+  }, [open, currentPage, dispatch]);
+
+  useEffect(() => {
+    if (open) {
+      dispatch(fetchImplemented({ page: implementedPage, limit: 5 }));
+    }
+  }, [open, implementedPage, dispatch]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -53,24 +67,28 @@ export function ClosedBusinessModal({
               <h3 className="text-lg font-bold">Closed Won</h3>
               <div className="text-right">
                 <div className="text-lg font-bold text-green-600">
-                  ${closedWon.amount.toLocaleString()}
+                  ${(closedWonData?.amount || 0).toLocaleString()}
                 </div>
                 <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
-                  {closedWon.productsCount}{" "}
-                  {closedWon.productsCount === 1 ? "product" : "products"}
+                  {closedWonData?.productsCount || 0}{" "}
+                  {closedWonData?.productsCount === 1 ? "product" : "products"}
                 </div>
               </div>
             </div>
 
-            {closedWon.hospitals.length === 0 ? (
+            {!closedWonData || closedWonData.data.length === 0 ? (
               <div className="py-8 flex items-center justify-center">
-                <span className="text-muted-foreground text-sm font-medium tracking-tight">
-                  No Closed Won deals yet
-                </span>
+                {isFetchingClosedWon ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="text-muted-foreground text-sm font-medium tracking-tight">
+                    No Closed Won deals yet
+                  </span>
+                )}
               </div>
             ) : (
               <div className="mt-4 flex flex-col gap-3">
-                {closedWon.hospitals.map((hospital, hIdx) =>
+                {closedWonData.data.map((hospital: any, hIdx: number) =>
                   hospital.products.map((prod: any, pIdx: number) => (
                     <Link
                       href={`/hospitals/${hospital._id}`}
@@ -97,6 +115,38 @@ export function ClosedBusinessModal({
                     </Link>
                   )),
                 )}
+
+                {closedWonData && closedWonData.totalPages > 5 && (
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+                    <div className="text-xs text-muted-foreground font-medium">
+                      Page {closedWonData.page} of {closedWonData.totalPages}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 rounded-md cursor-pointer disabled:opacity-50"
+                        disabled={
+                          closedWonData.page === 1 || isFetchingClosedWon
+                        }
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(1, prev - 1))
+                        }
+                      >
+                        <ChevronLeft className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 rounded-md cursor-pointer disabled:opacity-50"
+                        disabled={!closedWonData.hasMore || isFetchingClosedWon}
+                        onClick={() => setCurrentPage((prev) => prev + 1)}
+                      >
+                        <ChevronRight className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -106,24 +156,30 @@ export function ClosedBusinessModal({
               <h3 className="text-lg font-bold">Implemented</h3>
               <div className="text-right">
                 <div className="text-lg font-bold text-blue-700">
-                  ${implemented.amount.toLocaleString()}
+                  ${(implementedData?.amount || 0).toLocaleString()}
                 </div>
                 <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
-                  {implemented.productsCount}{" "}
-                  {implemented.productsCount === 1 ? "product" : "products"}
+                  {implementedData?.productsCount || 0}{" "}
+                  {implementedData?.productsCount === 1
+                    ? "product"
+                    : "products"}
                 </div>
               </div>
             </div>
 
-            {implemented.hospitals.length === 0 ? (
+            {!implementedData || implementedData.data.length === 0 ? (
               <div className="py-8 flex items-center justify-center">
-                <span className="text-muted-foreground text-sm font-medium tracking-tight">
-                  No Implemented deals yet
-                </span>
+                {isFetchingImplemented ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="text-muted-foreground text-sm font-medium tracking-tight">
+                    No Implemented deals yet
+                  </span>
+                )}
               </div>
             ) : (
               <div className="mt-4 flex flex-col gap-3">
-                {implemented.hospitals.map((hospital, hIdx) =>
+                {implementedData.data.map((hospital: any, hIdx: number) =>
                   hospital.products.map((prod: any, pIdx: number) => (
                     <Link
                       href={`/hospitals/${hospital._id}`}
@@ -149,6 +205,41 @@ export function ClosedBusinessModal({
                       </div>
                     </Link>
                   )),
+                )}
+
+                {implementedData && implementedData.totalPages > 5 && (
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
+                    <div className="text-xs text-muted-foreground font-medium">
+                      Page {implementedData.page} of{" "}
+                      {implementedData.totalPages}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 rounded-md cursor-pointer disabled:opacity-50"
+                        disabled={
+                          implementedData.page === 1 || isFetchingImplemented
+                        }
+                        onClick={() =>
+                          setImplementedPage((prev) => Math.max(1, prev - 1))
+                        }
+                      >
+                        <ChevronLeft className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 rounded-md cursor-pointer disabled:opacity-50"
+                        disabled={
+                          !implementedData.hasMore || isFetchingImplemented
+                        }
+                        onClick={() => setImplementedPage((prev) => prev + 1)}
+                      >
+                        <ChevronRight className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
             )}

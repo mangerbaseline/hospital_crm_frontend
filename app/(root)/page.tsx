@@ -64,10 +64,10 @@ function Home() {
           title="Closed Business"
           icon={CheckCircle2}
           iconClassName="text-muted-foreground"
-          value={`$${(dashboardStats?.closedWon?.amount || 0).toLocaleString()}`}
+          value={`$${(dashboardStats?.closedBusiness?.totalAmount || 0).toLocaleString()}`}
           subtitle={
             <>
-              {dashboardStats?.closedWon?.hospitals?.length || 0} hospitals
+              {dashboardStats?.closedBusiness?.hospitalCount || 0} hospitals
               <br />
               Total Expected ARR
             </>

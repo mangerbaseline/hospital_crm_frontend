@@ -789,22 +789,53 @@ export interface DocumentState {
   deleteDocumentError: string | null;
 }
 
+export interface FetchClosedWonParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export type FetchImplementedParams = FetchClosedWonParams;
+
+export interface ClosedWonProduct {
+  _id: string;
+  product: {
+    _id: string;
+    name: string;
+  };
+  dealAmount: number;
+  stage: string;
+  expectedCloseDate: string;
+  dealDate: string;
+}
+
+export interface ClosedWonDeal {
+  _id: string;
+  hospitalName: string;
+  totalAmount: number;
+  productsCount: number;
+  products: ClosedWonProduct[];
+}
+
+export interface ClosedWonResponse {
+  success: boolean;
+  page: number;
+  limit: number;
+  totalHospitals: number;
+  totalPages: number;
+  hasMore: boolean;
+  amount: number;
+  productsCount: number;
+  data: ClosedWonDeal[];
+}
+
 export interface DashboardStatsResponse {
   totalHospitals: number;
   totalHospitalsInDB: number;
   totalProductsInDB: number;
   activeDeals: number;
   totalPipelineAmount: number;
-  closedWon: {
-    amount: number;
-    productsCount: number;
-    hospitals: any[];
-  };
-  implemented: {
-    amount: number;
-    productsCount: number;
-    hospitals: any[];
-  };
+  closedBusiness: { totalAmount: number; hospitalCount: number };
   pipeline: {
     stage: string;
     amount: number;
@@ -822,6 +853,14 @@ export interface DashboardState {
   dashboardStats: DashboardStatsResponse | null;
   isFetchingDashboardStats: boolean;
   fetchDashboardError: string | null;
+
+  closedWonData: ClosedWonResponse | null;
+  isFetchingClosedWon: boolean;
+  fetchClosedWonError: string | null;
+
+  implementedData: ClosedWonResponse | null;
+  isFetchingImplemented: boolean;
+  fetchImplementedError: string | null;
 }
 
 export interface EmailAddress {
