@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchUsers } from "@/store/features/user/userSlice";
 
@@ -16,6 +25,7 @@ interface UserSelectProps {
   onValueChange?: (value: string) => void;
   className?: string;
   placeholder?: string;
+  showAll?: boolean;
 }
 
 export function UserSelect({
@@ -23,10 +33,16 @@ export function UserSelect({
   onValueChange,
   className,
   placeholder = "Select Sales Rep",
+  showAll = true,
 }: UserSelectProps) {
   const dispatch = useAppDispatch();
   const { users } = useAppSelector((state) => state.user);
   const { user: currentUser } = useAppSelector((state) => state.auth);
+
+  const [open, setOpen] = useState(false);
+  const [selectedVal, setSelectedVal] = useState(
+    value || currentUser?._id || (showAll ? "all" : ""),
+  );
 
   useEffect(() => {
     if (users.length === 0) {
@@ -34,23 +50,92 @@ export function UserSelect({
     }
   }, [dispatch, users.length]);
 
+  useEffect(() => {
+    if (value !== undefined) {
+      setSelectedVal(value);
+    }
+  }, [value]);
+
+  const selectedName =
+    selectedVal === "all"
+      ? "All Sales Reps"
+      : users.find((u) => u._id === selectedVal)?.name ||
+        (currentUser?._id === selectedVal ? currentUser?.name : placeholder);
+
   return (
-    <Select
-      key={currentUser?._id || "loading"}
-      defaultValue={value || currentUser?._id || "all"}
-      onValueChange={onValueChange}
-    >
-      <SelectTrigger className={className}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent className="border-border">
-        <SelectItem value="all">All Sales Reps</SelectItem>
-        {users.map((user) => (
-          <SelectItem key={user?._id} value={user?._id}>
-            {user?.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className={cn(
+            "w-full justify-between text-xs h-9 font-normal border-border shadow-none hover:bg-muted bg-muted/70",
+            className,
+          )}
+        >
+          <span className="truncate text-left flex-1">{selectedName}</span>
+          <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-(--radix-popover-trigger-width) p-0 z-100"
+        align="start"
+      >
+        <Command onWheel={(e) => e.stopPropagation()} shouldFilter={true}>
+          <CommandInput
+            placeholder="Search sales rep..."
+            className="h-9 text-xs"
+          />
+          <CommandList>
+            <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+              No sales rep found.
+            </CommandEmpty>
+            <CommandGroup>
+              {showAll && (
+                <CommandItem
+                  value="all"
+                  onSelect={() => {
+                    onValueChange?.("all");
+                    if (value === undefined) setSelectedVal("all");
+                    setOpen(false);
+                  }}
+                  className="text-xs"
+                >
+                  All Sales Reps
+                  <Check
+                    className={cn(
+                      "ml-auto h-4 w-4",
+                      selectedVal === "all" ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                </CommandItem>
+              )}
+              {users.map((u) => (
+                <CommandItem
+                  key={u._id}
+                  value={u.name}
+                  onSelect={() => {
+                    onValueChange?.(u._id);
+                    if (value === undefined) setSelectedVal(u._id);
+                    setOpen(false);
+                  }}
+                  className="text-xs"
+                >
+                  {u.name}
+                  <Check
+                    className={cn(
+                      "ml-auto h-4 w-4",
+                      selectedVal === u._id ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

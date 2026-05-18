@@ -215,6 +215,7 @@ export interface CreateHospitalPayload {
   state: string;
   zip: string;
   gpo: string;
+  userId?: string;
   // competitiveProduct: string;
   // teamHospital: boolean;
   // magnetHospital: boolean;

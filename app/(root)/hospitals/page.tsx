@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { X } from "lucide-react";
+import { UserRole } from "@/store/types";
 
 function Hospitals() {
   const router = useRouter();
@@ -29,6 +30,7 @@ function Hospitals() {
 
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.auth);
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
   const {
     hospitalsWithDeals,
     isFetchingHospitalsWithDeals,
@@ -94,11 +96,13 @@ function Hospitals() {
         title="All Hospitals"
         subTitle="Hospitals organized by expected close date"
       >
-        <UserSelect
-          value={selectedUser}
-          onValueChange={setSelectedUser}
-          className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
-        />
+        {isAdmin && (
+          <UserSelect
+            value={selectedUser}
+            onValueChange={setSelectedUser}
+            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+          />
+        )}
       </DashboardHeader>
 
       <div className="flex flex-col md:flex-row md:gap-4 items-start md:items-center justify-between mt-6">

@@ -10,6 +10,7 @@ export const hospitalSchema = z.object({
   state: z.string().min(1, "State is required"),
   zip: z.string().min(1, "Zip code is required"),
   gpo: z.string().min(1, "GPO is required"),
+  userId: z.string(),
   // competitiveProduct: z.string(),
   // teamHospital: z.boolean(),
   // magnetHospital: z.boolean(),

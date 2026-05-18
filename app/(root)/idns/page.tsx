@@ -18,7 +18,7 @@ import { IDNCard } from "@/components/idn/IDNCard";
 import { IDNCardSkeleton } from "@/components/idn/IDNCardSkeleton";
 import { IDNDetailsModal } from "@/components/idn/IDNDetailsModal";
 import { SearchBar } from "@/components/SearchBar";
-import { IDNWithDeals } from "@/store/types";
+import { IDNWithDeals, UserRole } from "@/store/types";
 
 function IDNs() {
   const dispatch = useAppDispatch();
@@ -31,6 +31,7 @@ function IDNs() {
     totalIDNs,
     totalPages,
   } = useAppSelector((state) => state.idn);
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   const [selectedUser, setSelectedUser] = useState<string>(
     currentUser?._id || "all",
@@ -88,11 +89,13 @@ function IDNs() {
         title="All IDNs"
         subTitle="Integrated Delivery Networks and their expected revenue"
       >
-        <UserSelect
-          value={selectedUser}
-          onValueChange={setSelectedUser}
-          className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
-        />
+        {isAdmin && (
+          <UserSelect
+            value={selectedUser}
+            onValueChange={setSelectedUser}
+            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+          />
+        )}
       </DashboardHeader>
 
       <div className="mt-6">

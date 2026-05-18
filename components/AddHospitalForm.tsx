@@ -17,13 +17,6 @@ import {
   CommandItem,
   CommandList,
 } from "./ui/command";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
@@ -35,6 +28,8 @@ import {
   hospitalSchema,
   HospitalFormValues,
 } from "@/validations/hospital.validations";
+import { UserRole } from "@/store/types";
+import { UserSelect } from "./UserSelect";
 
 interface AddHospitalFormProps {
   onSuccess?: () => void;
@@ -43,10 +38,12 @@ interface AddHospitalFormProps {
 
 function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user: currentUser } = useAppSelector((state) => state.auth);
   const { idns } = useAppSelector((state) => state.idn);
   const { gpos } = useAppSelector((state) => state.gpo);
   const { isCreateHospitalLoading } = useAppSelector((state) => state.hospital);
+
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   const [idnOpen, setIdnOpen] = useState(false);
   const [gpoOpen, setGpoOpen] = useState(false);
@@ -69,6 +66,7 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
       state: "",
       zip: "",
       gpo: "",
+      userId: currentUser?._id || "",
       // teamHospital: false,
       // magnetHospital: false,
       // bedsWithMac: 0,
@@ -79,11 +77,18 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
 
   const idnValue = watch("idn");
   const gpoValue = watch("gpo");
+  const userIdValue = watch("userId");
 
   useEffect(() => {
     dispatch(fetchIDNs({ limit: 1000 }));
     dispatch(fetchGPOs({ limit: 1000 }));
   }, [dispatch]);
+
+  useEffect(() => {
+    if (currentUser?._id && !userIdValue) {
+      setValue("userId", currentUser._id);
+    }
+  }, [currentUser, setValue, userIdValue]);
 
   const onSubmit = async (data: HospitalFormValues) => {
     try {
@@ -100,10 +105,30 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
     <div className="rounded-xl border border-border bg-background p-5 flex flex-col gap-4">
       <DialogTitle asChild>
         <CardHeader className="w-full bg-muted rounded-xl p-4 border border-border mt-2">
-          <CardTitle className="text-sm">Sales Rep</CardTitle>
-          <CardDescription className="text-lg text-primary font-semibold">
-            {user?.name}
-          </CardDescription>
+          <CardTitle className="text-sm mb-1.5">Sales Rep</CardTitle>
+          {isAdmin ? (
+            <Controller
+              control={control}
+              name="userId"
+              render={({ field }) => (
+                <UserSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  showAll={false}
+                  className="w-full bg-background border-border shadow-none cursor-pointer h-9 text-xs"
+                />
+              )}
+            />
+          ) : (
+            <CardDescription className="text-lg text-primary font-semibold">
+              {currentUser?.name}
+            </CardDescription>
+          )}
+          {errors.userId && (
+            <p className="text-xs text-destructive mt-1">
+              {errors.userId.message}
+            </p>
+          )}
         </CardHeader>
       </DialogTitle>
 

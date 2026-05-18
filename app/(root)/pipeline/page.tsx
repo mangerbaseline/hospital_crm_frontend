@@ -9,6 +9,7 @@ import { MultiProductSelect } from "@/components/products/MultiProductSelect";
 import { GPOSelect } from "@/components/gpo/GPOSelect";
 import { PipelineStatsCard } from "@/components/pipeline/PipelineStatsCard";
 import { PipelineBoard } from "@/components/pipeline/PipelineBoard";
+import { UserRole } from "@/store/types";
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -27,6 +28,7 @@ function Pipeline() {
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [selectedGpoId, setSelectedGpoId] = useState<string>("all");
   const dispatch = useAppDispatch();
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   useEffect(() => {
     dispatch(
@@ -49,20 +51,22 @@ function Pipeline() {
           subTitle="Track deals across all stages"
         >
           <div className="hidden gap-2 w-full sm:w-auto lg:flex">
-            <UserSelect
-              value={selectedUserId}
-              onValueChange={setSelectedUserId}
-              className="w-full sm:w-[150px] bg-muted border-border shadow-sm cursor-pointer"
-            />
+            {isAdmin && (
+              <UserSelect
+                value={selectedUserId}
+                onValueChange={setSelectedUserId}
+                className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+              />
+            )}
             <GPOSelect
               value={selectedGpoId}
               onValueChange={setSelectedGpoId}
-              className="w-full sm:w-[150px] bg-muted border-border shadow-sm cursor-pointer"
+              className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
             />
             <MultiProductSelect
               value={selectedProductIds}
               onValueChange={setSelectedProductIds}
-              className="w-full sm:w-[200px] bg-muted border-border shadow-sm cursor-pointer"
+              className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
             />
           </div>
         </DashboardHeader>

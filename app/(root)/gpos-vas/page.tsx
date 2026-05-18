@@ -17,7 +17,7 @@ import {
 import { GPOWithDealsList } from "@/components/gpo/GPOWithDealsList";
 import { GPOHospitalDetailsModal } from "@/components/gpo/GPOHospitalDetailsModal";
 import { SearchBar } from "@/components/SearchBar";
-import { GPOWithDeals } from "@/store/types";
+import { GPOWithDeals, UserRole } from "@/store/types";
 
 function GposVasPage() {
   const dispatch = useAppDispatch();
@@ -30,6 +30,7 @@ function GposVasPage() {
     totalGPOs,
     totalPages,
   } = useAppSelector((state) => state.gpo);
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   const [selectedUser, setSelectedUser] = useState<string>(
     currentUser?._id || "all",
@@ -87,11 +88,13 @@ function GposVasPage() {
         title="GPOs & VAs"
         subTitle="Group Purchasing Organizations, Veteran Affairs Hospitals and their expected revenue"
       >
-        <UserSelect
-          value={selectedUser}
-          onValueChange={setSelectedUser}
-          className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
-        />
+        {isAdmin && (
+          <UserSelect
+            value={selectedUser}
+            onValueChange={setSelectedUser}
+            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+          />
+        )}
       </DashboardHeader>
 
       <div className="mt-6">

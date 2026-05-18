@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { UserRole } from "@/store/types";
 
 function Contacts() {
   const dispatch = useAppDispatch();
@@ -33,6 +34,7 @@ function Contacts() {
     (state) => state.contact,
   );
   const { products } = useAppSelector((state) => state.product);
+  const isAdmin = user?.role === UserRole.ADMIN;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"my" | "all">("my");
@@ -124,32 +126,36 @@ function Contacts() {
         </InputGroup>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
-          <Button
-            variant={activeFilter === "my" ? "default" : "outline"}
-            size="lg"
-            onClick={() => setActiveFilter("my")}
-            className={cn(
-              "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
-              activeFilter === "my"
-                ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
-                : "border-border/60 bg-white hover:bg-muted text-foreground",
-            )}
-          >
-            <Users className="h-4 w-4" /> My Contacts
-          </Button>
-          <Button
-            variant={activeFilter === "all" ? "default" : "outline"}
-            size="lg"
-            onClick={() => setActiveFilter("all")}
-            className={cn(
-              "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
-              activeFilter === "all"
-                ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
-                : "border-border/60 bg-white hover:bg-muted text-foreground",
-            )}
-          >
-            <Funnel className="h-4 w-4" /> All Contacts
-          </Button>
+          {isAdmin && (
+            <>
+              <Button
+                variant={activeFilter === "my" ? "default" : "outline"}
+                size="lg"
+                onClick={() => setActiveFilter("my")}
+                className={cn(
+                  "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
+                  activeFilter === "my"
+                    ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
+                    : "border-border/60 bg-white hover:bg-muted text-foreground",
+                )}
+              >
+                <Users className="h-4 w-4" /> My Contacts
+              </Button>
+              <Button
+                variant={activeFilter === "all" ? "default" : "outline"}
+                size="lg"
+                onClick={() => setActiveFilter("all")}
+                className={cn(
+                  "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
+                  activeFilter === "all"
+                    ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
+                    : "border-border/60 bg-white hover:bg-muted text-foreground",
+                )}
+              >
+                <Funnel className="h-4 w-4" /> All Contacts
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

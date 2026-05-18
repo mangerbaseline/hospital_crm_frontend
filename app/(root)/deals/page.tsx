@@ -24,11 +24,14 @@ import {
 } from "@/components/ui/select";
 import { DealCard } from "@/components/deals/DealCard";
 import { DealCardSkeleton } from "@/components/deals/DealCardSkeleton";
+import { UserRole } from "@/store/types";
 
 export default function DealsPage() {
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const { deals, isFetchingDeals, page, limit, totalDeals, totalPages } =
     useAppSelector((state) => state.deal);
+
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   const dispatch = useAppDispatch();
 
@@ -111,20 +114,22 @@ export default function DealsPage() {
         subTitle="View and manage all your deals"
       >
         <div className="hidden gap-2 w-full sm:w-auto lg:flex">
-          <UserSelect
-            value={selectedUserId}
-            onValueChange={setSelectedUserId}
-            className="w-full sm:w-[150px] bg-muted border-border shadow-sm cursor-pointer"
-          />
+          {isAdmin && (
+            <UserSelect
+              value={selectedUserId}
+              onValueChange={setSelectedUserId}
+              className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+            />
+          )}
           <GPOSelect
             value={selectedGpoId}
             onValueChange={setSelectedGpoId}
-            className="w-full sm:w-[150px] bg-muted border-border shadow-sm cursor-pointer"
+            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
           />
           <MultiProductSelect
             value={selectedProductIds}
             onValueChange={setSelectedProductIds}
-            className="w-full sm:w-[200px] bg-muted border-border shadow-sm cursor-pointer"
+            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
           />
         </div>
       </DashboardHeader>
