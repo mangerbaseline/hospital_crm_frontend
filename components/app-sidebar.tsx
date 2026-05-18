@@ -63,7 +63,7 @@ const data = {
     },
     {
       title: "GPOs & Gov",
-      url: "/gpos-vas",
+      url: "/gpos-gov",
       icon: ShoppingCart,
     },
     {

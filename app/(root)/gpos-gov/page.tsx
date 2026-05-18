@@ -85,7 +85,7 @@ function GposVasPage() {
   return (
     <section className="max-w-7xl mx-auto w-full">
       <DashboardHeader
-        title="GPOs & VAs"
+        title="GPOs & Gov"
         subTitle="Group Purchasing Organizations, Veteran Affairs Hospitals and their expected revenue"
       >
         {isAdmin && (
