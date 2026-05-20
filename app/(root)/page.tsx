@@ -12,7 +12,11 @@ import { AddDealModal } from "@/components/dashboard/AddDealModel";
 import { AddContactModal } from "@/components/dashboard/AddContactModal";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchDashboardStats } from "@/store/features/dashboard/dashboardSlice";
+import {
+  fetchDashboardStats,
+  fetchDashboardTasks,
+  fetchDashboardActivity,
+} from "@/store/features/dashboard/dashboardSlice";
 
 function Home() {
   const dispatch = useAppDispatch();

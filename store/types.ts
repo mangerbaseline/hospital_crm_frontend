@@ -842,12 +842,71 @@ export interface DashboardStatsResponse {
     amount: number;
     hospitalCount: number;
   }[];
-  tasks: TaskActivity[];
-  recentActivity: {
-    type: string;
-    data: any;
-    createdAt: string;
-  }[];
+}
+
+export interface DashboardTask {
+  _id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  hospital: {
+    _id: string;
+    hospitalName: string;
+  };
+  user: string;
+  reminders: ("email" | "push")[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DashboardTasksResponse {
+  success: boolean;
+  page: number;
+  limit: number;
+  totalTasks: number;
+  totalPages: number;
+  data: DashboardTask[];
+}
+
+export interface DashboardActivityItem {
+  _id: string;
+  activityType: string;
+  notes?: string;
+  Date?: string;
+  title?: string;
+  description?: string;
+  dueDate?: string;
+  contact?: {
+    _id: string;
+    firstName: string;
+    lastName?: string;
+  };
+  hospital: {
+    _id: string;
+    hospitalName: string;
+  };
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DashboardActivityResponse {
+  success: boolean;
+  page?: number;
+  limit?: number;
+  totalPages?: number;
+  totalActivities?: number;
+  data: DashboardActivityItem[];
+}
+
+export interface FetchDashboardTasksParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface FetchDashboardActivityParams {
+  page?: number;
+  limit?: number;
 }
 
 export interface DashboardState {
@@ -862,6 +921,20 @@ export interface DashboardState {
   implementedData: ClosedWonResponse | null;
   isFetchingImplemented: boolean;
   fetchImplementedError: string | null;
+
+  dashboardTasks: DashboardTask[];
+  isFetchingDashboardTasks: boolean;
+  fetchDashboardTasksError: string | null;
+  dashboardTasksPage: number;
+  dashboardTasksTotalPages: number;
+  dashboardTasksHasMore: boolean;
+
+  dashboardActivities: DashboardActivityItem[];
+  isFetchingDashboardActivities: boolean;
+  fetchDashboardActivitiesError: string | null;
+  dashboardActivityPage: number;
+  dashboardActivityTotalPages: number;
+  dashboardActivityHasMore: boolean;
 }
 
 export interface EmailAddress {

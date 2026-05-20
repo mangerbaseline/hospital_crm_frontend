@@ -6,6 +6,10 @@ import {
   ClosedWonResponse,
   FetchClosedWonParams,
   FetchImplementedParams,
+  DashboardTasksResponse,
+  DashboardActivityResponse,
+  FetchDashboardTasksParams,
+  FetchDashboardActivityParams,
 } from "@/store/types";
 
 const initialState: DashboardState = {
@@ -18,6 +22,18 @@ const initialState: DashboardState = {
   implementedData: null,
   isFetchingImplemented: false,
   fetchImplementedError: null,
+  dashboardTasks: [],
+  isFetchingDashboardTasks: false,
+  fetchDashboardTasksError: null,
+  dashboardTasksPage: 1,
+  dashboardTasksTotalPages: 1,
+  dashboardTasksHasMore: true,
+  dashboardActivities: [],
+  isFetchingDashboardActivities: false,
+  fetchDashboardActivitiesError: null,
+  dashboardActivityPage: 1,
+  dashboardActivityTotalPages: 1,
+  dashboardActivityHasMore: true,
 };
 
 export const fetchDashboardStats = createAsyncThunk(
@@ -32,6 +48,40 @@ export const fetchDashboardStats = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch dashboard stats",
+      );
+    }
+  },
+);
+
+export const fetchDashboardTasks = createAsyncThunk(
+  "dashboard/fetchDashboardTasks",
+  async (params: FetchDashboardTasksParams = {}, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 10 } = params;
+      const response = await axiosInstance.get<DashboardTasksResponse>(
+        `/api/task/dashboard-tasks?page=${page}&limit=${limit}`,
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch dashboard tasks",
+      );
+    }
+  },
+);
+
+export const fetchDashboardActivity = createAsyncThunk(
+  "dashboard/fetchDashboardActivity",
+  async (params: FetchDashboardActivityParams = {}, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 10 } = params;
+      const response = await axiosInstance.get<DashboardActivityResponse>(
+        `/api/activity/dashboard-activity?page=${page}&limit=${limit}`,
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch dashboard activity",
       );
     }
   },
@@ -117,6 +167,44 @@ const dashboardSlice = createSlice({
       .addCase(fetchImplemented.rejected, (state, action) => {
         state.isFetchingImplemented = false;
         state.fetchImplementedError = action.payload as string;
+      })
+      .addCase(fetchDashboardTasks.pending, (state, action) => {
+        state.isFetchingDashboardTasks = true;
+        state.fetchDashboardTasksError = null;
+        if (action.meta.arg?.page === 1 || !action.meta.arg?.page) {
+          state.dashboardTasks = [];
+        }
+      })
+      .addCase(fetchDashboardTasks.fulfilled, (state, action) => {
+        state.isFetchingDashboardTasks = false;
+        state.dashboardTasks = action.payload.data || [];
+        state.dashboardTasksPage = action.payload.page || 1;
+        state.dashboardTasksTotalPages = action.payload.totalPages || 1;
+        state.dashboardTasksHasMore =
+          state.dashboardTasksPage < state.dashboardTasksTotalPages;
+      })
+      .addCase(fetchDashboardTasks.rejected, (state, action) => {
+        state.isFetchingDashboardTasks = false;
+        state.fetchDashboardTasksError = action.payload as string;
+      })
+      .addCase(fetchDashboardActivity.pending, (state, action) => {
+        state.isFetchingDashboardActivities = true;
+        state.fetchDashboardActivitiesError = null;
+        if (action.meta.arg?.page === 1 || !action.meta.arg?.page) {
+          state.dashboardActivities = [];
+        }
+      })
+      .addCase(fetchDashboardActivity.fulfilled, (state, action) => {
+        state.isFetchingDashboardActivities = false;
+        state.dashboardActivities = action.payload.data || [];
+        state.dashboardActivityPage = action.payload.page || 1;
+        state.dashboardActivityTotalPages = action.payload.totalPages || 1;
+        state.dashboardActivityHasMore =
+          state.dashboardActivityPage < state.dashboardActivityTotalPages;
+      })
+      .addCase(fetchDashboardActivity.rejected, (state, action) => {
+        state.isFetchingDashboardActivities = false;
+        state.fetchDashboardActivitiesError = action.payload as string;
       });
   },
 });

@@ -1,13 +1,15 @@
 "use client";
 
+import { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { NotebookPen, Phone, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import Link from "next/link";
+import { fetchDashboardActivity } from "@/store/features/dashboard/dashboardSlice";
 
 interface ActivityItemProps {
   type: "call" | "note" | "task";
@@ -112,11 +114,16 @@ function ActivitySkeleton() {
 }
 
 export function RecentActivity() {
-  const { dashboardStats, isFetchingDashboardStats } = useAppSelector(
+  const { dashboardActivities, isFetchingDashboardActivities } = useAppSelector(
     (state) => state.dashboard,
   );
+  const dispatch = useAppDispatch();
 
-  const activities = dashboardStats?.recentActivity || [];
+  useEffect(() => {
+    dispatch(fetchDashboardActivity({}));
+  }, [dispatch]);
+
+  const activities = dashboardActivities || [];
 
   const mapActivityToRepo = (activity: any): ActivityItemProps => {
     let type: ActivityItemProps["type"] = "note";
@@ -124,14 +131,14 @@ export function RecentActivity() {
     let description = "";
     let user: string[] | undefined = undefined;
 
-    const data = activity.data || {};
+    const data = activity;
     const hospitalId =
       typeof data.hospital === "string" ? data.hospital : data.hospital?._id;
     const hospitalName = data.hospital?.hospitalName
       ? ` - ${data.hospital.hospitalName}`
       : "";
 
-    if (activity.type === "callLog") {
+    if (activity.activityType === "callLog") {
       type = "call";
       title = `Call logged${hospitalName}`;
       description = data.notes || "";
@@ -141,11 +148,11 @@ export function RecentActivity() {
             (data.contact.lastName ? ` ${data.contact.lastName}` : ""),
         ];
       }
-    } else if (activity.type === "note") {
+    } else if (activity.activityType === "note") {
       type = "note";
       title = `Note added${hospitalName}`;
       description = data.notes || "";
-    } else if (activity.type === "task") {
+    } else if (activity.activityType === "task") {
       type = "task";
       title = `Task: ${data.title || "Unknown"}`;
       description =
@@ -174,7 +181,7 @@ export function RecentActivity() {
       <CardContent className="p-0 flex-1 min-h-0 w-full overflow-hidden">
         <ScrollArea className="h-full w-full max-w-full">
           <div className="flex flex-col px-2 md:px-4 pb-4">
-            {isFetchingDashboardStats ? (
+            {isFetchingDashboardActivities ? (
               Array.from({ length: 5 }).map((_, idx) => (
                 <ActivitySkeleton key={idx} />
               ))
@@ -187,7 +194,7 @@ export function RecentActivity() {
                 const props = mapActivityToRepo(activity);
                 return (
                   <ActivityItem
-                    key={activity.data?._id || index}
+                    key={activity._id || index}
                     {...props}
                     isLast={index === activities.length - 1}
                   />

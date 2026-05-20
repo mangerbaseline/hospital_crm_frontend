@@ -1,14 +1,38 @@
+import { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock } from "lucide-react";
-import { useAppSelector } from "@/lib/hooks";
+import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { fetchDashboardTasks } from "@/store/features/dashboard/dashboardSlice";
 
 export function UpcomingTasks() {
-  const { dashboardStats, isFetchingDashboardStats } = useAppSelector(
-    (state) => state.dashboard,
-  );
+  const {
+    dashboardTasks,
+    isFetchingDashboardTasks,
+    dashboardTasksHasMore,
+    dashboardTasksPage,
+    dashboardTasksTotalPages,
+  } = useAppSelector((state) => state.dashboard);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(fetchDashboardTasks({ page: 1, limit: 5 }));
+  }, [dispatch]);
+
+  const handleNextPage = () => {
+    if (dashboardTasksHasMore) {
+      dispatch(fetchDashboardTasks({ page: dashboardTasksPage + 1, limit: 5 }));
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (dashboardTasksPage > 1) {
+      dispatch(fetchDashboardTasks({ page: dashboardTasksPage - 1, limit: 5 }));
+    }
+  };
 
   return (
     <Card className="flex py-0 flex-col h-full shadow-none border-none sm:shadow-sm sm:border-border sm:border rounded-xl transition-all w-full min-w-0 max-h-[400px] overflow-hidden">
@@ -18,10 +42,10 @@ export function UpcomingTasks() {
           Upcoming Tasks
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0 flex-1 min-h-0 w-full overflow-hidden">
-        <ScrollArea className="h-full w-full max-w-full">
+      <CardContent className="p-0 flex-1 min-h-0 w-full overflow-hidden flex flex-col">
+        <ScrollArea className="flex-1 w-full max-w-full">
           <div className="flex flex-col px-1 sm:px-4 pb-6">
-            {isFetchingDashboardStats ? (
+            {isFetchingDashboardTasks ? (
               Array.from({ length: 3 }).map((_, idx) => (
                 <div
                   key={idx}
@@ -32,8 +56,8 @@ export function UpcomingTasks() {
                   <Skeleton className="h-3 w-full" />
                 </div>
               ))
-            ) : dashboardStats?.tasks && dashboardStats.tasks.length > 0 ? (
-              dashboardStats.tasks.map((task) => {
+            ) : dashboardTasks && dashboardTasks.length > 0 ? (
+              dashboardTasks.map((task) => {
                 const hospitalName =
                   task.hospital && typeof task.hospital === "object"
                     ? task.hospital.hospitalName || "Unknown Hospital"
@@ -76,6 +100,29 @@ export function UpcomingTasks() {
             )}
           </div>
         </ScrollArea>
+        {dashboardTasksTotalPages > 0 && dashboardTasks.length > 0 && (
+          <div className="flex items-center justify-between mt-auto border-t border-border pt-3 pb-4 px-4 bg-card z-10 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrevPage}
+              disabled={dashboardTasksPage === 1 || isFetchingDashboardTasks}
+            >
+              Previous
+            </Button>
+            <span className="text-xs text-muted-foreground font-medium">
+              Page {dashboardTasksPage} of {dashboardTasksTotalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={!dashboardTasksHasMore || isFetchingDashboardTasks}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
