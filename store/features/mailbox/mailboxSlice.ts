@@ -34,14 +34,15 @@ export const fetchReceivedEmails = createAsyncThunk(
       page = 1,
       limit = 10,
       search = "",
-    }: { page?: number; limit?: number; search?: string },
+      hospitalId = "",
+    }: { page?: number; limit?: number; search?: string; hospitalId?: string },
     { rejectWithValue },
   ) => {
     try {
       const response = await axiosInstance.get<
         PaginatedApiResponse<EmailMessage[]>
       >(
-        `/api/graph-app/received-emails?page=${page}&limit=${limit}&search=${search}`,
+        `/api/graph-app/received-emails?page=${page}&limit=${limit}&search=${search}&hospitalId=${hospitalId}`,
       );
       return response.data;
     } catch (error: any) {
@@ -59,14 +60,15 @@ export const fetchSentEmails = createAsyncThunk(
       page = 1,
       limit = 10,
       search = "",
-    }: { page?: number; limit?: number; search?: string },
+      hospitalId = "",
+    }: { page?: number; limit?: number; search?: string; hospitalId?: string },
     { rejectWithValue },
   ) => {
     try {
       const response = await axiosInstance.get<
         PaginatedApiResponse<EmailMessage[]>
       >(
-        `/api/graph-app/sent-emails?page=${page}&limit=${limit}&search=${search}`,
+        `/api/graph-app/sent-emails?page=${page}&limit=${limit}&search=${search}&hospitalId=${hospitalId}`,
       );
       return response.data;
     } catch (error: any) {

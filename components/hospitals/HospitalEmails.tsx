@@ -822,12 +822,21 @@ export function HospitalEmails({ hospitalId }: { hospitalId: string }) {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      dispatch(fetchReceivedEmails({ page: 1, limit, search: searchQuery }));
-      dispatch(fetchSentEmails({ page: 1, limit, search: searchQuery }));
+      dispatch(
+        fetchReceivedEmails({
+          page: 1,
+          limit,
+          search: searchQuery,
+          hospitalId,
+        }),
+      );
+      dispatch(
+        fetchSentEmails({ page: 1, limit, search: searchQuery, hospitalId }),
+      );
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [dispatch, searchQuery]);
+  }, [dispatch, searchQuery, hospitalId]);
 
   const handleEmailClick = (email: EmailMessage, type: "received" | "sent") => {
     setSelectedEmail(email);
@@ -840,10 +849,22 @@ export function HospitalEmails({ hospitalId }: { hospitalId: string }) {
 
     if (emailType === "received") {
       dispatch(
-        fetchReceivedEmails({ page: newPage, limit, search: searchQuery }),
+        fetchReceivedEmails({
+          page: newPage,
+          limit,
+          search: searchQuery,
+          hospitalId,
+        }),
       );
     } else {
-      dispatch(fetchSentEmails({ page: newPage, limit, search: searchQuery }));
+      dispatch(
+        fetchSentEmails({
+          page: newPage,
+          limit,
+          search: searchQuery,
+          hospitalId,
+        }),
+      );
     }
   };
 
@@ -851,8 +872,17 @@ export function HospitalEmails({ hospitalId }: { hospitalId: string }) {
     try {
       await dispatch(syncEmails({ hospitalId })).unwrap();
       toast.success("Emails synced successfully");
-      dispatch(fetchReceivedEmails({ page: 1, limit, search: searchQuery }));
-      dispatch(fetchSentEmails({ page: 1, limit, search: searchQuery }));
+      dispatch(
+        fetchReceivedEmails({
+          page: 1,
+          limit,
+          search: searchQuery,
+          hospitalId,
+        }),
+      );
+      dispatch(
+        fetchSentEmails({ page: 1, limit, search: searchQuery, hospitalId }),
+      );
     } catch (error: any) {
       toast.error(error || "Failed to sync emails");
     }
