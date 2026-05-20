@@ -956,7 +956,6 @@ export interface EmailMessage {
   ccRecipients: EmailAddress[];
   conversationId: string;
   createdAt: string;
-  crmUser: string;
   from: EmailAddress;
   hasAttachments: boolean;
   attachments?: {
