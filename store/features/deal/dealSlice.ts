@@ -30,6 +30,9 @@ const initialState: DealState = {
   totalPages: 1,
   isDeleteDealLoading: false,
   deleteDealError: null,
+  quickStats: null,
+  isFetchingQuickStats: false,
+  quickStatsError: null,
 };
 
 export const createDeal = createAsyncThunk(
@@ -139,6 +142,24 @@ export const removeDealProduct = createAsyncThunk(
   },
 );
 
+export const fetchHospitalProductCount = createAsyncThunk(
+  "deal/fetchHospitalProductCount",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get<{
+        success: boolean;
+        hospitalCount: number;
+        productCount: number;
+      }>("/api/deal/stats/hospital-product-count");
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch quick stats",
+      );
+    }
+  },
+);
+
 const dealSlice = createSlice({
   name: "deal",
   initialState,
@@ -235,6 +256,21 @@ const dealSlice = createSlice({
       .addCase(removeDealProduct.rejected, (state, action) => {
         state.isDealProductLoading = false;
         state.dealProductError = action.payload as string;
+      })
+      .addCase(fetchHospitalProductCount.pending, (state) => {
+        state.isFetchingQuickStats = true;
+        state.quickStatsError = null;
+      })
+      .addCase(fetchHospitalProductCount.fulfilled, (state, action) => {
+        state.isFetchingQuickStats = false;
+        state.quickStats = {
+          hospitalCount: action.payload.hospitalCount,
+          productCount: action.payload.productCount,
+        };
+      })
+      .addCase(fetchHospitalProductCount.rejected, (state, action) => {
+        state.isFetchingQuickStats = false;
+        state.quickStatsError = action.payload as string;
       });
   },
 });

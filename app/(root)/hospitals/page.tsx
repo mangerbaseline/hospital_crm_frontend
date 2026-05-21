@@ -31,6 +31,9 @@ function Hospitals() {
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const isAdmin = currentUser?.role === UserRole.ADMIN;
+  const isAdminOrExecutive =
+    currentUser?.role === UserRole.ADMIN ||
+    currentUser?.role === UserRole.EXECUTIVE;
   const {
     hospitalsWithDeals,
     isFetchingHospitalsWithDeals,
@@ -44,7 +47,7 @@ function Hospitals() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
 
   const [selectedUser, setSelectedUser] = useState<string>(
-    currentUser?._id || "all",
+    isAdminOrExecutive ? "all" : currentUser?._id || "all",
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -96,11 +99,11 @@ function Hospitals() {
         title="All Hospitals"
         subTitle="Hospitals organized by expected close date"
       >
-        {isAdmin && (
+        {isAdminOrExecutive && (
           <UserSelect
             value={selectedUser}
             onValueChange={setSelectedUser}
-            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
           />
         )}
       </DashboardHeader>
@@ -115,7 +118,7 @@ function Hospitals() {
             <SlidersHorizontal className="h-4 w-4" />
             <span>Rows:</span>
             <Select value={String(pageSize)} onValueChange={handleLimitChange}>
-              <SelectTrigger className="w-full sm:w-[70px] h-7 border-none p-0 shadow-none cursor-pointer">
+              <SelectTrigger className="w-full sm:w-17.5 h-7 border-none p-0 shadow-none cursor-pointer">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

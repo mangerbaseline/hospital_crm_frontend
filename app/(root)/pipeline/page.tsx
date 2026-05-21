@@ -22,13 +22,16 @@ const formatCurrency = (value: number) => {
 function Pipeline() {
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const { stats } = useAppSelector((state) => state.deal);
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
+  const isAdminOrExecutive =
+    currentUser?.role === UserRole.ADMIN ||
+    currentUser?.role === UserRole.EXECUTIVE;
   const [selectedUserId, setSelectedUserId] = useState<string>(
-    currentUser?._id || "all",
+    isAdminOrExecutive ? "all" : currentUser?._id || "all",
   );
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [selectedGpoId, setSelectedGpoId] = useState<string>("all");
   const dispatch = useAppDispatch();
-  const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   useEffect(() => {
     dispatch(
@@ -51,22 +54,22 @@ function Pipeline() {
           subTitle="Track deals across all stages"
         >
           <div className="hidden gap-2 w-full sm:w-auto lg:flex">
-            {isAdmin && (
+            {isAdminOrExecutive && (
               <UserSelect
                 value={selectedUserId}
                 onValueChange={setSelectedUserId}
-                className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+                className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
               />
             )}
             <GPOSelect
               value={selectedGpoId}
               onValueChange={setSelectedGpoId}
-              className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+              className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
             />
             <MultiProductSelect
               value={selectedProductIds}
               onValueChange={setSelectedProductIds}
-              className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+              className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
             />
           </div>
         </DashboardHeader>

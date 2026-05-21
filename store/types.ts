@@ -615,6 +615,12 @@ export interface DealState {
   totalPages: number;
   isDeleteDealLoading: boolean;
   deleteDealError: string | null;
+  quickStats: {
+    hospitalCount: number;
+    productCount: number;
+  } | null;
+  isFetchingQuickStats: boolean;
+  quickStatsError: string | null;
 }
 
 export interface AddDealProductPayload {

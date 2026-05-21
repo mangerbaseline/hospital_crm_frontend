@@ -29,18 +29,18 @@ export function GPOHospitalDetailsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] sm:max-w-[600px] p-0 flex flex-col overflow-hidden bg-muted gap-0 border-none shadow-2xl">
+      <DialogContent className="max-h-[90vh] sm:max-w-150 p-0 flex flex-col overflow-hidden bg-muted gap-0 border-none shadow-2xl">
         <DialogHeader className="px-6 py-4 border-b border-border bg-white shrink-0">
           <div className="flex items-center gap-3">
             <span className="p-1.5 bg-blue-100 rounded-md">
               <Building2 className="h-5 w-5 text-blue-600" />
             </span>
             <DialogTitle className="text-xl font-bold">
-              {gpo.name} - Hospitals
+              {gpo?.name} - Hospitals
             </DialogTitle>
           </div>
           <DialogDescription className="text-sm text-slate-500 mt-0.5">
-            View details of hospitals associated with {gpo.name}.
+            View details of hospitals associated with {gpo?.name}.
           </DialogDescription>
         </DialogHeader>
 
@@ -71,10 +71,10 @@ export function GPOHospitalDetailsModal({
                 {gpo.gpoARRByProduct?.map((prod, idx) => (
                   <div
                     key={idx}
-                    className="border border-border rounded-lg px-4 py-2 bg-white flex flex-col items-center justify-center min-w-[100px] shadow-sm"
+                    className="border border-border rounded-lg px-4 py-2 bg-white flex flex-col items-center justify-center min-w-25 shadow-sm"
                   >
                     <span className="text-[10px] text-muted-foreground font-medium mb-0.5 uppercase">
-                      {prod.name}
+                      {prod?.name}
                     </span>
                     <span className="text-sm font-bold text-blue-600">
                       ${prod.amount.toLocaleString()}
@@ -103,11 +103,24 @@ export function GPOHospitalDetailsModal({
                     <div className="flex flex-col items-start gap-1 text-sm text-muted-foreground mt-0.5">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        {hospital.city}, {hospital.state}
+                        {/* {hospital.city}, {hospital.state} */}
+                        <span className="truncate w-full">
+                          {hospital?.city || hospital?.state ? (
+                            <>
+                              {hospital?.city}
+                              {hospital?.city && hospital?.state && ", "}
+                              {hospital?.state}
+                            </>
+                          ) : (
+                            "No Location"
+                          )}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1 uppercase tracking-wide text-[11px] font-medium">
                         <Building className="h-3 w-3" />
-                        IDN: {hospital.idn.name}
+                        {hospital?.idn?.name
+                          ? `IDN: ${hospital.idn.name}`
+                          : "No IDN"}
                       </div>
                     </div>
                   </div>
@@ -126,10 +139,10 @@ export function GPOHospitalDetailsModal({
                     {hospital.expectedARRByProduct?.map((prod, idx) => (
                       <div
                         key={idx}
-                        className="border border-border/60 rounded-md px-3 py-1.5 bg-slate-50 flex flex-col min-w-[80px]"
+                        className="border border-border/60 rounded-md px-3 py-1.5 bg-slate-50 flex flex-col min-w-20"
                       >
                         <span className="text-[10px] text-muted-foreground font-medium">
-                          {prod.name}
+                          {prod?.name}
                         </span>
                         <span className="text-sm font-bold text-blue-600 leading-tight">
                           ${prod.amount.toLocaleString()}

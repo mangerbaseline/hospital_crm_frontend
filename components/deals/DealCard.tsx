@@ -97,15 +97,34 @@ export function DealCard({ deal, onDealUpdated }: DealCardProps) {
               >
                 {deal.hospital?.hospitalName}
               </h3>
+
               <div className="flex flex-col items-start gap-1 text-[11px] text-muted-foreground/80 mt-1 font-medium w-full">
-                <span className="truncate w-full">
-                  {deal.hospital?.city}, {deal.hospital?.state}
-                </span>
+                {/* <span className="truncate w-full">
+                  <span className="truncate w-full">
+                    {deal.hospital?.city || deal.hospital?.state ? (
+                      <>
+                        {deal.hospital?.city}
+                        {deal.hospital?.city && deal.hospital?.state && ", "}
+                        {deal.hospital?.state}
+                      </>
+                    ) : (
+                      "No Location"
+                    )}
+                  </span>
+                </span> */}
+
                 <span
                   className="truncate w-full font-semibold text-muted-foreground"
                   title={deal.hospital?.idn?.name}
                 >
                   {deal.hospital?.idn?.name || "No IDN"}
+                </span>
+
+                <span
+                  className="truncate w-full font-semibold text-muted-foreground"
+                  title={deal.hospital?.gpo?.name}
+                >
+                  {deal.hospital?.gpo?.name || "No GPO"}
                 </span>
               </div>
             </div>

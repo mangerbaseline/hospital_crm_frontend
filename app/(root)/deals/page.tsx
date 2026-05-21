@@ -32,11 +32,14 @@ export default function DealsPage() {
     useAppSelector((state) => state.deal);
 
   const isAdmin = currentUser?.role === UserRole.ADMIN;
+  const isAdminOrExecutive =
+    currentUser?.role === UserRole.ADMIN ||
+    currentUser?.role === UserRole.EXECUTIVE;
 
   const dispatch = useAppDispatch();
 
   const [selectedUserId, setSelectedUserId] = useState<string>(
-    currentUser?._id || "all",
+    isAdminOrExecutive ? "all" : currentUser?._id || "all",
   );
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [selectedGpoId, setSelectedGpoId] = useState<string>("all");
@@ -114,22 +117,22 @@ export default function DealsPage() {
         subTitle="View and manage all your deals"
       >
         <div className="hidden gap-2 w-full sm:w-auto lg:flex">
-          {isAdmin && (
+          {isAdminOrExecutive && (
             <UserSelect
               value={selectedUserId}
               onValueChange={setSelectedUserId}
-              className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+              className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
             />
           )}
           <GPOSelect
             value={selectedGpoId}
             onValueChange={setSelectedGpoId}
-            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
           />
           <MultiProductSelect
             value={selectedProductIds}
             onValueChange={setSelectedProductIds}
-            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
           />
         </div>
       </DashboardHeader>
@@ -168,7 +171,7 @@ export default function DealsPage() {
             <SlidersHorizontal className="h-4 w-4" />
             <span>Rows:</span>
             <Select value={String(pageSize)} onValueChange={handleLimitChange}>
-              <SelectTrigger className="w-full sm:w-[70px] h-7 border-none p-0 shadow-none cursor-pointer">
+              <SelectTrigger className="w-full sm:w-17.5 h-7 border-none p-0 shadow-none cursor-pointer">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

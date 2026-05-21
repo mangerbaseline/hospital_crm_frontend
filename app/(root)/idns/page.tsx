@@ -32,9 +32,12 @@ function IDNs() {
     totalPages,
   } = useAppSelector((state) => state.idn);
   const isAdmin = currentUser?.role === UserRole.ADMIN;
+  const isAdminOrExecutive =
+    currentUser?.role === UserRole.ADMIN ||
+    currentUser?.role === UserRole.EXECUTIVE;
 
   const [selectedUser, setSelectedUser] = useState<string>(
-    currentUser?._id || "all",
+    isAdminOrExecutive ? "all" : currentUser?._id || "all",
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -89,11 +92,11 @@ function IDNs() {
         title="All IDNs"
         subTitle="Integrated Delivery Networks and their expected revenue"
       >
-        {isAdmin && (
+        {isAdminOrExecutive && (
           <UserSelect
             value={selectedUser}
             onValueChange={setSelectedUser}
-            className="w-full sm:w-[180px] bg-muted border-border shadow-sm cursor-pointer"
+            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
           />
         )}
       </DashboardHeader>
@@ -147,7 +150,7 @@ function IDNs() {
 
           <div className="flex items-center gap-2 order-1 sm:order-2">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mr-4">
-              <span>Rows per page:</span>
+              <span>Rows:</span>
               <Select
                 value={String(pageSize)}
                 onValueChange={handleLimitChange}

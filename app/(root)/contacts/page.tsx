@@ -10,7 +10,15 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { Plus, Search, Users, Filter, Funnel, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Users,
+  Filter,
+  Funnel,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   ContactCard,
@@ -30,11 +38,13 @@ import { UserRole } from "@/store/types";
 function Contacts() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { contacts, isFetchingContacts, totalPages, totalContacts } = useAppSelector(
-    (state) => state.contact,
-  );
+  const { contacts, isFetchingContacts, totalPages, totalContacts } =
+    useAppSelector((state) => state.contact);
   const { products } = useAppSelector((state) => state.product);
-  const isAdmin = user?.role === UserRole.ADMIN;
+
+  // const isAdmin = user?.role === UserRole.ADMIN;
+  const isAdminOrExecutive =
+    user?.role === UserRole.ADMIN || user?.role === UserRole.EXECUTIVE;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"my" | "all">("my");
@@ -72,7 +82,15 @@ function Contacts() {
         productId: selectedProductId === "all" ? "" : selectedProductId,
       }),
     );
-  }, [dispatch, searchQuery, activeFilter, user?._id, selectedProductId, currentPage, pageSize]);
+  }, [
+    dispatch,
+    searchQuery,
+    activeFilter,
+    user?._id,
+    selectedProductId,
+    currentPage,
+    pageSize,
+  ]);
 
   return (
     <section className="max-w-7xl mx-auto w-full">
@@ -85,7 +103,7 @@ function Contacts() {
             : "All contacts across the organization"
         }
       >
-        <div className="hidden sm:flex w-full sm:w-[180px]">
+        <div className="hidden sm:flex w-full sm:w-45">
           <Select
             value={selectedProductId}
             onValueChange={setSelectedProductId}
@@ -104,7 +122,7 @@ function Contacts() {
           </Select>
         </div>
         <AddContactModal>
-          <Button className="flex gap-3 p-3 md:p-[18px] text-sm bg-black text-white border border-border cursor-pointer hover:bg-black/80 shadow-xl shadow-muted transition-all duration-200">
+          <Button className="flex gap-3 p-3 md:p-4.5 text-sm bg-black text-white border border-border cursor-pointer hover:bg-black/80 shadow-xl shadow-muted transition-all duration-200">
             <Plus className="h-4 w-4" /> Add Contact
           </Button>
         </AddContactModal>
@@ -144,7 +162,7 @@ function Contacts() {
         </InputGroup>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
-          {isAdmin && (
+          {isAdminOrExecutive && (
             <>
               <Button
                 variant={activeFilter === "my" ? "default" : "outline"}
@@ -216,13 +234,14 @@ function Contacts() {
             <span className="text-foreground font-bold">
               {Math.min(currentPage * pageSize, totalContacts)}
             </span>{" "}
-            of <span className="text-foreground font-bold">{totalContacts}</span>{" "}
+            of{" "}
+            <span className="text-foreground font-bold">{totalContacts}</span>{" "}
             contacts
           </div>
 
           <div className="flex items-center gap-2 order-1 sm:order-2">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mr-4">
-              <span>Rows per page:</span>
+              <span>Rows:</span>
               <Select
                 value={String(pageSize)}
                 onValueChange={handleLimitChange}
@@ -264,7 +283,9 @@ function Contacts() {
                       size="sm"
                       onClick={() => handlePageChange(pageNum)}
                       className={`h-9 w-9 rounded-md font-bold shadow-sm transition-all cursor-pointer ${
-                        currentPage === pageNum ? "shadow-primary/20 scale-110" : ""
+                        currentPage === pageNum
+                          ? "shadow-primary/20 scale-110"
+                          : ""
                       }`}
                     >
                       {pageNum}

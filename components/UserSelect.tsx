@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchUsers } from "@/store/features/user/userSlice";
+import { UserRole } from "@/store/types";
 
 interface UserSelectProps {
   value?: string;
@@ -39,9 +40,14 @@ export function UserSelect({
   const { users } = useAppSelector((state) => state.user);
   const { user: currentUser } = useAppSelector((state) => state.auth);
 
+  const isAdminOrExecutive =
+    currentUser?.role === UserRole.ADMIN ||
+    currentUser?.role === UserRole.EXECUTIVE;
+
   const [open, setOpen] = useState(false);
   const [selectedVal, setSelectedVal] = useState(
-    value || currentUser?._id || (showAll ? "all" : ""),
+    value ||
+      (isAdminOrExecutive && showAll ? "all" : currentUser?._id || (showAll ? "all" : "")),
   );
 
   useEffect(() => {

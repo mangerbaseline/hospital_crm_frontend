@@ -27,10 +27,12 @@ import {
   Handshake,
   Briefcase,
 } from "lucide-react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { logoutUser } from "@/store/features/auth/authSlice";
+import { fetchHospitalProductCount } from "@/store/features/deal/dealSlice";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -114,6 +116,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { setOpenMobile } = useSidebar();
+
+  const { quickStats } = useAppSelector((state) => state.deal);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchHospitalProductCount());
+    }
+  }, [dispatch, user]);
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
@@ -279,13 +289,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <span className="text-sm text-muted-foreground">
                 Total Hospitals:
               </span>
-              <span className="text-sm font-semibold ">23</span>
+              <span className="text-sm font-semibold ">{quickStats?.hospitalCount ?? 0}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
                 Total Products:
               </span>
-              <span className="text-sm font-semibold ">35</span>
+              <span className="text-sm font-semibold ">{quickStats?.productCount ?? 0}</span>
             </div>
           </div>
         </div>

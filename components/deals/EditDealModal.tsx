@@ -135,7 +135,7 @@ export function EditDealModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[460px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-115 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Edit Deal</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
