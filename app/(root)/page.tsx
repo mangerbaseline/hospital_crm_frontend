@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Building2, DollarSign, CheckCircle2, UserPlus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ClosedBusinessModal } from "@/components/dashboard/ClosedBusinessModal";
 import { UpcomingTasks } from "@/components/dashboard/UpcomingTasks";
@@ -20,7 +22,7 @@ import {
 
 function Home() {
   const dispatch = useAppDispatch();
-  const { dashboardStats } = useAppSelector((state) => state.dashboard);
+  const { dashboardStats, isFetchingDashboardStats } = useAppSelector((state) => state.dashboard);
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
@@ -46,48 +48,70 @@ function Home() {
 
       {/* stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <StatsCard
-          title="My Hospitals"
-          icon={Building2}
-          iconClassName="text-muted-foreground"
-          value={dashboardStats?.totalHospitals || 0}
-          subtitle={<>Total hospitals</>}
-          buttonText="View All"
-          href="/hospitals"
-        />
-        <StatsCard
-          title="My Pipeline"
-          icon={DollarSign}
-          iconClassName="text-muted-foreground"
-          value={`$${(dashboardStats?.totalPipelineAmount || 0).toLocaleString()}`}
-          subtitle={<>{dashboardStats?.activeDeals || 0} active deals</>}
-          buttonText="View Pipeline"
-          href="/pipeline"
-        />
-        <StatsCard
-          title="Closed Business"
-          icon={CheckCircle2}
-          iconClassName="text-muted-foreground"
-          value={`$${(dashboardStats?.closedBusiness?.totalAmount || 0).toLocaleString()}`}
-          subtitle={
-            <>
-              {dashboardStats?.closedBusiness?.hospitalCount || 0} hospitals
-              <br />
-              Total Expected ARR
-            </>
-          }
-          buttonText="View All"
-          trigger={
-            <ClosedBusinessModal>
-              <Button
-                variant="outline"
-                className="w-full h-9 rounded-lg border-border font-medium hover:bg-muted cursor-pointer transition-colors"
-              >
-                View All
-              </Button>
-            </ClosedBusinessModal>
-          }
-        />
+        {/* Loading skeletons for stats */}
+        {isFetchingDashboardStats ? (
+          <>
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="flex flex-col h-full shadow-sm shadow-black/5 border-border rounded-[16px] transition-all hover:shadow-md py-0">
+                <CardHeader className="flex flex-row items-center justify-between pb-4 pt-5 px-6 space-y-0">
+                  <Skeleton className="h-4 w-24" />
+                </CardHeader>
+                <CardContent className="flex flex-col flex-1 px-6">
+                  <Skeleton className="h-8 w-1/2 mb-2" />
+                  <Skeleton className="h-4 w-32" />
+                </CardContent>
+                <CardFooter className="px-5 pb-5 pt-0 border-none bg-transparent">
+                  <Skeleton className="h-9 w-24" />
+                </CardFooter>
+              </Card>
+            ))}
+          </>
+        ) : (
+          <>
+            <StatsCard
+              title="My Hospitals"
+              icon={Building2}
+              iconClassName="text-muted-foreground"
+              value={dashboardStats?.totalHospitals || 0}
+              subtitle={<>Total hospitals</>}
+              buttonText="View All"
+              href="/hospitals"
+            />
+            <StatsCard
+              title="My Pipeline"
+              icon={DollarSign}
+              iconClassName="text-muted-foreground"
+              value={`$${(dashboardStats?.totalPipelineAmount || 0).toLocaleString()}`}
+              subtitle={<> {dashboardStats?.activeDeals || 0} active deals</>}
+              buttonText="View Pipeline"
+              href="/pipeline"
+            />
+            <StatsCard
+              title="Closed Business"
+              icon={CheckCircle2}
+              iconClassName="text-muted-foreground"
+              value={`$${(dashboardStats?.closedBusiness?.totalAmount || 0).toLocaleString()}`}
+              subtitle={
+                <>
+                  {dashboardStats?.closedBusiness?.hospitalCount || 0} hospitals
+                  <br />
+                  Total Expected ARR
+                </>
+              }
+              buttonText="View All"
+              trigger={
+                <ClosedBusinessModal>
+                  <Button
+                    variant="outline"
+                    className="w-full h-9 rounded-lg border-border font-medium hover:bg-muted cursor-pointer transition-colors"
+                  >
+                    View All
+                  </Button>
+                </ClosedBusinessModal>
+              }
+            />
+          </>
+        )}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-8 w-full min-w-0">
         <UpcomingTasks />
