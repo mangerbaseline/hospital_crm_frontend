@@ -58,9 +58,10 @@ export const fetchAllActivities = createAsyncThunk(
   async (params: FetchActivitiesParams | undefined, { rejectWithValue }) => {
     try {
       const queryParams = new URLSearchParams();
-      if (params?.hospitalId)
-        queryParams.append("hospitalId", params.hospitalId);
+      if (params?.hospitalId) queryParams.append("hospitalId", params.hospitalId);
       if (params?.limit) queryParams.append("limit", params.limit.toString());
+      if (params?.page) queryParams.append("page", params.page.toString());
+      if (params?.showAll) queryParams.append("showAll", "true");
 
       const response = await axiosInstance.get<FetchAllActivitiesResponse>(
         `/api/activity/all-activities?${queryParams.toString()}`,

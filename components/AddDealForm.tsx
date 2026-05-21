@@ -6,6 +6,7 @@ import {
   useFieldArray,
   FormProvider,
   SubmitHandler,
+  Controller,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "./ui/label";
@@ -42,8 +43,10 @@ import {
 import { createDeal } from "@/store/features/deal/dealSlice";
 import { dealSchema, DealFormValues } from "@/validations/deal.validations";
 import { toast } from "sonner";
-import { DealProductStage } from "@/store/types";
+import { DealProductStage, UserRole } from "@/store/types";
 import { useRef } from "react";
+import { UserSelect } from "./UserSelect";
+import { CardHeader, CardTitle, CardDescription } from "./ui/card";
 
 interface AddDealFormProps {
   onSuccess?: () => void;
@@ -51,6 +54,7 @@ interface AddDealFormProps {
 
 function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const dispatch = useAppDispatch();
+  const { user: currentUser } = useAppSelector((state) => state.auth);
   const {
     idns,
     isFetchingIDNs,
@@ -68,6 +72,8 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const { products } = useAppSelector((state) => state.product);
   const { isCreateDealLoading } = useAppSelector((state) => state.deal);
 
+  const isAdmin = currentUser?.role === UserRole.ADMIN;
+
   const [idnOpen, setIdnOpen] = useState(false);
   const [idnSearch, setIdnSearch] = useState("");
   const [hospitalOpen, setHospitalOpen] = useState(false);
@@ -81,6 +87,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
       gpo: "",
       products: [],
       notes: "",
+      userId: currentUser?._id || "",
     },
   });
 
@@ -102,11 +109,18 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const idnValue = watch("idn");
   const hospitalValue = watch("hospital");
   const selectedProducts = watch("products");
+  const userIdValue = watch("userId");
 
   const idnObserverRef = useRef<IntersectionObserver | null>(null);
   const idnSentinelRef = useRef<HTMLDivElement | null>(null);
   const hospitalObserverRef = useRef<IntersectionObserver | null>(null);
   const hospitalSentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (currentUser?._id && !userIdValue) {
+      setValue("userId", currentUser._id);
+    }
+  }, [currentUser, setValue, userIdValue]);
 
   useEffect(() => {
     dispatch(fetchIDNs({ page: 1, limit: 10, search: "" }));
@@ -285,10 +299,39 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
 
   return (
     <div className="rounded-xl border border-border p-5 flex flex-col gap-4">
-      <h3 className="text-sm font-bold mb-2">Add New Deal</h3>
+      {/* <h3 className="text-sm font-bold mb-2">Add New Deal</h3> */}
 
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <CardHeader className="w-full bg-muted rounded-xl p-4 border border-border">
+            <CardTitle className="text-sm mb-1.5 font-bold">
+              Sales Rep
+            </CardTitle>
+            {isAdmin ? (
+              <Controller
+                control={control}
+                name="userId"
+                render={({ field }) => (
+                  <UserSelect
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    showAll={false}
+                    className="w-full bg-background border-border shadow-none cursor-pointer h-9 text-xs"
+                  />
+                )}
+              />
+            ) : (
+              <CardDescription className="text-lg text-primary font-semibold">
+                {currentUser?.name}
+              </CardDescription>
+            )}
+            {errors.userId && (
+              <p className="text-xs text-destructive mt-1">
+                {errors.userId.message}
+              </p>
+            )}
+          </CardHeader>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-xs font-semibold">IDN Name</Label>
@@ -584,7 +627,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                     <div className="flex items-center gap-2">
                       <Checkbox
                         id={`product-${product._id}`}
-                        className="h-[14px] w-[14px] rounded-[3px] border-foreground/50"
+                        className="h-3.5 w-3.5 rounded-[3px] border-foreground/50"
                         checked={isSelected}
                         onCheckedChange={() => handleProductToggle(product._id)}
                       />
@@ -611,7 +654,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
             <Label className="text-xs font-semibold block">Notes</Label>
             <Textarea
               placeholder="Enter any additional notes"
-              className="bg-muted mt-1.5 text-xs min-h-[70px] resize-none"
+              className="bg-muted mt-1.5 text-xs min-h-17.5 resize-none"
               {...register("notes")}
             />
           </div>

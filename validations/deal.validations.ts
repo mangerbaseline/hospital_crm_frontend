@@ -19,6 +19,7 @@ export const dealSchema = z.object({
     .array(dealProductSchema)
     .min(1, "At least one product must be selected"),
   notes: z.string().optional(),
+  userId: z.string().optional(),
 });
 
 export type DealFormValues = z.infer<typeof dealSchema>;

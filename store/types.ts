@@ -738,6 +738,8 @@ export type ActivityItem = TaskActivity | CallLogActivity | NoteActivity;
 export interface FetchActivitiesParams {
   hospitalId?: string;
   limit?: number;
+  page?: number;
+  showAll?: boolean;
 }
 
 export interface FetchAllActivitiesResponse {

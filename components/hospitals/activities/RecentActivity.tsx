@@ -11,6 +11,7 @@ import {
   Calendar,
   Mail,
   MoreVertical,
+  CheckSquare,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
@@ -22,6 +23,7 @@ import { format } from "date-fns";
 import { AddNoteModal } from "./AddNoteModal";
 import { LogCallModal } from "./LogCallModal";
 import { AddTaskModal } from "./AddTaskModal";
+import { AllActivitiesModal } from "./AllActivitiesModal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -45,6 +47,7 @@ export function RecentActivity({
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isAllModalOpen, setIsAllModalOpen] = useState(false);
 
   useEffect(() => {
     if (hospitalId) {
@@ -167,7 +170,7 @@ export function RecentActivity({
             className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
             <div className="flex items-start gap-3">
-              <div className="mt-1 h-5 w-5 border-2 border-border rounded shrink-0" />
+              <CheckSquare className="h-5 w-5 text-indigo-600" />
               <div className="flex flex-col flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-foreground leading-tight">
                   {activity.title}
@@ -239,6 +242,14 @@ export function RecentActivity({
             >
               <Plus className="h-5 w-5" />
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-2 bg-card text-foreground hover:bg-muted border-border cursor-pointer"
+              onClick={() => setIsAllModalOpen(true)}
+            >
+              View All
+            </Button>
           </div>
         </div>
         <p className="text-[12px] font-medium text-muted-foreground">
@@ -246,7 +257,7 @@ export function RecentActivity({
         </p>
       </div>
 
-      <ScrollArea className="flex-1 max-h-[400px]">
+      <div className="flex-1 max-h-100 overflow-y-auto">
         <div className="flex flex-col gap-4 py-1 pr-3">
           {isFetchingActivities ? (
             <div className="flex items-center justify-center py-10">
@@ -264,7 +275,7 @@ export function RecentActivity({
             [...activities].reverse().map(renderActivityItem)
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       <AddNoteModal
         isOpen={isNoteModalOpen}
@@ -278,10 +289,15 @@ export function RecentActivity({
         contacts={selectedHospital?.contacts || []}
       />
       <AddTaskModal
-        isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
+          isOpen={isTaskModalOpen}
+          onClose={() => setIsTaskModalOpen(false)}
+          hospitalId={hospitalId}
+          hospitalName={hospitalName}
+        />
+      <AllActivitiesModal
+        isOpen={isAllModalOpen}
+        onClose={() => setIsAllModalOpen(false)}
         hospitalId={hospitalId}
-        hospitalName={hospitalName}
       />
     </Card>
   );
