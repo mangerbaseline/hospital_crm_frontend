@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchProducts } from "@/store/features/product/productSlice";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface MultiProductSelectProps {
   value?: string[];
@@ -36,6 +36,7 @@ export function MultiProductSelect({
   const dispatch = useAppDispatch();
   const { products } = useAppSelector((state) => state.product);
   const [open, setOpen] = useState(false);
+  const closeTimeout = useRef<number | null>(null);
 
   useEffect(() => {
     if (products.length === 0) {
@@ -67,12 +68,36 @@ export function MultiProductSelect({
           role="combobox"
           aria-expanded={open}
           className={cn("w-full justify-between font-normal", className)}
+          onMouseEnter={() => {
+            if (closeTimeout.current) {
+              window.clearTimeout(closeTimeout.current);
+              closeTimeout.current = null;
+            }
+            setOpen(true);
+          }}
+          onMouseLeave={() => {
+            // close after short delay unless user enters popover content
+            closeTimeout.current = window.setTimeout(() => setOpen(false), 350);
+          }}
         >
           <span className="truncate">{displayText}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
+      <PopoverContent
+        className="w-50 p-0"
+        align="start"
+        onMouseEnter={() => {
+          if (closeTimeout.current) {
+            window.clearTimeout(closeTimeout.current);
+            closeTimeout.current = null;
+          }
+          setOpen(true);
+        }}
+        onMouseLeave={() => {
+          closeTimeout.current = window.setTimeout(() => setOpen(false), 350);
+        }}
+      >
         <Command onWheel={(e) => e.stopPropagation()}>
           <CommandInput placeholder="Search products..." />
           <CommandList>
@@ -83,6 +108,7 @@ export function MultiProductSelect({
                   key={product._id}
                   value={product.name}
                   onSelect={() => handleSelect(product._id)}
+                  className="cursor-pointer"
                 >
                   <Check
                     className={cn(

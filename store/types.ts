@@ -249,6 +249,7 @@ export interface CreateContactPayload {
   phoneNumber: string;
   email: string;
   isPrimary: boolean;
+  product?: string;
 }
 
 export interface FetchContactsParams {

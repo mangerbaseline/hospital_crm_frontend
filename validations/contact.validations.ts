@@ -8,6 +8,7 @@ export const createContactSchema = z.object({
   phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
   email: z.email("Please enter a valid email address"),
   isPrimary: z.boolean(),
+  product: z.string().optional(),
 });
 
 export type CreateContactValues = z.infer<typeof createContactSchema>;

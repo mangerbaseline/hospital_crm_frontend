@@ -76,7 +76,7 @@ export function IDNModal({ isOpen, onClose, onSuccess, idn }: IDNModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={isLoading ? undefined : onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>{idn ? "Edit IDN" : "Add New IDN"}</DialogTitle>
           <DialogDescription>

@@ -113,10 +113,15 @@ function Pipeline() {
               <PipelineStatsCard value="-" label="Loading ARR..." />
             </>
           )}
-          <PipelineStatsCard
-            value={stats ? stats.closedBusiness : "-"}
-            label="Closed Business"
-          />
+
+          {stats ? (
+            <PipelineStatsCard
+              value={formatCurrency(Number(stats.closedBusiness || 0))}
+              label="Closed Business"
+            />
+          ) : (
+            <PipelineStatsCard value="-" label="Loading Closed Business..." />
+          )}
         </div>
       </section>
 

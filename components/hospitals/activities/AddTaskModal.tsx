@@ -106,7 +106,7 @@ export function AddTaskModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] rounded-2xl">
+      <DialogContent className="sm:max-w-125 rounded-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Add Task</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -139,7 +139,7 @@ export function AddTaskModal({
             <Textarea
               id="description"
               placeholder="Add details about this task..."
-              className="min-h-[80px] bg-muted border-border rounded-xl resize-none"
+              className="min-h-20 bg-muted border-border rounded-xl resize-none"
               {...register("description")}
             />
           </div>

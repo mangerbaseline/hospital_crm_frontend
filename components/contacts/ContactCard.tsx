@@ -13,7 +13,7 @@ export function ContactCard({ contact, className }: ContactCardProps) {
     typeof contact.hospital === "object" ? contact.hospital : null;
   const hospitalName = hospital?.hospitalName || "Unknown Hospital";
   const hospitalId = hospital?._id || "#";
-  const hospitalIdn = hospital?.idn?.name || "";
+  const hospitalIdn = hospital?.idn?.name?.trim() || "No IDN";
 
   return (
     <Link
@@ -54,7 +54,9 @@ export function ContactCard({ contact, className }: ContactCardProps) {
           </div>
           <div className="flex items-center gap-3 text-foreground font-normal group/item hover:text-primary transition-colors min-w-0">
             <Phone className="h-4 w-4 text-muted-foreground group-hover/item:text-primary transition-colors shrink-0" />
-            <span className="text-sm truncate">{contact.phoneNumber}</span>
+            <span className="text-sm truncate">
+              {contact.phoneNumber || "N/A"}
+            </span>
           </div>
         </div>
 
@@ -68,11 +70,9 @@ export function ContactCard({ contact, className }: ContactCardProps) {
             <h4 className="text-sm font-bold text-foreground leading-tight truncate">
               {hospitalName}
             </h4>
-            {hospitalIdn && (
-              <p className="text-xs text-muted-foreground font-medium mt-0.5 truncate">
-                {hospitalIdn}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground font-medium mt-0.5 truncate">
+              {hospitalIdn}
+            </p>
           </div>
         </div>
       </div>

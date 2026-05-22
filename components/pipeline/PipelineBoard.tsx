@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -128,10 +128,44 @@ export function PipelineBoard({ onStageChange }: PipelineBoardProps = {}) {
   const [columns, setColumns] =
     useState<Record<string, ColumnData>>(derivedColumns);
   const [activeDeal, setActiveDeal] = useState<PipelineCardDeal | null>(null);
+  const [topScrollContentWidth, setTopScrollContentWidth] = useState<number>(0);
+  const topScrollbarRef = useRef<HTMLDivElement | null>(null);
+  const mainScrollRef = useRef<HTMLDivElement | null>(null);
+
+  const syncTopToMain = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollLeft = event.currentTarget.scrollLeft;
+    }
+  }, []);
+
+  const syncMainToTop = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    if (topScrollbarRef.current) {
+      topScrollbarRef.current.scrollLeft = event.currentTarget.scrollLeft;
+    }
+  }, []);
 
   useEffect(() => {
     setColumns(derivedColumns);
   }, [derivedColumns]);
+
+  useEffect(() => {
+    const main = mainScrollRef.current;
+    if (!main) return;
+
+    setTopScrollContentWidth(main.scrollWidth);
+    const handleResize = () => {
+      if (main) {
+        setTopScrollContentWidth(main.scrollWidth);
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(main);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [columns]);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -283,13 +317,13 @@ export function PipelineBoard({ onStageChange }: PipelineBoardProps = {}) {
   };
 
   return (
-    <div className="w-full min-h-[450px] pt-6 min-w-0 max-w-full flex flex-col">
+    <div className="w-full min-h-112.5 pt-6 min-w-0 max-w-full flex flex-col">
       {isFetchingDeals ? (
         <div className="flex-1 w-full overflow-x-hidden flex gap-4">
           {Array.from({ length: 7 }).map((_, i) => (
             <div
               key={i}
-              className="flex flex-col h-full w-[280px] shrink-0 bg-muted/20 rounded-xl border border-border/50 p-3"
+              className="flex flex-col h-full w-70 shrink-0 bg-muted/20 rounded-xl border border-border/50 p-3"
             >
               <div className="flex items-center justify-between mb-4 mt-1">
                 <div className="flex items-center gap-2">
@@ -307,28 +341,47 @@ export function PipelineBoard({ onStageChange }: PipelineBoardProps = {}) {
           ))}
         </div>
       ) : (
-        <div className="w-full flex-1 overflow-x-auto pb-4">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDragEnd={onDragEnd}
+        <div className="w-full flex-1 flex flex-col gap-2">
+          <div
+            ref={topScrollbarRef}
+            onScroll={syncTopToMain}
+            className="top-scrollbar-wrapper rounded-lg"
           >
-            <div className="flex gap-4 min-w-max pr-4 h-full outline-none">
-              {columnOrder.map((columnId) => (
-                <PipelineColumn key={columnId} column={columns[columnId]} />
-              ))}
-            </div>
+            <div
+              style={{
+                width: `${topScrollContentWidth}px`,
+                minHeight: 1,
+              }}
+            />
+          </div>
 
-            <DragOverlay>
-              {activeDeal ? (
-                <div className="opacity-90 scale-[1.02] shadow-xl z-50">
-                  <PipelineCard deal={activeDeal} index={0} />
-                </div>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
+          <div
+            ref={mainScrollRef}
+            onScroll={syncMainToTop}
+            className="w-full flex-1 overflow-x-auto pb-4 pipeline-main-scroll"
+          >
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCorners}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDragEnd={onDragEnd}
+            >
+              <div className="flex gap-4 min-w-max pr-4 h-full outline-none">
+                {columnOrder.map((columnId) => (
+                  <PipelineColumn key={columnId} column={columns[columnId]} />
+                ))}
+              </div>
+
+              <DragOverlay>
+                {activeDeal ? (
+                  <div className="opacity-90 scale-[1.02] shadow-xl z-50">
+                    <PipelineCard deal={activeDeal} index={0} />
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          </div>
         </div>
       )}
     </div>

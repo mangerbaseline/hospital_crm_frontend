@@ -44,6 +44,7 @@ import {
   CreateContactValues,
 } from "@/validations/contact.validations";
 import { toast } from "sonner";
+import { MultiProductSelect } from "@/components/products/MultiProductSelect";
 import { Hospital } from "@/store/types";
 
 export function AddContactModal({
@@ -61,6 +62,7 @@ export function AddContactModal({
   const [open, setOpen] = useState(false);
   const [hospitalOpen, setHospitalOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
   const {
     register,
@@ -94,6 +96,7 @@ export function AddContactModal({
     } else {
       setSearch("");
     }
+    setSelectedProductIds([]);
   }, [open, dispatch, defaultHospital, setValue]);
 
   useEffect(() => {
@@ -147,7 +150,13 @@ export function AddContactModal({
   }, [hospitals, isFetchingHospitals, hasMoreSelection]);
 
   const onSubmit = async (data: CreateContactValues) => {
-    const resultAction = await dispatch(createContact(data));
+    const payload = {
+      ...data,
+      product:
+        selectedProductIds.length > 0 ? selectedProductIds[0] : undefined,
+    } as any;
+
+    const resultAction = await dispatch(createContact(payload));
     if (createContact.fulfilled.match(resultAction)) {
       toast.success("Contact created successfully");
       reset();
@@ -173,7 +182,7 @@ export function AddContactModal({
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px] max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-5">
+      <DialogContent className="sm:max-w-106.25 max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-5">
         <DialogHeader className="text-left">
           <DialogTitle className="text-lg font-bold">Add Contact</DialogTitle>
           <DialogDescription className="text-sm mt-1 text-muted-foreground">
@@ -366,6 +375,17 @@ export function AddContactModal({
             )}
           </div>
 
+          <div>
+            <Label className="text-xs font-semibold">Product (optional)</Label>
+            <div className="mt-1.5">
+              <MultiProductSelect
+                value={selectedProductIds}
+                onValueChange={setSelectedProductIds}
+                placeholder="Select product (optional)"
+              />
+            </div>
+          </div>
+
           <div className="flex items-center gap-2 mt-1">
             <Controller
               name="isPrimary"
@@ -373,7 +393,7 @@ export function AddContactModal({
               render={({ field }) => (
                 <Checkbox
                   id="primary_contact"
-                  className="h-4 w-4 rounded-[4px] border-foreground/50"
+                  className="h-4 w-4 rounded-lg border-foreground/50"
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />

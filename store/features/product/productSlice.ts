@@ -46,6 +46,23 @@ export const fetchProducts = createAsyncThunk(
   },
 );
 
+export const fetchAdminProducts = createAsyncThunk(
+  "product/fetchAdminProducts",
+  async (params: FetchProductsParams, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 10, search = "" } = params;
+      const response = await axiosInstance.get<PaginatedApiResponse<Product[]>>(
+        `/api/product/all-products-admin?page=${page}&limit=${limit}&search=${search}`,
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch admin products",
+      );
+    }
+  },
+);
+
 export const getSingleProduct = createAsyncThunk(
   "product/getSingleProduct",
   async (id: string, { rejectWithValue }) => {
@@ -148,6 +165,25 @@ const productSlice = createSlice({
         },
       )
       .addCase(fetchProducts.rejected, (state, action) => {
+        state.isFetchingProducts = false;
+        state.fetchProductsError = action.payload as string;
+      })
+      .addCase(fetchAdminProducts.pending, (state) => {
+        state.isFetchingProducts = true;
+        state.fetchProductsError = null;
+      })
+      .addCase(
+        fetchAdminProducts.fulfilled,
+        (state, action: PayloadAction<PaginatedApiResponse<Product[]>>) => {
+          state.isFetchingProducts = false;
+          state.products = action.payload.data;
+          state.page = action.payload.page;
+          state.limit = action.payload.limit;
+          state.totalProducts = action.payload.totalProducts || 0;
+          state.totalPages = action.payload.totalPages;
+        },
+      )
+      .addCase(fetchAdminProducts.rejected, (state, action) => {
         state.isFetchingProducts = false;
         state.fetchProductsError = action.payload as string;
       })

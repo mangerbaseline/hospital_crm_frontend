@@ -134,3 +134,32 @@
   display: block !important;
   min-width: 0 !important;
 }
+
+.top-scrollbar-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-color: #e5e7eb transparent;
+}
+
+.top-scrollbar-wrapper::-webkit-scrollbar {
+  height: 10px;
+}
+
+.top-scrollbar-wrapper::-webkit-scrollbar-thumb {
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+}
+
+.top-scrollbar-wrapper::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.pipeline-main-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pipeline-main-scroll::-webkit-scrollbar {
+  display: none;
+  height: 0;
+}

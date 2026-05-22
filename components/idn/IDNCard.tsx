@@ -20,8 +20,11 @@ export function IDNCard({ idn, onViewClick }: IDNCardProps) {
     <Card className="overflow-hidden border-border shadow-sm hover:drop-shadow-lg transition-shadow p-0 rounded-xl hover:bg-muted/30">
       <CardHeader className="p-4 pb-2">
         <div className="bg-slate-700 w-max px-3 py-2 rounded-md mb-2">
-          <h3 className="font-bold text-sm text-white leading-tight line-clamp-1">
-            {idn.name}
+          <h3
+            className="font-bold text-sm text-white leading-tight"
+            title={idn.name}
+          >
+            {idn.name.length > 40 ? `${idn.name.slice(0, 40)}...` : idn.name}
           </h3>
         </div>
       </CardHeader>

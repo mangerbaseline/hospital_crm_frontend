@@ -30,7 +30,7 @@ export function IDNTable({ idns, isLoading, onEdit, onDelete }: IDNTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px]">#</TableHead>
+              <TableHead className="w-20">#</TableHead>
               <TableHead>IDN Name</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -42,7 +42,7 @@ export function IDNTable({ idns, isLoading, onEdit, onDelete }: IDNTableProps) {
                   <Skeleton className="h-10 w-10 rounded-lg" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-4 w-50" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-8 w-8 ml-auto rounded-full" />
@@ -60,7 +60,7 @@ export function IDNTable({ idns, isLoading, onEdit, onDelete }: IDNTableProps) {
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
-            <TableHead className="w-[80px] pl-6">#</TableHead>
+            <TableHead className="w-20 pl-6">#</TableHead>
             <TableHead>IDN Name</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -92,8 +92,13 @@ export function IDNTable({ idns, isLoading, onEdit, onDelete }: IDNTableProps) {
                   </Avatar>
                 </TableCell>
                 <TableCell>
-                  <span className="font-semibold text-foreground tracking-tight">
-                    {idn.name}
+                  <span
+                    className="font-semibold text-foreground tracking-tight"
+                    title={idn.name}
+                  >
+                    {idn.name.length > 40
+                      ? `${idn.name.slice(0, 40)}...`
+                      : idn.name}
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
@@ -110,7 +115,7 @@ export function IDNTable({ idns, isLoading, onEdit, onDelete }: IDNTableProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-[180px] animate-in fade-in-0 zoom-in-95"
+                      className="w-45 animate-in fade-in-0 zoom-in-95"
                     >
                       <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1.5">
                         Actions

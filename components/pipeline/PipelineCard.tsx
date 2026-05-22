@@ -74,7 +74,11 @@ export function PipelineCard({ deal, index }: KanbanCardProps) {
               {deal.hospital?.hospitalName || "Unknown Hospital"}
             </span>
             <span className="text-[10px] text-muted-foreground mt-0.5">
-              {deal.hospital?.city}, {deal.hospital?.state}
+              {deal.hospital?.city || deal.hospital?.state
+                ? [deal.hospital?.city, deal.hospital?.state]
+                    .filter(Boolean)
+                    .join(", ")
+                : "N/A"}
             </span>
           </div>
         </div>
@@ -85,7 +89,7 @@ export function PipelineCard({ deal, index }: KanbanCardProps) {
             getProductColor(deal.product?.name || ""),
           )}
         >
-          <span className="truncate max-w-[120px]">{deal.product?.name}</span>
+          <span className="truncate max-w-30">{deal.product?.name}</span>
           <span>{formatCurrency(deal.dealAmount)}</span>
         </div>
 
