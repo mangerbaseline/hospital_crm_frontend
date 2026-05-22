@@ -252,7 +252,7 @@ function Contacts() {
           ))
         ) : contacts.length > 0 ? (
           contacts.map((contact) => (
-            <ContactCard key={contact._id} contact={contact} />
+            <ContactCard key={contact.email} contact={contact} />
           ))
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center py-20 bg-muted/30 rounded-3xl border border-dashed border-border gap-4">

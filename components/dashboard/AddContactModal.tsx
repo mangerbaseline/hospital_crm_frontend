@@ -152,8 +152,7 @@ export function AddContactModal({
   const onSubmit = async (data: CreateContactValues) => {
     const payload = {
       ...data,
-      product:
-        selectedProductIds.length > 0 ? selectedProductIds[0] : undefined,
+      product: selectedProductIds.length > 0 ? selectedProductIds : undefined,
     } as any;
 
     const resultAction = await dispatch(createContact(payload));

@@ -22,7 +22,10 @@ interface HospitalContactsProps {
   hospital?: any;
 }
 
-export function HospitalContacts({ contacts, hospital }: HospitalContactsProps) {
+export function HospitalContacts({
+  contacts,
+  hospital,
+}: HospitalContactsProps) {
   return (
     <Card className="flex flex-col h-full min-h-0 p-6 shadow-md border border-border rounded-xl bg-card">
       <div className="flex items-center justify-between">
@@ -38,7 +41,7 @@ export function HospitalContacts({ contacts, hospital }: HospitalContactsProps) 
         </AddContactModal>
       </div>
 
-      <ScrollArea className="flex-1 px-2 max-h-[400px]">
+      <ScrollArea className="flex-1 px-2 max-h-100">
         <div className="flex flex-col gap-4 py-1 pr-1">
           {contacts.length === 0 ? (
             <div className="flex items-center justify-center py-20 text-muted-foreground font-medium">

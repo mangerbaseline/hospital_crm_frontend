@@ -180,6 +180,7 @@ export interface Contact {
   phoneNumber: string;
   email: string;
   isPrimary: boolean;
+  product?: Product[];
   createdAt: string;
   updatedAt: string;
 }
@@ -249,7 +250,7 @@ export interface CreateContactPayload {
   phoneNumber: string;
   email: string;
   isPrimary: boolean;
-  product?: string;
+  product?: string[];
 }
 
 export interface FetchContactsParams {
@@ -485,6 +486,8 @@ export enum DealProductStage {
   TRIAL = "Trial",
   PENDING_DECISION = "Pending Decision",
   CLOSED_WON = "Closed Won",
+  CLOSED_LOST = "Closed Lost",
+  GHOSTED = "Ghosted",
   IMPLEMENTED = "Implemented",
 }
 
