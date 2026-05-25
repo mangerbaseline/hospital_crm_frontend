@@ -114,9 +114,9 @@ export const NotificationBanner = () => {
   const [isSubscribed, setIsSubscribed] = useState<boolean | null>(null);
 
   const checkBrowserSubscription = async () => {
-    
     if (typeof window === "undefined") return false;
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window))
+      return false;
 
     try {
       const registration = await navigator.serviceWorker.getRegistration();
@@ -210,7 +210,7 @@ export const NotificationBanner = () => {
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Button
               onClick={handleEnable}
-              className="flex-1 sm:flex-none bg-white text-blue-600 hover:bg-blue-50 font-bold px-4 sm:px-8 py-2 rounded-xl"
+              className="flex-1 sm:flex-none bg-white text-blue-600 hover:bg-blue-50 font-bold px-4 sm:px-8 py-2 rounded-xl cursor-pointer"
             >
               Enable Now
             </Button>

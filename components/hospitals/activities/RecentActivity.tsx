@@ -99,7 +99,7 @@ export function RecentActivity({
             </div>
             <button
               onClick={() => handleDelete(activity._id, ActivityType.CALL_LOG)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-1"
+              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive transition-opacity p-1 cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -156,7 +156,7 @@ export function RecentActivity({
             </div>
             <button
               onClick={() => handleDelete(activity._id, ActivityType.NOTE)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-1"
+              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive transition-opacity p-1 cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -198,7 +198,7 @@ export function RecentActivity({
             </div>
             <button
               onClick={() => handleDelete(activity._id, ActivityType.TASK)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-1"
+              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive transition-opacity p-1 cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -289,11 +289,11 @@ export function RecentActivity({
         contacts={selectedHospital?.contacts || []}
       />
       <AddTaskModal
-          isOpen={isTaskModalOpen}
-          onClose={() => setIsTaskModalOpen(false)}
-          hospitalId={hospitalId}
-          hospitalName={hospitalName}
-        />
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        hospitalId={hospitalId}
+        hospitalName={hospitalName}
+      />
       <AllActivitiesModal
         isOpen={isAllModalOpen}
         onClose={() => setIsAllModalOpen(false)}

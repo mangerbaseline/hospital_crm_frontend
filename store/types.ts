@@ -234,8 +234,10 @@ export interface ContactState {
   selectedContact: Contact | null;
   isFetchingContacts: boolean;
   isCreateContactLoading: boolean;
+  isDeleteContactLoading: boolean;
   fetchContactsError: string | null;
   createContactError: string | null;
+  deleteContactError: string | null;
   page: number;
   limit: number;
   totalContacts: number;
