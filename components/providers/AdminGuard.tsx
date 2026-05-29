@@ -19,7 +19,10 @@ export default function AdminGuard({
 
   useEffect(() => {
     if (isInitialized) {
-      if (!user || user.role !== "Admin") {
+      if (
+        !user ||
+        (user.role !== "Admin" && user.role !== "Customer Success")
+      ) {
         if (!toastShownRef.current) {
           toast.error("Unauthorized Access", {
             id: "unauthorized-access-toast",

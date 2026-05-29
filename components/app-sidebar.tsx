@@ -193,7 +193,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {user?.role === "Admin" && (
+        {(user?.role === "Admin" || user?.role === "Customer Success") && (
           <>
             <SidebarGroup>
               <SidebarGroupLabel>Create</SidebarGroupLabel>
@@ -289,13 +289,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <span className="text-sm text-muted-foreground">
                 Total Hospitals:
               </span>
-              <span className="text-sm font-semibold ">{quickStats?.hospitalCount ?? 0}</span>
+              <span className="text-sm font-semibold ">
+                {quickStats?.hospitalCount ?? 0}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
                 Total Products:
               </span>
-              <span className="text-sm font-semibold ">{quickStats?.productCount ?? 0}</span>
+              <span className="text-sm font-semibold ">
+                {quickStats?.productCount ?? 0}
+              </span>
             </div>
           </div>
         </div>
