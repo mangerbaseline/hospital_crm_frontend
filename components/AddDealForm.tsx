@@ -32,6 +32,7 @@ import {
   getSingleIDN,
   clearSelectedIDN,
   resetIDNsForSelection,
+  setIDNsForSelection,
 } from "@/store/features/idn/idnSlice";
 import { fetchProducts } from "@/store/features/product/productSlice";
 import {
@@ -135,15 +136,15 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!idnOpen) return;
+    if (!idnOpen || hospitalValue) return;
     const timer = setTimeout(() => {
       dispatch(fetchIDNs({ page: 1, limit: 10, search: idnSearch }));
     }, 500);
     return () => clearTimeout(timer);
-  }, [idnSearch, dispatch, idnOpen]);
+  }, [idnSearch, dispatch, idnOpen, hospitalValue]);
 
   const loadMoreIDNs = () => {
-    if (idnHasMoreSelection && !isFetchingIDNs) {
+    if (idnHasMoreSelection && !isFetchingIDNs && !hospitalValue) {
       dispatch(
         fetchIDNs({
           page: idnSelectionPage + 1,
@@ -174,28 +175,39 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   }, [idns, isFetchingIDNs, idnHasMoreSelection]);
 
   useEffect(() => {
-    if (!hospitalOpen || !idnValue) return;
+    if (!hospitalOpen) return;
+    if (hospitals.length > 0 && hospitalSearch === "") return;
+
+    if (hospitalSearch === "") {
+      dispatch(
+        fetchHospitalsForSelection({
+          page: 1,
+          limit: 20,
+          search: "",
+        }),
+      );
+      return;
+    }
+
     const timer = setTimeout(() => {
       dispatch(
         fetchHospitalsForSelection({
           page: 1,
-          limit: 10,
+          limit: 20,
           search: hospitalSearch,
-          idn: idnValue,
         }),
       );
     }, 500);
     return () => clearTimeout(timer);
-  }, [hospitalSearch, dispatch, hospitalOpen, idnValue]);
+  }, [hospitalSearch, dispatch, hospitalOpen, hospitals.length]);
 
   const loadMoreHospitals = () => {
     if (hospitalHasMoreSelection && !isFetchingHospitals) {
       dispatch(
         fetchHospitalsForSelection({
           page: hospitalSelectionPage + 1,
-          limit: 10,
+          limit: 20,
           search: hospitalSearch,
-          idn: idnValue,
         }),
       );
     }
@@ -221,30 +233,37 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   }, [hospitals, isFetchingHospitals, hospitalHasMoreSelection]);
 
   useEffect(() => {
-    if (idnValue) {
-      dispatch(
-        fetchHospitalsForSelection({
-          page: 1,
-          limit: 10,
-          search: "",
-          idn: idnValue,
-        }),
-      );
-      setValue("hospital", "");
-      dispatch(clearSelectedHospital());
-    }
-  }, [dispatch, idnValue, setValue]);
-
-  useEffect(() => {
     if (selectedHospital) {
       setValue(
         "gpo",
-        typeof selectedHospital.gpo === "string"
-          ? selectedHospital.gpo
-          : selectedHospital.gpo._id,
+        selectedHospital.gpo
+          ? typeof selectedHospital.gpo === "string"
+            ? selectedHospital.gpo
+            : selectedHospital.gpo._id
+          : ""
       );
+
+      const idnObj = selectedHospital.idn;
+      if (idnObj && typeof idnObj !== "string") {
+        setValue("idn", idnObj._id, { shouldValidate: true });
+        dispatch(setIDNsForSelection([idnObj]));
+        dispatch(getSingleIDN(idnObj._id));
+      } else if (idnObj) {
+        // String IDN
+        setValue("idn", idnObj, { shouldValidate: true });
+        dispatch(getSingleIDN(idnObj));
+      } else {
+        setValue("idn", "");
+        dispatch(clearSelectedIDN());
+        dispatch(resetIDNsForSelection());
+      }
+    } else {
+      // Clear selections
+      setValue("idn", "");
+      dispatch(clearSelectedIDN());
+      dispatch(resetIDNsForSelection());
     }
-  }, [selectedHospital, setValue]);
+  }, [selectedHospital, setValue, dispatch]);
 
   const handleIDNSelect = (idnId: string) => {
     if (idnId === idnValue) {
@@ -261,6 +280,9 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
     if (hospitalId === hospitalValue) {
       setValue("hospital", "");
       dispatch(clearSelectedHospital());
+      setValue("idn", "");
+      dispatch(clearSelectedIDN());
+      setValue("gpo", "");
     } else {
       setValue("hospital", hospitalId, { shouldValidate: true });
       dispatch(getSingleHospital(hospitalId));
@@ -334,6 +356,99 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              <Label className="text-xs font-semibold">Hospital Name</Label>
+              <Popover
+                open={hospitalOpen}
+                onOpenChange={setHospitalOpen}
+                modal={false}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={hospitalOpen}
+                    className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted disabled:opacity-50 cursor-pointer"
+                  >
+                    <span className="truncate text-left flex-1">
+                      {isFetchingHospitals && hospitals.length === 0 ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Loading...
+                        </span>
+                      ) : hospitalValue ? (
+                        selectedHospital?.hospitalName ||
+                        hospitals.find((h) => h._id === hospitalValue)
+                          ?.hospitalName
+                      ) : (
+                        "Select Hospital"
+                      )}
+                    </span>
+                    <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-(--radix-popover-trigger-width) p-0 z-100"
+                  align="start"
+                >
+                  <Command
+                    shouldFilter={false}
+                    onWheel={(e) => e.stopPropagation()}
+                  >
+                    <CommandInput
+                      placeholder="Search hospital..."
+                      className="h-9 text-xs"
+                      value={hospitalSearch}
+                      onValueChange={setHospitalSearch}
+                    />
+                    <CommandList>
+                      <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+                        No hospitals found.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {hospitals.map((hospital) => (
+                          <CommandItem
+                            key={hospital._id}
+                            value={hospital._id}
+                            onSelect={() => handleHospitalSelect(hospital._id)}
+                            className="text-xs"
+                          >
+                            {hospital.hospitalName}
+                            <Check
+                              className={cn(
+                                "ml-auto h-4 w-4",
+                                hospitalValue === hospital._id
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                      {hospitalHasMoreSelection && (
+                        <div
+                          ref={hospitalSentinelRef}
+                          className="h-8 flex items-center justify-center py-2"
+                        >
+                          {isFetchingHospitals ? (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground">Load more</span>
+                          )}
+                        </div>
+                      )}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {errors.hospital && (
+                <p className="text-[10px] text-destructive mt-1">
+                  {errors.hospital.message}
+                </p>
+              )}
+            </div>
+
+            <div>
               <Label className="text-xs font-semibold">IDN Name</Label>
               <Popover open={idnOpen} onOpenChange={setIdnOpen} modal={false}>
                 <PopoverTrigger asChild>
@@ -342,13 +457,16 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={idnOpen}
-                    className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted"
+                    disabled={!hospitalValue}
+                    className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted cursor-pointer"
                   >
                     <span className="truncate text-left flex-1">
                       {idnValue
                         ? selectedIDN?.name ||
                           idns.find((idn) => idn._id === idnValue)?.name
-                        : "Select IDN"}
+                        : hospitalValue
+                        ? "Select IDN"
+                        : "Select Hospital first"}
                     </span>
                     <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
                   </Button>
@@ -408,100 +526,6 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
               {errors.idn && (
                 <p className="text-[10px] text-destructive mt-1">
                   {errors.idn.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold">Hospital Name</Label>
-              <Popover
-                open={hospitalOpen}
-                onOpenChange={setHospitalOpen}
-                modal={false}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={hospitalOpen}
-                    disabled={!idnValue}
-                    className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted disabled:opacity-50"
-                  >
-                    <span className="truncate text-left flex-1">
-                      {isFetchingHospitals ? (
-                        <span className="flex items-center gap-2">
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          Loading...
-                        </span>
-                      ) : hospitalValue ? (
-                        selectedHospital?.hospitalName ||
-                        hospitals.find((h) => h._id === hospitalValue)
-                          ?.hospitalName
-                      ) : idnValue ? (
-                        "Select Hospital"
-                      ) : (
-                        "Select IDN first"
-                      )}
-                    </span>
-                    <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-(--radix-popover-trigger-width) p-0 z-100"
-                  align="start"
-                >
-                  <Command
-                    shouldFilter={false}
-                    onWheel={(e) => e.stopPropagation()}
-                  >
-                    <CommandInput
-                      placeholder="Search hospital..."
-                      className="h-9 text-xs"
-                      value={hospitalSearch}
-                      onValueChange={setHospitalSearch}
-                    />
-                    <CommandList>
-                      <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                        No hospitals found in this IDN.
-                      </CommandEmpty>
-                      <CommandGroup>
-                        {hospitals.map((hospital) => (
-                          <CommandItem
-                            key={hospital._id}
-                            value={hospital._id}
-                            onSelect={() => handleHospitalSelect(hospital._id)}
-                            className="text-xs"
-                          >
-                            {hospital.hospitalName}
-                            <Check
-                              className={cn(
-                                "ml-auto h-4 w-4",
-                                hospitalValue === hospital._id
-                                  ? "opacity-100"
-                                  : "opacity-0",
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                      {hospitalHasMoreSelection && (
-                        <div
-                          ref={hospitalSentinelRef}
-                          className="h-4 flex items-center justify-center py-2"
-                        >
-                          {isFetchingHospitals && (
-                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                          )}
-                        </div>
-                      )}
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              {errors.hospital && (
-                <p className="text-[10px] text-destructive mt-1">
-                  {errors.hospital.message}
                 </p>
               )}
             </div>

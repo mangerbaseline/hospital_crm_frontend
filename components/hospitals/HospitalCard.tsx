@@ -41,10 +41,13 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
               {hospital.hospitalName}
             </h3>
             <p className="text-xs text-muted-foreground font-medium mt-0.5">
-              {hospital.idn?.name}
+              {hospital.idn?.name || "No IDN"}
             </p>
+
             <p className="text-[11px] text-muted-foreground/80 mt-0.5">
-              {hospital.city}, {hospital.state}
+              {hospital.city && hospital.state
+                ? `${hospital.city}, ${hospital.state}`
+                : hospital.city || hospital.state || "N/A"}
             </p>
           </div>
         </div>
@@ -56,7 +59,7 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
             Total Expected ARR
           </span>
           <span className="text-2xl font-bold text-emerald-600">
-            ${totalArr}
+            ${Number(totalArr).toLocaleString()}
           </span>
         </div>
 
@@ -104,7 +107,9 @@ function ProductBlock({ product }: { product: DealProduct }) {
     >
       <div className="flex justify-between items-start">
         <span className="font-bold text-sm tracking-tight">{productName}</span>
-        <span className="font-bold text-lg">${product.dealAmount || 0}</span>
+        <span className="font-bold text-lg">
+          ${Number(product.dealAmount || 0).toLocaleString()}
+        </span>
       </div>
 
       <div className="flex flex-col gap-2">

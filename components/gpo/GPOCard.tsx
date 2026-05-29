@@ -1,5 +1,4 @@
 "use client";
-
 import { GPOWithDeals } from "@/store/types";
 import { Card } from "@/components/ui/card";
 import { Building2, Eye } from "lucide-react";

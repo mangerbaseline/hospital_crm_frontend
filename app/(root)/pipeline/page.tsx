@@ -25,7 +25,8 @@ function Pipeline() {
   const isAdmin = currentUser?.role === UserRole.ADMIN;
   const isAdminOrExecutive =
     currentUser?.role === UserRole.ADMIN ||
-    currentUser?.role === UserRole.EXECUTIVE;
+    currentUser?.role === UserRole.EXECUTIVE ||
+    currentUser?.role === UserRole.CUSTOMER_SUCCESS;
   const [selectedUserId, setSelectedUserId] = useState<string>(
     isAdminOrExecutive ? "all" : currentUser?._id || "all",
   );
@@ -96,7 +97,7 @@ function Pipeline() {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5 w-full">
           <PipelineStatsCard
             value={stats ? String(stats.totalHospitals) : "-"}
-            label="My Hospitals"
+            label="Total Deals"
           />
           {stats?.productRevenue ? (
             stats.productRevenue.map((prod) => (

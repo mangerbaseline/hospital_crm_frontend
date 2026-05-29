@@ -6,7 +6,7 @@ export function HospitalDetailsSkeleton() {
     <div className="flex flex-col gap-6">
       <Card className="flex flex-col gap-4 p-6 shadow-md border border-border rounded-xl bg-white">
         <div className="flex justify-end w-full">
-          <Skeleton className="h-8 w-[110px] rounded-lg" />
+          <Skeleton className="h-8 w-27.5 rounded-lg" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

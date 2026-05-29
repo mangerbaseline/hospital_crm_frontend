@@ -34,7 +34,8 @@ function IDNs() {
   const isAdmin = currentUser?.role === UserRole.ADMIN;
   const isAdminOrExecutive =
     currentUser?.role === UserRole.ADMIN ||
-    currentUser?.role === UserRole.EXECUTIVE;
+    currentUser?.role === UserRole.EXECUTIVE ||
+    currentUser?.role === UserRole.CUSTOMER_SUCCESS;
 
   const [selectedUser, setSelectedUser] = useState<string>(
     isAdminOrExecutive ? "all" : currentUser?._id || "all",

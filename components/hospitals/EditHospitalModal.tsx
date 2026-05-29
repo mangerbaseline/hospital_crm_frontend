@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -37,7 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchIDNs } from "@/store/features/idn/idnSlice";
+import { fetchIDNs, resetIDNsForSelection } from "@/store/features/idn/idnSlice";
 import { fetchGPOs } from "@/store/features/gpo/gpoSlice";
 import { fetchUsers } from "@/store/features/user/userSlice";
 import { updateHospital } from "@/store/features/hospital/hospitalSlice";
@@ -58,7 +58,7 @@ export function EditHospitalModal({
   children,
 }: EditHospitalModalProps) {
   const dispatch = useAppDispatch();
-  const { idns } = useAppSelector((state) => state.idn);
+  const { idns, isFetchingIDNs, hasMoreSelection, selectionPage } = useAppSelector((state) => state.idn);
   const { gpos } = useAppSelector((state) => state.gpo);
   const { users } = useAppSelector((state) => state.user);
   const { user } = useAppSelector((state) => state.auth);
@@ -69,6 +69,12 @@ export function EditHospitalModal({
   const [open, setOpen] = useState(false);
   const [idnOpen, setIdnOpen] = useState(false);
   const [gpoOpen, setGpoOpen] = useState(false);
+  const [idnSearch, setIdnSearch] = useState("");
+  const idnSearchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const idnListRef = useRef<HTMLDivElement>(null);
+  const isLoadingIdnRef = useRef(false);
+
+  const IDN_PAGE_LIMIT = 20;
   const [selectedUser, setSelectedUser] = useState<string>(
     typeof hospital.user === "object"
       ? (hospital.user as any)?._id || ""
@@ -99,11 +105,10 @@ export function EditHospitalModal({
         typeof hospital.gpo === "object"
           ? (hospital.gpo as any)?._id || ""
           : hospital.gpo || "",
-      // teamHospital: hospital.teamHospital ?? false,
-      // magnetHospital: hospital.magnetHospital ?? false,
-      // bedsWithMac: hospital.bedsWithMac ?? 0,
-      // ICUBeds: hospital.ICUBeds ?? 0,
-      // competitiveProduct: hospital.competitiveProduct || "",
+      userId:
+        typeof hospital.user === "object"
+          ? (hospital.user as any)?._id || ""
+          : hospital.user || "",
     },
   });
 
@@ -112,14 +117,61 @@ export function EditHospitalModal({
 
   useEffect(() => {
     if (open) {
-      if (idns.length === 0) dispatch(fetchIDNs({ limit: 1000 }));
       if (gpos.length === 0) dispatch(fetchGPOs({ limit: 1000 }));
       if (users.length === 0) dispatch(fetchUsers({ limit: 1000 }));
     }
-  }, [open, dispatch, idns.length, gpos.length, users.length]);
+  }, [open, dispatch, gpos.length, users.length]);
+
+  // Fetch IDNs when dropdown opens or search changes
+  useEffect(() => {
+    if (idnOpen) {
+      isLoadingIdnRef.current = true;
+      dispatch(resetIDNsForSelection());
+      dispatch(fetchIDNs({ page: 1, limit: IDN_PAGE_LIMIT, search: idnSearch }));
+    }
+  }, [idnOpen, idnSearch, dispatch]);
+
+  // Keep the ref in sync with Redux loading state
+  useEffect(() => {
+    if (!isFetchingIDNs) {
+      isLoadingIdnRef.current = false;
+    }
+  }, [isFetchingIDNs]);
+
+  // Reset search when dropdown closes
+  useEffect(() => {
+    if (!idnOpen) {
+      setIdnSearch("");
+    }
+  }, [idnOpen]);
+
+  // Handle IDN search with debounce
+  const handleIdnSearchChange = useCallback((value: string) => {
+    if (idnSearchTimerRef.current) {
+      clearTimeout(idnSearchTimerRef.current);
+    }
+    idnSearchTimerRef.current = setTimeout(() => {
+      setIdnSearch(value);
+    }, 300);
+  }, []);
+
+  // Handle scroll-to-load-more for IDN list
+  const handleIdnScroll = useCallback(() => {
+    const el = idnListRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    if (scrollHeight - scrollTop - clientHeight < 30 && hasMoreSelection && !isLoadingIdnRef.current) {
+      isLoadingIdnRef.current = true;
+      dispatch(fetchIDNs({ page: selectionPage + 1, limit: IDN_PAGE_LIMIT, search: idnSearch }));
+    }
+  }, [hasMoreSelection, selectionPage, idnSearch, dispatch]);
 
   useEffect(() => {
     if (open) {
+      const userIdVal =
+        typeof hospital.user === "object"
+          ? (hospital.user as any)?._id || ""
+          : hospital.user || "";
       reset({
         idn:
           typeof hospital.idn === "object"
@@ -134,17 +186,9 @@ export function EditHospitalModal({
           typeof hospital.gpo === "object"
             ? (hospital.gpo as any)?._id || ""
             : hospital.gpo || "",
-        // teamHospital: hospital.teamHospital ?? false,
-        // magnetHospital: hospital.magnetHospital ?? false,
-        // bedsWithMac: hospital.bedsWithMac ?? 0,
-        // ICUBeds: hospital.ICUBeds ?? 0,
-        // competitiveProduct: hospital.competitiveProduct || "",
+        userId: userIdVal,
       });
-      setSelectedUser(
-        typeof hospital.user === "object"
-          ? (hospital.user as any)?._id || ""
-          : hospital.user || "",
-      );
+      setSelectedUser(userIdVal);
     }
   }, [open, hospital, reset]);
 
@@ -167,7 +211,7 @@ export function EditHospitalModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-150 max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
             Edit Hospital Information
@@ -212,14 +256,16 @@ export function EditHospitalModal({
                       variant="outline"
                       role="combobox"
                       aria-expanded={idnOpen}
-                      className="w-full justify-between mt-1.5 text-xs h-9 bg-white font-medium border-border shadow-none hover:bg-muted"
+                      className="w-full justify-between mt-1.5 text-xs h-9 bg-white font-medium border-border shadow-none hover:bg-muted cursor-pointer"
                     >
-                      {idnValue
-                        ? idns.find((idn) => idn._id === idnValue)?.name ||
-                          (typeof hospital.idn === "object"
-                            ? (hospital.idn as any)?.name
-                            : "Select IDN")
-                        : "Select IDN"}
+                      <span className="truncate text-left flex-1 min-w-0">
+                        {idnValue
+                          ? idns.find((idn) => idn._id === idnValue)?.name ||
+                            (typeof hospital.idn === "object"
+                              ? (hospital.idn as any)?.name
+                              : "Select IDN")
+                          : "Select IDN"}
+                      </span>
                       <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
                     </Button>
                   </PopoverTrigger>
@@ -227,14 +273,15 @@ export function EditHospitalModal({
                     className="w-(--radix-popover-trigger-width) p-0 z-100"
                     align="start"
                   >
-                    <Command onWheel={(e) => e.stopPropagation()}>
+                    <Command onWheel={(e) => e.stopPropagation()} shouldFilter={false}>
                       <CommandInput
                         placeholder="Search IDN..."
                         className="h-9 text-xs"
+                        onValueChange={handleIdnSearchChange}
                       />
-                      <CommandList>
+                      <CommandList ref={idnListRef} onScroll={handleIdnScroll}>
                         <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                          No IDN found.
+                          {isFetchingIDNs ? "Loading..." : "No IDN found."}
                         </CommandEmpty>
                         <CommandGroup>
                           {idns.map((idn) => (
@@ -262,6 +309,11 @@ export function EditHospitalModal({
                               />
                             </CommandItem>
                           ))}
+                          {isFetchingIDNs && (
+                            <div className="flex justify-center py-2">
+                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            </div>
+                          )}
                         </CommandGroup>
                       </CommandList>
                     </Command>
@@ -420,92 +472,6 @@ export function EditHospitalModal({
               </p>
             )}
           </div>
-
-          {/* <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs font-semibold">ICU Beds</Label>
-              <Input
-                type="number"
-                placeholder="Enter number"
-                className="text-xs h-9 mt-1.5 bg-muted"
-                {...register("ICUBeds", { valueAsNumber: true })}
-              />
-              {errors.ICUBeds && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.ICUBeds.message}
-                </p>
-              )}
-            </div>
-            <div>
-              <Label className="text-xs font-semibold">Beds with MAC</Label>
-              <Input
-                type="number"
-                placeholder="Enter number"
-                className="text-xs h-9 mt-1.5 bg-muted"
-                {...register("bedsWithMac", { valueAsNumber: true })}
-              />
-              {errors.bedsWithMac && (
-                <p className="text-xs text-destructive mt-1">
-                  {errors.bedsWithMac.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs font-semibold">TEAM Hospital</Label>
-              <Controller
-                control={control}
-                name="teamHospital"
-                render={({ field }) => (
-                  <Select
-                    value={field.value ? "yes" : "no"}
-                    onValueChange={(val) => field.onChange(val === "yes")}
-                  >
-                    <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
-                      <SelectValue placeholder="Select Yes or No" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">Yes</SelectItem>
-                      <SelectItem value="no">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs font-semibold">MAGNET Hospital</Label>
-              <Controller
-                control={control}
-                name="magnetHospital"
-                render={({ field }) => (
-                  <Select
-                    value={field.value ? "yes" : "no"}
-                    onValueChange={(val) => field.onChange(val === "yes")}
-                  >
-                    <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
-                      <SelectValue placeholder="Select Yes or No" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">Yes</SelectItem>
-                      <SelectItem value="no">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold">Competitive Product</Label>
-            <Input
-              placeholder="Enter competitive product"
-              className="text-xs mt-1.5 h-9 bg-muted"
-              {...register("competitiveProduct")}
-            />
-          </div> */}
 
           <div className="flex justify-end mt-2">
             <Button

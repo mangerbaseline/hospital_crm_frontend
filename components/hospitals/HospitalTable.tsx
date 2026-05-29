@@ -36,7 +36,7 @@ export function HospitalTable({ hospitals, isLoading }: HospitalTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px]">#</TableHead>
+              <TableHead className="w-20">#</TableHead>
               <TableHead>Hospital Name</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>IDN</TableHead>
@@ -51,16 +51,16 @@ export function HospitalTable({ hospitals, isLoading }: HospitalTableProps) {
                   <Skeleton className="h-10 w-10 rounded-lg" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-4 w-50" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-25" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4 w-[120px]" />
+                  <Skeleton className="h-4 w-30" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4 w-[80px]" />
+                  <Skeleton className="h-4 w-20" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-8 w-8 ml-auto rounded-full" />
@@ -78,7 +78,7 @@ export function HospitalTable({ hospitals, isLoading }: HospitalTableProps) {
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
-            <TableHead className="w-[80px] pl-6">#</TableHead>
+            <TableHead className="w-20 pl-6">#</TableHead>
             <TableHead>Hospital Name</TableHead>
             <TableHead>Location</TableHead>
             <TableHead>IDN</TableHead>
@@ -120,18 +120,22 @@ export function HospitalTable({ hospitals, isLoading }: HospitalTableProps) {
                   <TableCell>
                     <Avatar className="h-10 w-10 rounded-lg border-2 border-background shadow-sm hover:scale-105 transition-transform duration-200 cursor-default">
                       <AvatarFallback className="bg-primary/5 text-primary rounded-lg font-bold">
-                        {hospital.hospitalName.substring(0, 2).toUpperCase()}
+                        {hospital?.hospitalName.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </TableCell>
                   <TableCell>
                     <span className="font-semibold text-foreground tracking-tight line-clamp-1">
-                      {hospital.hospitalName}
+                      {hospital?.hospitalName}
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="text-muted-foreground text-sm">
-                      {hospital.city}, {hospital.state}
+                      {hospital.city || hospital.state
+                        ? `${hospital.city || ""}${
+                            hospital.city && hospital.state ? ", " : ""
+                          }${hospital.state || ""}`
+                        : "N/A"}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -155,7 +159,7 @@ export function HospitalTable({ hospitals, isLoading }: HospitalTableProps) {
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[180px]">
+                      <DropdownMenuContent align="end" className="w-45">
                         <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           Actions
                         </DropdownMenuLabel>

@@ -42,12 +42,15 @@ export function UserSelect({
 
   const isAdminOrExecutive =
     currentUser?.role === UserRole.ADMIN ||
-    currentUser?.role === UserRole.EXECUTIVE;
+    currentUser?.role === UserRole.EXECUTIVE ||
+    currentUser?.role === UserRole.CUSTOMER_SUCCESS;
 
   const [open, setOpen] = useState(false);
   const [selectedVal, setSelectedVal] = useState(
     value ||
-      (isAdminOrExecutive && showAll ? "all" : currentUser?._id || (showAll ? "all" : "")),
+      (isAdminOrExecutive && showAll
+        ? "all"
+        : currentUser?._id || (showAll ? "all" : "")),
   );
 
   useEffect(() => {

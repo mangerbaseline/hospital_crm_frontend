@@ -8,6 +8,7 @@ import {
   Target,
   Pencil,
   Trash2,
+  Eye,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,6 +26,7 @@ import { EditDealModal } from "./EditDealModal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { removeDealProduct } from "@/store/features/deal/dealSlice";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface DealCardProps {
   deal: PipelineDeal;
@@ -99,20 +101,6 @@ export function DealCard({ deal, onDealUpdated }: DealCardProps) {
               </h3>
 
               <div className="flex flex-col items-start gap-1 text-[11px] text-muted-foreground/80 mt-1 font-medium w-full">
-                {/* <span className="truncate w-full">
-                  <span className="truncate w-full">
-                    {deal.hospital?.city || deal.hospital?.state ? (
-                      <>
-                        {deal.hospital?.city}
-                        {deal.hospital?.city && deal.hospital?.state && ", "}
-                        {deal.hospital?.state}
-                      </>
-                    ) : (
-                      "No Location"
-                    )}
-                  </span>
-                </span> */}
-
                 <span
                   className="truncate w-full font-semibold text-muted-foreground"
                   title={deal.hospital?.idn?.name}
@@ -181,27 +169,32 @@ export function DealCard({ deal, onDealUpdated }: DealCardProps) {
           </div>
         </CardContent>
 
-        <CardFooter className="px-5 py-4 bg-muted/30 border-t border-border mt-auto group-hover:bg-muted/50 transition-colors">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden">
-                <User className="h-4 w-4 text-slate-600" />
+          <CardFooter className="px-5 py-4 bg-muted/30 border-t border-border mt-auto group-hover:bg-muted/50 transition-colors">
+            <div className="flex flex-col w-full gap-2">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden">
+                  <User className="h-4 w-4 text-slate-600" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">
+                    Sales Rep
+                  </span>
+                  <span className="text-xs font-bold text-slate-900 leading-none">
+                    {deal.user?.name}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">
-                  Sales Rep
-                </span>
-                <span className="text-xs font-bold text-slate-900 leading-none">
-                  {deal.user?.name}
-                </span>
-              </div>
+              <Link href={`/hospitals/${deal.hospital?._id}`} className="w-full">
+                <Button
+                  variant="secondary"
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white border-none h-10 text-xs font-semibold rounded-lg flex gap-2 items-center justify-center cursor-pointer"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  View More
+                </Button>
+              </Link>
             </div>
-
-            <div className="text-[10px] font-bold text-muted-foreground">
-              {deal.hospital?.gpo?.name}
-            </div>
-          </div>
-        </CardFooter>
+          </CardFooter>
       </Card>
 
       <EditDealModal

@@ -163,6 +163,12 @@ const idnSlice = createSlice({
       state.selectionTotalPages = 1;
       state.hasMoreSelection = true;
     },
+    setIDNsForSelection: (state, action: PayloadAction<IDN[]>) => {
+      state.idns = action.payload;
+      state.selectionPage = 1;
+      state.selectionTotalPages = 1;
+      state.hasMoreSelection = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -228,6 +234,9 @@ const idnSlice = createSlice({
       .addCase(getSingleIDN.fulfilled, (state, action: PayloadAction<IDN>) => {
         state.isGetSingleIDNLoading = false;
         state.selectedIDN = action.payload;
+        if (action.payload && !state.idns.some((idn) => idn._id === action.payload._id)) {
+          state.idns.push(action.payload);
+        }
       })
       .addCase(getSingleIDN.rejected, (state, action) => {
         state.isGetSingleIDNLoading = false;
@@ -283,6 +292,6 @@ const idnSlice = createSlice({
   },
 });
 
-export const { clearSelectedIDN, resetIDNStatus, resetIDNsForSelection } =
+export const { clearSelectedIDN, resetIDNStatus, resetIDNsForSelection, setIDNsForSelection } =
   idnSlice.actions;
 export default idnSlice.reducer;

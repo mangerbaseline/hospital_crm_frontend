@@ -241,7 +241,7 @@ export function HospitalDocuments({ hospitalId }: HospitalDocumentsProps) {
       </div>
 
       {/* Documents List - Grouped by Category */}
-      <ScrollArea className="flex-1 max-h-[300px]">
+      <ScrollArea className="flex-1 max-h-75">
         {isFetchingDocuments ? (
           <div className="flex flex-col gap-2">
             {Array.from({ length: 3 }).map((_, idx) => (

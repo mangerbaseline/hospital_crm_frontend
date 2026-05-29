@@ -97,6 +97,14 @@ const stages: FunnelStageProps[] = [
     href: "/hospitals?productStage=Closed%20Won",
   },
   {
+    label: "Closed Lost",
+    amount: "$0",
+    count: 0,
+    colorClass: "bg-[#7cb9fc] hover:bg-[#60a5fa]",
+    widthClass: "w-[45%] max-w-[525px]",
+    href: "/hospitals?productStage=Closed%20Lost",
+  },
+  {
     label: "Implemented",
     amount: "$0",
     count: 0,
@@ -140,11 +148,11 @@ export function SalesPipelineFunnel() {
       <CardContent className="px-6 pb-8 pt-0 flex flex-col items-center">
         <div className="flex flex-col items-center gap-2 w-full max-w-[800px]">
           {isFetchingDashboardStats
-            ? Array.from({ length: 7 }).map((_, idx) => (
+            ? Array.from({ length: 8 }).map((_, idx) => (
                 <Skeleton
                   key={idx}
                   className="h-[60px] rounded-xl mb-1 mt-1"
-                  style={{ width: `${100 - idx * 10}%` }}
+                  style={{ width: `${100 - idx * 8}%` }}
                 />
               ))
             : mergedStages.map((stage, index) => (

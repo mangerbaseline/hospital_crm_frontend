@@ -39,6 +39,7 @@ const emptyColumnsSkeleton: Record<string, ColumnData> = {
     deals: [],
   },
   closed: { id: "closed", title: "Closed Won", color: "#22c55e", deals: [] },
+  lost: { id: "lost", title: "Closed Lost", color: "#ef4444", deals: [] },
   implemented: {
     id: "implemented",
     title: "Implemented",
@@ -54,6 +55,7 @@ const columnOrder = [
   "trial",
   "pending",
   "closed",
+  "lost",
   "implemented",
 ];
 
@@ -71,6 +73,8 @@ const stageToColumnId = (stage?: string) => {
       return "pending";
     case DealProductStage.CLOSED_WON:
       return "closed";
+    case DealProductStage.CLOSED_LOST:
+      return "lost";
     case DealProductStage.IMPLEMENTED:
       return "implemented";
     default:
@@ -92,6 +96,8 @@ const columnIdToStage = (id: string) => {
       return DealProductStage.PENDING_DECISION;
     case "closed":
       return DealProductStage.CLOSED_WON;
+    case "lost":
+      return DealProductStage.CLOSED_LOST;
     case "implemented":
       return DealProductStage.IMPLEMENTED;
     default:
@@ -320,7 +326,7 @@ export function PipelineBoard({ onStageChange }: PipelineBoardProps = {}) {
     <div className="w-full min-h-112.5 pt-6 min-w-0 max-w-full flex flex-col">
       {isFetchingDeals ? (
         <div className="flex-1 w-full overflow-x-hidden flex gap-4">
-          {Array.from({ length: 7 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
               className="flex flex-col h-full w-70 shrink-0 bg-muted/20 rounded-xl border border-border/50 p-3"

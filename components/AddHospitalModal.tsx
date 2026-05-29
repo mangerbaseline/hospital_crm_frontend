@@ -22,7 +22,7 @@ export function AddHospitalModal({
       open={isOpen}
       onOpenChange={isCreateHospitalLoading ? undefined : onClose}
     >
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto p-0 shadow-none">
+      <DialogContent className="sm:max-w-125 max-h-[90vh] overflow-y-auto p-0 shadow-none">
         <AddHospitalForm onSuccess={onSuccess} onCancel={onClose} />
       </DialogContent>
     </Dialog>

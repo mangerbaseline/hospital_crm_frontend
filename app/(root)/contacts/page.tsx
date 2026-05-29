@@ -44,7 +44,9 @@ function Contacts() {
 
   // const isAdmin = user?.role === UserRole.ADMIN;
   const isAdminOrExecutive =
-    user?.role === UserRole.ADMIN || user?.role === UserRole.EXECUTIVE;
+    user?.role === UserRole.ADMIN ||
+    user?.role === UserRole.EXECUTIVE ||
+    user?.role === UserRole.CUSTOMER_SUCCESS;
 
   const [searchQuery, setSearchQuery] = useState("");
   // const [activeFilter, setActiveFilter] = useState<"my" | "all">("my");

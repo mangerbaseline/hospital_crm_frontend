@@ -11,11 +11,6 @@ export const hospitalSchema = z.object({
   zip: z.string().min(1, "Zip code is required"),
   gpo: z.string().min(1, "GPO is required"),
   userId: z.string(),
-  // competitiveProduct: z.string(),
-  // teamHospital: z.boolean(),
-  // magnetHospital: z.boolean(),
-  // bedsWithMac: z.number().min(0, "Must be 0 or more"),
-  // ICUBeds: z.number().min(0, "Must be 0 or more"),
 });
 
 export type HospitalFormValues = z.infer<typeof hospitalSchema>;

@@ -36,7 +36,7 @@ export function ProductTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[80px]">#</TableHead>
+              <TableHead className="w-20">#</TableHead>
               <TableHead>Product Details</TableHead>
               <TableHead>Date Added</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -50,12 +50,12 @@ export function ProductTable({
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-2">
-                    <Skeleton className="h-4 w-[200px]" />
-                    <Skeleton className="h-3 w-[150px]" />
+                    <Skeleton className="h-4 w-50" />
+                    <Skeleton className="h-3 w-37.5" />
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-25" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-8 w-8 ml-auto rounded-full" />
@@ -73,7 +73,7 @@ export function ProductTable({
       <Table>
         <TableHeader className="bg-muted/50">
           <TableRow>
-            <TableHead className="w-[80px] pl-6">#</TableHead>
+            <TableHead className="w-20 pl-6">#</TableHead>
             <TableHead>Product Details</TableHead>
             <TableHead>Date Added</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -134,7 +134,7 @@ export function ProductTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-[180px] animate-in fade-in-0 zoom-in-95"
+                      className="w-45 animate-in fade-in-0 zoom-in-95"
                     >
                       <DropdownMenuLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1.5">
                         Actions
