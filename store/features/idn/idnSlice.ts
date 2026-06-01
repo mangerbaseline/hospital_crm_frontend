@@ -10,6 +10,7 @@ import {
   PaginatedApiResponse,
   FetchIDNsParams,
   FetchIDNsDealsParams,
+  IDNHospitalWithARR,
 } from "@/store/types";
 
 const initialState: IDNState = {
@@ -35,6 +36,14 @@ const initialState: IDNState = {
   selectionPage: 1,
   selectionTotalPages: 1,
   hasMoreSelection: true,
+
+  idnHospitals: [],
+  isFetchingIDNHospitals: false,
+  fetchIDNHospitalsError: null,
+  idnHospitalsPage: 1,
+  idnHospitalsLimit: 10,
+  idnHospitalsTotal: 0,
+  idnHospitalsTotalPages: 1,
 };
 
 export const fetchIDNs = createAsyncThunk(
@@ -67,6 +76,26 @@ export const fetchIDNsWithDeals = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch IDNs with deals",
+      );
+    }
+  },
+);
+
+export const fetchIDNHospitals = createAsyncThunk(
+  "idn/fetchIDNHospitals",
+  async (
+    params: { idnId: string; page?: number; limit?: number },
+    { rejectWithValue },
+  ) => {
+    try {
+      const { idnId, page = 1, limit = 10 } = params;
+      const response = await axiosInstance.get<
+        PaginatedApiResponse<IDNHospitalWithARR[]>
+      >(`/api/idn/deals-by-idn?idnId=${idnId}&page=${page}&limit=${limit}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch IDN hospitals",
       );
     }
   },
@@ -156,6 +185,8 @@ const idnSlice = createSlice({
       state.createIDNError = null;
       state.updateIDNError = null;
       state.deleteIDNError = null;
+      state.isFetchingIDNHospitals = false;
+      state.fetchIDNHospitalsError = null;
     },
     resetIDNsForSelection: (state) => {
       state.idns = [];
@@ -234,7 +265,10 @@ const idnSlice = createSlice({
       .addCase(getSingleIDN.fulfilled, (state, action: PayloadAction<IDN>) => {
         state.isGetSingleIDNLoading = false;
         state.selectedIDN = action.payload;
-        if (action.payload && !state.idns.some((idn) => idn._id === action.payload._id)) {
+        if (
+          action.payload &&
+          !state.idns.some((idn) => idn._id === action.payload._id)
+        ) {
           state.idns.push(action.payload);
         }
       })
@@ -288,10 +322,39 @@ const idnSlice = createSlice({
       .addCase(deleteIDN.rejected, (state, action) => {
         state.isDeleteIDNLoading = false;
         state.deleteIDNError = action.payload as string;
+      })
+      .addCase(fetchIDNHospitals.pending, (state) => {
+        state.isFetchingIDNHospitals = true;
+        state.fetchIDNHospitalsError = null;
+      })
+      .addCase(
+        fetchIDNHospitals.fulfilled,
+        (
+          state,
+          action: PayloadAction<PaginatedApiResponse<IDNHospitalWithARR[]>>,
+        ) => {
+          state.isFetchingIDNHospitals = false;
+          state.idnHospitals = action.payload.data;
+          const pagination =
+            (action.payload as any).pagination || action.payload;
+          state.idnHospitalsPage = pagination.page || 1;
+          state.idnHospitalsLimit = pagination.limit || 10;
+          state.idnHospitalsTotal =
+            pagination.total || pagination.totalHospitals || 0;
+          state.idnHospitalsTotalPages = pagination.totalPages || 1;
+        },
+      )
+      .addCase(fetchIDNHospitals.rejected, (state, action) => {
+        state.isFetchingIDNHospitals = false;
+        state.fetchIDNHospitalsError = action.payload as string;
       });
   },
 });
 
-export const { clearSelectedIDN, resetIDNStatus, resetIDNsForSelection, setIDNsForSelection } =
-  idnSlice.actions;
+export const {
+  clearSelectedIDN,
+  resetIDNStatus,
+  resetIDNsForSelection,
+  setIDNsForSelection,
+} = idnSlice.actions;
 export default idnSlice.reducer;

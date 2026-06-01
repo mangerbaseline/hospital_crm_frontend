@@ -378,6 +378,14 @@ export interface GPOState {
   limit: number;
   totalGPOs: number;
   totalPages: number;
+
+  gpoHospitals: GPOHospitalWithARR[];
+  isFetchingGPOHospitals: boolean;
+  fetchGPOHospitalsError: string | null;
+  gpoHospitalsPage: number;
+  gpoHospitalsLimit: number;
+  gpoHospitalsTotal: number;
+  gpoHospitalsTotalPages: number;
 }
 
 export interface CreateGPOPayload {
@@ -459,6 +467,14 @@ export interface IDNState {
   selectionPage: number;
   selectionTotalPages: number;
   hasMoreSelection: boolean;
+
+  idnHospitals: IDNHospitalWithARR[];
+  isFetchingIDNHospitals: boolean;
+  fetchIDNHospitalsError: string | null;
+  idnHospitalsPage: number;
+  idnHospitalsLimit: number;
+  idnHospitalsTotal: number;
+  idnHospitalsTotalPages: number;
 }
 
 export interface CreateIDNPayload {

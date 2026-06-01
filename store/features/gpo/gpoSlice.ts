@@ -10,6 +10,7 @@ import {
   PaginatedApiResponse,
   FetchGPOsParams,
   FetchGPOsDealsParams,
+  GPOHospitalWithARR,
 } from "@/store/types";
 
 const initialState: GPOState = {
@@ -32,6 +33,14 @@ const initialState: GPOState = {
   limit: 10,
   totalGPOs: 0,
   totalPages: 1,
+
+  gpoHospitals: [],
+  isFetchingGPOHospitals: false,
+  fetchGPOHospitalsError: null,
+  gpoHospitalsPage: 1,
+  gpoHospitalsLimit: 10,
+  gpoHospitalsTotal: 0,
+  gpoHospitalsTotalPages: 1,
 };
 
 export const fetchGPOs = createAsyncThunk(
@@ -64,6 +73,26 @@ export const fetchGPOsWithDeals = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch GPOs with deals",
+      );
+    }
+  },
+);
+
+export const fetchGPOHospitals = createAsyncThunk(
+  "gpo/fetchGPOHospitals",
+  async (
+    params: { gpoId: string; page?: number; limit?: number },
+    { rejectWithValue },
+  ) => {
+    try {
+      const { gpoId, page = 1, limit = 10 } = params;
+      const response = await axiosInstance.get<
+        PaginatedApiResponse<GPOHospitalWithARR[]>
+      >(`/api/gpo/deals-by-gpo?gpoId=${gpoId}&page=${page}&limit=${limit}`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch GPO hospitals",
       );
     }
   },
@@ -153,6 +182,8 @@ const gpoSlice = createSlice({
       state.createGPOError = null;
       state.updateGPOError = null;
       state.deleteGPOError = null;
+      state.isFetchingGPOHospitals = false;
+      state.fetchGPOHospitalsError = null;
     },
   },
   extraReducers: (builder) => {
@@ -260,6 +291,31 @@ const gpoSlice = createSlice({
       .addCase(deleteGPO.rejected, (state, action) => {
         state.isDeleteGPOLoading = false;
         state.deleteGPOError = action.payload as string;
+      })
+      .addCase(fetchGPOHospitals.pending, (state) => {
+        state.isFetchingGPOHospitals = true;
+        state.fetchGPOHospitalsError = null;
+      })
+      .addCase(
+        fetchGPOHospitals.fulfilled,
+        (
+          state,
+          action: PayloadAction<PaginatedApiResponse<GPOHospitalWithARR[]>>,
+        ) => {
+          state.isFetchingGPOHospitals = false;
+          state.gpoHospitals = action.payload.data;
+          const pagination =
+            (action.payload as any).pagination || action.payload;
+          state.gpoHospitalsPage = pagination.page || 1;
+          state.gpoHospitalsLimit = pagination.limit || 10;
+          state.gpoHospitalsTotal =
+            pagination.total || pagination.totalHospitals || 0;
+          state.gpoHospitalsTotalPages = pagination.totalPages || 1;
+        },
+      )
+      .addCase(fetchGPOHospitals.rejected, (state, action) => {
+        state.isFetchingGPOHospitals = false;
+        state.fetchGPOHospitalsError = action.payload as string;
       });
   },
 });
