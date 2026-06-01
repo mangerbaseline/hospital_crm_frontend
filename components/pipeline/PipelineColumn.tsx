@@ -42,7 +42,7 @@ export function PipelineColumn({ column }: KanbanColumnProps) {
   );
 
   return (
-    <div className="flex flex-col h-full w-[280px] shrink-0 bg-muted/40 rounded-xl border border-border/50 p-3">
+    <div className="flex flex-col h-full w-70 shrink-0 bg-muted/40 rounded-xl border border-border/50 p-3">
       <div className="flex flex-col mb-3 shrink-0">
         <div className="flex items-center gap-2 mb-2">
           <div
@@ -67,7 +67,7 @@ export function PipelineColumn({ column }: KanbanColumnProps) {
       >
         <div
           className={cn(
-            "min-h-[200px] h-full rounded-lg transition-colors duration-200 p-1",
+            "h-[80vh] rounded-lg transition-colors duration-200 p-1",
             isOver ? "bg-muted/70 border border-dashed border-primary/20" : "",
           )}
         >
