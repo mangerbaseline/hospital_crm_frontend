@@ -295,7 +295,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                Total Products:
+                Total Deals:
               </span>
               <span className="text-sm font-semibold ">
                 {quickStats?.productCount ?? 0}
