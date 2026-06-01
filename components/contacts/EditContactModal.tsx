@@ -31,29 +31,27 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import {
-  fetchHospitalsForSelection,
-  getSingleHospital,
-} from "@/store/features/hospital/hospitalSlice";
-import {
-  createContact,
-  resetContactStatus,
-} from "@/store/features/contact/contactSlice";
+import { fetchHospitalsForSelection } from "@/store/features/hospital/hospitalSlice";
+import { updateContact } from "@/store/features/contact/contactSlice";
 import {
   createContactSchema,
   CreateContactValues,
 } from "@/validations/contact.validations";
 import { toast } from "sonner";
 import { MultiProductSelect } from "@/components/products/MultiProductSelect";
-import { Hospital } from "@/store/types";
+import { Contact } from "@/store/types";
 
-export function AddContactModal({
-  children,
-  hospital: defaultHospital,
-}: {
+interface EditContactModalProps {
+  contact: Contact;
   children: React.ReactNode;
-  hospital?: Hospital | any;
-}) {
+  onSuccess?: () => void;
+}
+
+export function EditContactModal({
+  contact,
+  children,
+  onSuccess,
+}: EditContactModalProps) {
   const dispatch = useAppDispatch();
   const { hospitals, isFetchingHospitals, selectionPage, hasMoreSelection } =
     useAppSelector((state) => state.hospital);
@@ -86,28 +84,39 @@ export function AddContactModal({
 
   useEffect(() => {
     if (open) {
-      if (defaultHospital) {
-        setValue("hospital", defaultHospital._id, { shouldValidate: true });
-      } else {
-        dispatch(
-          fetchHospitalsForSelection({ page: 1, limit: 10, search: "" }),
-        );
-      }
+      const hospId =
+        typeof contact.hospital === "object"
+          ? contact.hospital?._id || ""
+          : contact.hospital || "";
+      const prodIds = contact.product ? contact.product.map((p) => p._id) : [];
+
+      reset({
+        firstName: contact.firstName || "",
+        lastName: contact.lastName || "",
+        designation: contact.designation || "",
+        hospital: hospId,
+        phoneNumber: contact.phoneNumber || "",
+        email: contact.email || "",
+        isPrimary: contact.isPrimary || false,
+      });
+
+      setSelectedProductIds(prodIds);
+
+      dispatch(fetchHospitalsForSelection({ page: 1, limit: 10, search: "" }));
     } else {
       setSearch("");
     }
-    setSelectedProductIds([]);
-  }, [open, dispatch, defaultHospital, setValue]);
+  }, [open, contact, reset, dispatch]);
 
   useEffect(() => {
-    if (!open || defaultHospital) return;
+    if (!open) return;
 
     const timer = setTimeout(() => {
       dispatch(fetchHospitalsForSelection({ page: 1, limit: 10, search }));
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [search, dispatch, open, defaultHospital]);
+  }, [search, dispatch, open]);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -152,22 +161,21 @@ export function AddContactModal({
   const onSubmit = async (data: CreateContactValues) => {
     const payload = {
       ...data,
-      product: selectedProductIds.length > 0 ? selectedProductIds : undefined,
+      product: selectedProductIds,
     } as any;
 
-    const resultAction = await dispatch(createContact(payload));
-    if (createContact.fulfilled.match(resultAction)) {
-      toast.success("Contact created successfully");
-      reset();
+    try {
+      await dispatch(
+        updateContact({
+          id: contact._id,
+          payload,
+        }),
+      ).unwrap();
+      toast.success("Contact details updated successfully");
       setOpen(false);
-      dispatch(resetContactStatus());
-      if (defaultHospital) {
-        dispatch(getSingleHospital(defaultHospital._id));
-      }
-    } else {
-      toast.error(
-        (resultAction.payload as string) || "Failed to create contact",
-      );
+      onSuccess?.();
+    } catch (error: any) {
+      toast.error(error || "Failed to update contact information");
     }
   };
 
@@ -176,137 +184,115 @@ export function AddContactModal({
       open={open}
       onOpenChange={(v) => {
         setOpen(v);
-        if (!v) reset();
       }}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-106.25 max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-5">
+      <DialogContent className="sm:max-w-106.25 max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-5 border border-border rounded-2xl shadow-2xl bg-white">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-lg font-bold">Add Contact</DialogTitle>
+          <DialogTitle className="text-lg font-bold">Edit Contact</DialogTitle>
           <DialogDescription className="text-sm mt-1 text-muted-foreground">
-            {defaultHospital
-              ? `Add a new contact for ${defaultHospital.hospitalName}.`
-              : "Add a new contact to a hospital in your pipeline."}
+            Update dynamic variables for this contact profile.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          {defaultHospital ? (
-            <div className="rounded-xl border border-border bg-slate-50/50 p-4 flex flex-col gap-3">
-              <div>
-                <Label className="text-[11px] font-semibold text-muted-foreground">
-                  IDN Name
-                </Label>
-                <h4 className="text-sm font-bold -mt-0.5">
-                  {defaultHospital.idn &&
-                  typeof defaultHospital.idn === "object"
-                    ? defaultHospital.idn?.name
-                    : defaultHospital.idn || "Unknown"}
-                </h4>
-              </div>
-              <div>
-                <Label className="text-[11px] font-semibold text-muted-foreground">
-                  Hospital Name
-                </Label>
-                <h4 className="text-sm font-bold -mt-0.5">
-                  {defaultHospital.hospitalName}
-                </h4>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <Label className="text-xs font-semibold">Select Hospital</Label>
-              <Controller
-                name="hospital"
-                control={control}
-                render={({ field }) => (
-                  <Popover open={hospitalOpen} onOpenChange={setHospitalOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={hospitalOpen}
-                        className={cn(
-                          "w-full justify-between mt-1.5 text-xs h-9 bg-muted font-normal border-border",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value
-                          ? hospitals.find((h) => h._id === field.value)
-                              ?.hospitalName
-                          : "Select a hospital..."}
-                        <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-(--radix-popover-trigger-width) p-0 z-100"
-                      align="start"
+          <div>
+            <Label className="text-xs font-semibold">Select Hospital</Label>
+            <Controller
+              name="hospital"
+              control={control}
+              render={({ field }) => (
+                <Popover open={hospitalOpen} onOpenChange={setHospitalOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={hospitalOpen}
+                      className={cn(
+                        "w-full justify-between mt-1.5 text-xs h-9 bg-muted font-normal border-border cursor-pointer",
+                        !field.value && "text-muted-foreground",
+                      )}
                     >
-                      <Command
-                        shouldFilter={false}
-                        onWheel={(e) => e.stopPropagation()}
-                      >
-                        <CommandInput
-                          placeholder="Search hospital..."
-                          className="h-9 text-xs w-full"
-                          value={search}
-                          onValueChange={setSearch}
-                        />
-                        <CommandList>
-                          {hospitals.length === 0 && !isFetchingHospitals ? (
-                            <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                              No hospital found.
-                            </CommandEmpty>
-                          ) : null}
-                          <CommandGroup>
-                            {hospitals.map((hospital) => (
-                              <CommandItem
-                                key={hospital._id}
-                                value={hospital._id}
-                                onSelect={() => {
-                                  setValue("hospital", hospital._id, {
-                                    shouldValidate: true,
-                                  });
-                                  setHospitalOpen(false);
-                                }}
-                                className="text-xs"
-                              >
-                                {hospital.hospitalName}
-                                <Check
-                                  className={cn(
-                                    "ml-auto h-4 w-4",
-                                    field.value === hospital._id
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                          {hasMoreSelection && (
-                            <div
-                              ref={sentinelRef}
-                              className="h-4 flex items-center justify-center py-2"
+                      {field.value
+                        ? hospitals.find((h) => h._id === field.value)
+                            ?.hospitalName ||
+                          (typeof contact.hospital === "object" &&
+                          contact.hospital?._id === field.value
+                            ? contact.hospital.hospitalName
+                            : "Select a hospital...")
+                        : "Select a hospital..."}
+                      <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-(--radix-popover-trigger-width) p-0 z-100"
+                    align="start"
+                  >
+                    <Command
+                      shouldFilter={false}
+                      onWheel={(e) => e.stopPropagation()}
+                    >
+                      <CommandInput
+                        placeholder="Search hospital..."
+                        className="h-9 text-xs w-full"
+                        value={search}
+                        onValueChange={setSearch}
+                      />
+                      <CommandList>
+                        {hospitals.length === 0 && !isFetchingHospitals ? (
+                          <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+                            No hospital found.
+                          </CommandEmpty>
+                        ) : null}
+                        <CommandGroup>
+                          {hospitals.map((hosp) => (
+                            <CommandItem
+                              key={hosp._id}
+                              value={hosp._id}
+                              onSelect={() => {
+                                setValue("hospital", hosp._id, {
+                                  shouldValidate: true,
+                                });
+                                setHospitalOpen(false);
+                              }}
+                              className="text-xs"
                             >
-                              {isFetchingHospitals && (
-                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                              )}
-                            </div>
-                          )}
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                )}
-              />
-              {errors.hospital && (
-                <p className="text-[10px] text-destructive mt-1 font-medium">
-                  {errors.hospital.message}
-                </p>
+                              {hosp.hospitalName}
+                              <Check
+                                className={cn(
+                                  "ml-auto h-4 w-4",
+                                  field.value === hosp._id
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                        {hasMoreSelection && (
+                          <div
+                            ref={sentinelRef}
+                            className="h-4 flex items-center justify-center py-2"
+                          >
+                            {isFetchingHospitals && (
+                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            )}
+                          </div>
+                        )}
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               )}
-            </div>
-          )}
+            />
+            {errors.hospital && (
+              <p className="text-[10px] text-destructive mt-1 font-medium">
+                {errors.hospital.message}
+              </p>
+            )}
+          </div>
 
           <div>
             <Label className="text-xs font-semibold">First Name</Label>
@@ -392,7 +378,7 @@ export function AddContactModal({
               control={control}
               render={({ field }) => (
                 <Checkbox
-                  id="primary_contact"
+                  id="primary_contact_edit"
                   className="h-4 w-4 rounded-lg border-foreground/50"
                   checked={field.value}
                   onCheckedChange={field.onChange}
@@ -400,7 +386,7 @@ export function AddContactModal({
               )}
             />
             <Label
-              htmlFor="primary_contact"
+              htmlFor="primary_contact_edit"
               className="text-xs ml-1 font-medium leading-none cursor-pointer"
             >
               Primary Contact
@@ -416,10 +402,10 @@ export function AddContactModal({
               {isCreateContactLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
+                  Updating...
                 </>
               ) : (
-                "Add Contact"
+                "Update Contact"
               )}
             </Button>
           </div>

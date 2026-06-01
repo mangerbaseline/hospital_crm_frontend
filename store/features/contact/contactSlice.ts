@@ -15,9 +15,11 @@ const initialState: ContactState = {
   isFetchingContacts: false,
   isCreateContactLoading: false,
   isDeleteContactLoading: false,
+  isGetSingleContactLoading: false,
   fetchContactsError: null,
   createContactError: null,
   deleteContactError: null,
+  getSingleContactError: null,
   page: 1,
   limit: 10,
   totalContacts: 0,
@@ -100,6 +102,22 @@ export const deleteContact = createAsyncThunk(
   },
 );
 
+export const getSingleContact = createAsyncThunk(
+  "contact/getSingleContact",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get<ApiResponse<Contact>>(
+        `/api/contact/${id}`,
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch contact details",
+      );
+    }
+  },
+);
+
 const contactSlice = createSlice({
   name: "contact",
   initialState,
@@ -110,8 +128,10 @@ const contactSlice = createSlice({
     resetContactStatus: (state) => {
       state.isFetchingContacts = false;
       state.isCreateContactLoading = false;
+      state.isGetSingleContactLoading = false;
       state.fetchContactsError = null;
       state.createContactError = null;
+      state.getSingleContactError = null;
     },
   },
   extraReducers: (builder) => {
@@ -187,6 +207,24 @@ const contactSlice = createSlice({
       .addCase(deleteContact.rejected, (state, action) => {
         state.isDeleteContactLoading = false;
         state.deleteContactError = action.payload as string;
+      });
+    builder
+      .addCase(getSingleContact.pending, (state, action) => {
+        if (state.selectedContact?._id !== action.meta.arg) {
+          state.isGetSingleContactLoading = true;
+        }
+        state.getSingleContactError = null;
+      })
+      .addCase(
+        getSingleContact.fulfilled,
+        (state, action: PayloadAction<Contact>) => {
+          state.isGetSingleContactLoading = false;
+          state.selectedContact = action.payload;
+        },
+      )
+      .addCase(getSingleContact.rejected, (state, action) => {
+        state.isGetSingleContactLoading = false;
+        state.getSingleContactError = action.payload as string;
       });
   },
 });

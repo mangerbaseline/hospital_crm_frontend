@@ -87,4 +87,5 @@ export interface Contact {
 export interface ContactCardProps {
   contact: Contact;
   className?: string;
+  onViewClick?: (contact: Contact) => void;
 }

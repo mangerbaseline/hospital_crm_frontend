@@ -235,9 +235,11 @@ export interface ContactState {
   isFetchingContacts: boolean;
   isCreateContactLoading: boolean;
   isDeleteContactLoading: boolean;
+  isGetSingleContactLoading: boolean;
   fetchContactsError: string | null;
   createContactError: string | null;
   deleteContactError: string | null;
+  getSingleContactError: string | null;
   page: number;
   limit: number;
   totalContacts: number;
