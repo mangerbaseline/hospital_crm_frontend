@@ -30,8 +30,6 @@ function AddHospitalPage() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const productStage = searchParams.get("productStage") || "";
-
   const dispatch = useAppDispatch();
   const {
     hospitalsWithDeals,
@@ -64,14 +62,13 @@ function AddHospitalPage() {
         limit: pageSize,
         search: debouncedSearchQuery,
         userId: "",
-        productStage,
       }),
     );
-  }, [dispatch, currentPage, pageSize, debouncedSearchQuery, productStage]);
+  }, [dispatch, currentPage, pageSize, debouncedSearchQuery]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery, productStage]);
+  }, [debouncedSearchQuery]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -115,7 +112,7 @@ function AddHospitalPage() {
                 value={String(pageSize)}
                 onValueChange={handleLimitChange}
               >
-                <SelectTrigger className="w-full sm:w-[70px] h-7 border-none p-0 shadow-none cursor-pointer">
+                <SelectTrigger className="w-full sm:w-17.5 h-7 border-none p-0 shadow-none cursor-pointer">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -128,20 +125,6 @@ function AddHospitalPage() {
             </div>
           </div>
         </div>
-
-        {productStage && (
-          <div className="mt-4 mb-2">
-            <span className="inline-flex items-center gap-2 bg-blue-100/50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200">
-              Filtering by stage: {productStage}
-              <button
-                onClick={() => router.push(pathname)}
-                className="hover:bg-blue-200/50 rounded-full p-0.5 transition-colors"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </span>
-          </div>
-        )}
 
         <div className="mt-6">
           <HospitalTable
@@ -246,7 +229,6 @@ function AddHospitalPage() {
                 limit: pageSize,
                 search: debouncedSearchQuery,
                 userId: "",
-                productStage,
               }),
             );
           }}

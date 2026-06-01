@@ -12,6 +12,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
+  X,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,8 @@ import {
 import { DealCard } from "@/components/deals/DealCard";
 import { DealCardSkeleton } from "@/components/deals/DealCardSkeleton";
 import { UserRole } from "@/store/types";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { AddDealModal } from "@/components/dashboard/AddDealModel";
 
 export default function DealsPage() {
   const { user: currentUser } = useAppSelector((state) => state.auth);
@@ -36,6 +40,12 @@ export default function DealsPage() {
     currentUser?.role === UserRole.ADMIN ||
     currentUser?.role === UserRole.EXECUTIVE ||
     currentUser?.role === UserRole.CUSTOMER_SUCCESS;
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const dealStage = searchParams.get("dealStage") || "";
 
   const dispatch = useAppDispatch();
 
@@ -69,6 +79,7 @@ export default function DealsPage() {
           productIds: selectedProductIds.join(","),
         }),
         ...(selectedGpoId !== "all" && { gpoId: selectedGpoId }),
+        ...(dealStage && { dealStage }),
       }),
     );
   }, [
@@ -79,11 +90,18 @@ export default function DealsPage() {
     selectedUserId,
     selectedProductIds,
     selectedGpoId,
+    dealStage,
   ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery, selectedUserId, selectedProductIds, selectedGpoId]);
+  }, [
+    debouncedSearchQuery,
+    selectedUserId,
+    selectedProductIds,
+    selectedGpoId,
+    dealStage,
+  ]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -107,6 +125,7 @@ export default function DealsPage() {
           productIds: selectedProductIds.join(","),
         }),
         ...(selectedGpoId !== "all" && { gpoId: selectedGpoId }),
+        ...(dealStage && { dealStage }),
       }),
     );
   };
@@ -117,7 +136,7 @@ export default function DealsPage() {
         title="All Deals"
         subTitle="View and manage all your deals"
       >
-        <div className="hidden gap-2 w-full sm:w-auto lg:flex">
+        <div className="hidden gap-2 w-full sm:w-auto lg:grid grid-cols-2 xl:grid-cols-4 items-center">
           {isAdminOrExecutive && (
             <UserSelect
               value={selectedUserId}
@@ -135,6 +154,12 @@ export default function DealsPage() {
             onValueChange={setSelectedProductIds}
             className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
           />
+          <AddDealModal>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-3 p-3 md:p-4 text-sm cursor-pointer">
+              <Building2 className="h-2 w-2 md:h-4 md:w-4" />{" "}
+              <span className="md:block hidden">Add Deal</span>
+            </Button>
+          </AddDealModal>
         </div>
       </DashboardHeader>
 
@@ -154,6 +179,12 @@ export default function DealsPage() {
           onValueChange={setSelectedProductIds}
           className="w-full bg-muted border-border shadow-sm cursor-pointer"
         />
+        <AddDealModal>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-3 p-3 md:p-4 text-sm cursor-pointer">
+            <Building2 className="h-2 w-2 md:h-4 md:w-4" />{" "}
+            <span>Add Deal</span>
+          </Button>
+        </AddDealModal>
       </div>
 
       <div className="flex flex-col md:flex-row md:gap-4 items-start md:items-center justify-between mt-8 mb-4">
@@ -185,6 +216,20 @@ export default function DealsPage() {
           </div>
         </div>
       </div>
+
+      {dealStage && (
+        <div className="mt-4 mb-2">
+          <span className="inline-flex items-center gap-2 bg-blue-100/50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200 shadow-sm">
+            Filtering by stage: {dealStage}
+            <button
+              onClick={() => router.push(pathname)}
+              className="hover:bg-blue-200/50 rounded-full p-0.5 transition-colors cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {isFetchingDeals ? (

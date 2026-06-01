@@ -54,7 +54,7 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-900 hover:bg-blue-950",
     widthClass: "w-full max-w-[800px]",
-    href: "/hospitals?productStage=Demo",
+    href: "/deals?dealStage=Demo",
   },
   {
     label: "CPA",
@@ -62,7 +62,7 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-800 hover:bg-blue-900",
     widthClass: "w-[90%] max-w-[750px]",
-    href: "/hospitals?productStage=CPA",
+    href: "/deals?dealStage=CPA",
   },
   {
     label: "Committee",
@@ -70,7 +70,7 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-700 hover:bg-blue-800",
     widthClass: "w-[80%] max-w-[700px]",
-    href: "/hospitals?productStage=Committee",
+    href: "/deals?dealStage=Committee",
   },
   {
     label: "Trial",
@@ -78,7 +78,7 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-600 hover:bg-blue-700",
     widthClass: "w-[70%] max-w-[650px]",
-    href: "/hospitals?productStage=Trial",
+    href: "/deals?dealStage=Trial",
   },
   {
     label: "Pending Decision",
@@ -86,7 +86,7 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-500 hover:bg-blue-600",
     widthClass: "w-[60%] max-w-[600px]",
-    href: "/hospitals?productStage=Pending%20Decision",
+    href: "/deals?dealStage=Pending%20Decision",
   },
   {
     label: "Closed Won",
@@ -94,7 +94,7 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-400 hover:bg-blue-500",
     widthClass: "w-[50%] max-w-[550px]",
-    href: "/hospitals?productStage=Closed%20Won",
+    href: "/deals?dealStage=Closed%20Won",
   },
   {
     label: "Closed Lost",
@@ -102,7 +102,7 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-[#7cb9fc] hover:bg-[#60a5fa]",
     widthClass: "w-[45%] max-w-[525px]",
-    href: "/hospitals?productStage=Closed%20Lost",
+    href: "/deals?dealStage=Closed%20Lost",
   },
   {
     label: "Implemented",
@@ -110,7 +110,7 @@ const stages: FunnelStageProps[] = [
     count: 0,
     colorClass: "bg-blue-300 hover:bg-blue-400",
     widthClass: "w-[40%] max-w-[500px]",
-    href: "/hospitals?productStage=Implemented",
+    href: "/deals?dealStage=Implemented",
   },
 ];
 
@@ -146,12 +146,12 @@ export function SalesPipelineFunnel() {
         </Button>
       </CardHeader>
       <CardContent className="px-6 pb-8 pt-0 flex flex-col items-center">
-        <div className="flex flex-col items-center gap-2 w-full max-w-[800px]">
+        <div className="flex flex-col items-center gap-2 w-full max-w-200">
           {isFetchingDashboardStats
             ? Array.from({ length: 8 }).map((_, idx) => (
                 <Skeleton
                   key={idx}
-                  className="h-[60px] rounded-xl mb-1 mt-1"
+                  className="h-15 rounded-xl mb-1 mt-1"
                   style={{ width: `${100 - idx * 8}%` }}
                 />
               ))
@@ -160,7 +160,7 @@ export function SalesPipelineFunnel() {
               ))}
         </div>
         <p className="mt-8 text-[11px] font-medium text-muted-foreground">
-          Click any stage to view hospitals in that stage
+          Click any stage to view deals in that stage
         </p>
       </CardContent>
     </Card>

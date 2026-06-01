@@ -26,8 +26,6 @@ function Hospitals() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const productStage = searchParams.get("productStage") || "";
-
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const isAdmin = currentUser?.role === UserRole.ADMIN;
@@ -67,21 +65,13 @@ function Hospitals() {
         limit: pageSize,
         search: debouncedSearchQuery,
         userId: selectedUser === "all" ? "" : selectedUser,
-        productStage,
       }),
     );
-  }, [
-    dispatch,
-    currentPage,
-    pageSize,
-    debouncedSearchQuery,
-    selectedUser,
-    productStage,
-  ]);
+  }, [dispatch, currentPage, pageSize, debouncedSearchQuery, selectedUser]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery, selectedUser, productStage]);
+  }, [debouncedSearchQuery, selectedUser]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -132,20 +122,6 @@ function Hospitals() {
           </div>
         </div>
       </div>
-
-      {productStage && (
-        <div className="mt-4 mb-2">
-          <span className="inline-flex items-center gap-2 bg-blue-100/50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-200">
-            Filtering by stage: {productStage}
-            <button
-              onClick={() => router.push(pathname)}
-              className="hover:bg-blue-200/50 rounded-full p-0.5 transition-colors"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </span>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {isFetchingHospitalsWithDeals ? (

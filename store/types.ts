@@ -277,7 +277,6 @@ export interface FetchHospitalsDealsParams {
   limit?: number;
   search?: string;
   userId?: string;
-  productStage?: string;
 }
 
 export interface Product {
@@ -575,6 +574,7 @@ export interface FetchAllDealsParams {
   page?: number;
   limit?: number;
   search?: string;
+  dealStage?: string;
 }
 
 export interface ProductRevenue {
