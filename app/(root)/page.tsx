@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Building2, DollarSign, CheckCircle2, UserPlus } from "lucide-react";
+import {
+  Building2,
+  DollarSign,
+  CheckCircle2,
+  UserPlus,
+  ShieldCheck,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Card,
@@ -11,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ClosedBusinessModal } from "@/components/dashboard/ClosedBusinessModal";
+import { ImplementedModal } from "@/components/dashboard/ImplementedModal";
 import { UpcomingTasks } from "@/components/dashboard/UpcomingTasks";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { SalesPipelineFunnel } from "@/components/dashboard/SalesPipelineFunnel";
@@ -19,11 +26,7 @@ import { AddDealModal } from "@/components/dashboard/AddDealModel";
 import { AddContactModal } from "@/components/dashboard/AddContactModal";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import {
-  fetchDashboardStats,
-  fetchDashboardTasks,
-  fetchDashboardActivity,
-} from "@/store/features/dashboard/dashboardSlice";
+import { fetchDashboardStats } from "@/store/features/dashboard/dashboardSlice";
 
 function Home() {
   const dispatch = useAppDispatch();
@@ -40,13 +43,13 @@ function Home() {
       {/* Header */}
       <DashboardHeader>
         <AddDealModal>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-3 p-3 md:p-[18px] text-sm cursor-pointer">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-3 p-3 md:p-4.5 text-sm cursor-pointer">
             <Building2 className="h-2 w-2 md:h-4 md:w-4" />{" "}
             <span className="md:block hidden">Add Deal</span>
           </Button>
         </AddDealModal>
         <AddContactModal>
-          <Button className="flex gap-3 p-3 md:p-[18px] text-sm bg-sidebar border border-border text-foreground cursor-pointer hover:bg-muted shadow-xl shadow-muted">
+          <Button className="flex gap-3 p-3 md:p-4.5 text-sm bg-sidebar border border-border text-foreground cursor-pointer hover:bg-muted shadow-xl shadow-muted">
             <UserPlus className="h-2 w-2 md:h-4 md:w-4" />{" "}
             <span className="md:block hidden">Add Contact</span>
           </Button>
@@ -54,11 +57,11 @@ function Home() {
       </DashboardHeader>
 
       {/* stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {/* Loading skeletons for stats */}
         {isFetchingDashboardStats ? (
           <>
-            {[...Array(3)].map((_, i) => (
+            {[...Array(4)].map((_, i) => (
               <Card
                 key={i}
                 className="flex flex-col h-full shadow-sm shadow-black/5 border-border rounded-[16px] transition-all hover:shadow-md py-0"
@@ -79,13 +82,13 @@ function Home() {
         ) : (
           <>
             <StatsCard
-              title="My Hospitals"
+              title="All Deals"
               icon={Building2}
               iconClassName="text-muted-foreground"
-              value={dashboardStats?.totalHospitals || 0}
-              subtitle={<>Total hospitals</>}
+              value={dashboardStats?.totalDeals || 0}
+              // subtitle={}
               buttonText="View All"
-              href="/hospitals"
+              href="/deals"
             />
             <StatsCard
               title="Total"
@@ -97,7 +100,7 @@ function Home() {
               href="/pipeline"
             />
             <StatsCard
-              title="Closed Business"
+              title="Closed Won"
               icon={CheckCircle2}
               iconClassName="text-muted-foreground"
               value={`$${(dashboardStats?.closedBusiness?.totalAmount || 0).toLocaleString()}`}
@@ -118,6 +121,30 @@ function Home() {
                     View All
                   </Button>
                 </ClosedBusinessModal>
+              }
+            />
+            <StatsCard
+              title="Implemented"
+              icon={ShieldCheck}
+              iconClassName="text-muted-foreground"
+              value={`$${(dashboardStats?.implemented?.totalAmount || 0).toLocaleString()}`}
+              subtitle={
+                <>
+                  {dashboardStats?.implemented?.hospitalCount || 0} hospitals
+                  <br />
+                  Total Expected ARR
+                </>
+              }
+              buttonText="View All"
+              trigger={
+                <ImplementedModal>
+                  <Button
+                    variant="outline"
+                    className="w-full h-9 rounded-lg border-border font-medium hover:bg-muted cursor-pointer transition-colors"
+                  >
+                    View All
+                  </Button>
+                </ImplementedModal>
               }
             />
           </>

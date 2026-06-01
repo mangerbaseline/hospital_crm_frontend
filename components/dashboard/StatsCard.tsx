@@ -14,7 +14,7 @@ export interface StatsCardProps {
   title: string;
   icon: LucideIcon;
   value: string | number;
-  subtitle: React.ReactNode;
+  subtitle?: React.ReactNode;
   buttonText: string;
   href?: string;
   iconClassName?: string;

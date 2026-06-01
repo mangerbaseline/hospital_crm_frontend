@@ -850,9 +850,11 @@ export interface DashboardStatsResponse {
   totalHospitals: number;
   totalHospitalsInDB: number;
   totalProductsInDB: number;
+  totalDeals: number;
   activeDeals: number;
   totalPipelineAmount: number;
   closedBusiness: { totalAmount: number; hospitalCount: number };
+  implemented: { totalAmount: number; hospitalCount: number };
   pipeline: {
     stage: string;
     amount: number;
