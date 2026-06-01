@@ -54,14 +54,14 @@ export function HospitalCard({ hospital }: HospitalCardProps) {
       </CardHeader>
 
       <CardContent className="px-5">
-        <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 flex flex-col items-center justify-center">
+        {/* <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-3 flex flex-col items-center justify-center">
           <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider mb-1">
             Total Expected ARR
           </span>
           <span className="text-2xl font-bold text-emerald-600">
             ${Number(totalArr).toLocaleString()}
           </span>
-        </div>
+        </div> */}
 
         {allProducts.length > 0 && (
           <div className="mt-4">

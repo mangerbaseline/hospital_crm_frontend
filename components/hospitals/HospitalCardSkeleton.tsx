@@ -21,7 +21,7 @@ export function HospitalCardSkeleton() {
       </CardHeader>
 
       <CardContent className="p-5 pt-0 flex-1 flex flex-col">
-        <Skeleton className="h-20 w-full rounded-xl mb-4" />
+        {/* <Skeleton className="h-20 w-full rounded-xl mb-4" /> */}
         <div className="flex flex-col gap-3">
           <Skeleton className="h-3 w-1/4" />
           <Skeleton className="h-24 w-full rounded-xl" />
