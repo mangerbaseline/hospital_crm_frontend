@@ -44,63 +44,11 @@ export const fetchDashboardStats = createAsyncThunk(
         success: boolean;
         data: DashboardStatsResponse;
       }>("/api/deal/stats/get-dashboard-stats");
-
-      const apiData = response.data?.data;
-      return {
-        totalHospitals: apiData?.totalHospitals ?? 2391,
-        totalHospitalsInDB: apiData?.totalHospitalsInDB ?? 2391,
-        totalProductsInDB: apiData?.totalProductsInDB ?? 3,
-        totalDeals: apiData?.totalDeals ?? 192,
-        activeDeals: apiData?.activeDeals ?? 166,
-        totalPipelineAmount: apiData?.totalPipelineAmount ?? 21822407,
-        closedBusiness: apiData?.closedBusiness ?? {
-          totalAmount: 378928,
-          hospitalCount: 4,
-        },
-        implemented: apiData?.implemented ?? {
-          totalAmount: 6875309,
-          hospitalCount: 14,
-        },
-        pipeline: apiData?.pipeline ?? [
-          { stage: "Demo", amount: 7036011, hospitalCount: 48 },
-          { stage: "CPA", amount: 1818977, hospitalCount: 12 },
-          { stage: "Committee", amount: 1555386, hospitalCount: 16 },
-          { stage: "Trial", amount: 2689613, hospitalCount: 12 },
-          { stage: "Pending Decision", amount: 1562802, hospitalCount: 9 },
-          { stage: "Closed Won", amount: 378928, hospitalCount: 4 },
-          { stage: "Closed Lost", amount: 7077662, hospitalCount: 31 },
-          { stage: "Ghosted", amount: 284309, hospitalCount: 5 },
-          { stage: "Implemented", amount: 6875309, hospitalCount: 14 }
-        ],
-      };
+      return response.data.data;
     } catch (error: any) {
-      return {
-        totalHospitals: 2391,
-        totalHospitalsInDB: 2391,
-        totalProductsInDB: 3,
-        totalDeals: 192,
-        activeDeals: 166,
-        totalPipelineAmount: 21822407,
-        closedBusiness: {
-          totalAmount: 378928,
-          hospitalCount: 4,
-        },
-        implemented: {
-          totalAmount: 6875309,
-          hospitalCount: 14,
-        },
-        pipeline: [
-          { stage: "Demo", amount: 7036011, hospitalCount: 48 },
-          { stage: "CPA", amount: 1818977, hospitalCount: 12 },
-          { stage: "Committee", amount: 1555386, hospitalCount: 16 },
-          { stage: "Trial", amount: 2689613, hospitalCount: 12 },
-          { stage: "Pending Decision", amount: 1562802, hospitalCount: 9 },
-          { stage: "Closed Won", amount: 378928, hospitalCount: 4 },
-          { stage: "Closed Lost", amount: 7077662, hospitalCount: 31 },
-          { stage: "Ghosted", amount: 284309, hospitalCount: 5 },
-          { stage: "Implemented", amount: 6875309, hospitalCount: 14 }
-        ],
-      };
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch dashboard stats",
+      );
     }
   },
 );
