@@ -25,6 +25,7 @@ import {
   ContactCardSkeleton,
 } from "@/components/contacts/ContactCard";
 import { ContactDetailsModal } from "@/components/contacts/ContactDetailsModal";
+import { UserSelect } from "@/components/UserSelect";
 import { fetchContacts } from "@/store/features/contact/contactSlice";
 import { fetchProducts } from "@/store/features/product/productSlice";
 import {
@@ -50,9 +51,8 @@ function Contacts() {
     user?.role === UserRole.CUSTOMER_SUCCESS;
 
   const [searchQuery, setSearchQuery] = useState("");
-  // const [activeFilter, setActiveFilter] = useState<"my" | "all">("my");
-  const [activeFilter, setActiveFilter] = useState<"my" | "all">(
-    isAdminOrExecutive ? "all" : "my",
+  const [selectedUserId, setSelectedUserId] = useState<string>(
+    isAdminOrExecutive ? "all" : user?._id || "all",
   );
   const [selectedProductId, setSelectedProductId] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,7 +68,7 @@ function Contacts() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, activeFilter, selectedProductId]);
+  }, [searchQuery, selectedUserId, selectedProductId]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -91,15 +91,13 @@ function Contacts() {
         page: currentPage,
         limit: pageSize,
         search: searchQuery,
-        userId: activeFilter === "my" ? user?._id : "",
-        productId: selectedProductId === "all" ? "" : selectedProductId,
+        userId: selectedUserId === "all" ? "" : selectedUserId,
       }),
     );
   }, [
     dispatch,
     searchQuery,
-    activeFilter,
-    user?._id,
+    selectedUserId,
     selectedProductId,
     currentPage,
     pageSize,
@@ -138,29 +136,22 @@ function Contacts() {
       <DashboardHeader
         title="Contacts"
         subTitle={
-          activeFilter === "my"
+          !isAdminOrExecutive
             ? `Your contacts (${user?.name || "User"})`
-            : "All contacts across the organization"
+            : selectedUserId === "all"
+              ? "All contacts across the organization"
+              : "Contacts filtered by assigned sales rep"
         }
       >
-        <div className="hidden sm:flex w-full sm:w-45">
-          <Select
-            value={selectedProductId}
-            onValueChange={setSelectedProductId}
-          >
-            <SelectTrigger className="w-full bg-muted border-border shadow-sm cursor-pointer">
-              <SelectValue placeholder="Filter by product" />
-            </SelectTrigger>
-            <SelectContent className="z-110">
-              <SelectItem value="all">All Products</SelectItem>
-              {products.map((product) => (
-                <SelectItem key={product._id} value={product._id}>
-                  {product.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {isAdminOrExecutive && (
+          <div className="hidden sm:flex w-full sm:w-45">
+            <UserSelect
+              value={selectedUserId}
+              onValueChange={setSelectedUserId}
+              className="w-full bg-muted border-border shadow-sm cursor-pointer"
+            />
+          </div>
+        )}
         <AddContactModal>
           <Button className="flex gap-3 p-3 md:p-4.5 text-sm bg-black text-white border border-border cursor-pointer hover:bg-black/80 shadow-xl shadow-muted transition-all duration-200">
             <Plus className="h-4 w-4" /> Add Contact
@@ -169,19 +160,13 @@ function Contacts() {
       </DashboardHeader>
 
       <div className="flex flex-col gap-2 w-full sm:hidden -mt-4 mb-4 px-2">
-        <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-          <SelectTrigger className="w-full bg-muted border-border shadow-sm cursor-pointer">
-            <SelectValue placeholder="Filter by product" />
-          </SelectTrigger>
-          <SelectContent className="z-110">
-            <SelectItem value="all">All Products</SelectItem>
-            {products.map((product) => (
-              <SelectItem key={product._id} value={product._id}>
-                {product.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {isAdminOrExecutive && (
+          <UserSelect
+            value={selectedUserId}
+            onValueChange={setSelectedUserId}
+            className="w-full bg-muted border-border shadow-sm cursor-pointer"
+          />
+        )}
       </div>
 
       {/* search and filters */}
@@ -201,84 +186,37 @@ function Contacts() {
           />
         </InputGroup>
 
+        {/* Commented out My Contacts / All Contacts tabs as they are replaced by the users dropdown for non-sales users
         <div className="flex items-center gap-2 w-full md:w-auto">
-          {/* {isAdminOrExecutive && (
-            <>
-              <Button
-                variant={activeFilter === "my" ? "default" : "outline"}
-                size="lg"
-                onClick={() => setActiveFilter("my")}
-                className={cn(
-                  "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
-                  activeFilter === "my"
-                    ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
-                    : "border-border/60 bg-white hover:bg-muted text-foreground",
-                )}
-              >
-                <Users className="h-4 w-4" /> My Contacts
-              </Button>
-              <Button
-                variant={activeFilter === "all" ? "default" : "outline"}
-                size="lg"
-                onClick={() => setActiveFilter("all")}
-                className={cn(
-                  "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
-                  activeFilter === "all"
-                    ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
-                    : "border-border/60 bg-white hover:bg-muted text-foreground",
-                )}
-              >
-                <Funnel className="h-4 w-4" /> All Contacts
-              </Button>
-            </>
-          )} */}
-
           {isAdminOrExecutive ? (
             <>
               <Button
-                variant={activeFilter === "my" ? "default" : "outline"}
+                variant="outline"
                 size="lg"
-                onClick={() => setActiveFilter("my")}
-                className={cn(
-                  "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
-                  activeFilter === "my"
-                    ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
-                    : "border-border/60 bg-white hover:bg-muted text-foreground",
-                )}
+                className="flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border border-border/60 bg-white hover:bg-muted text-foreground"
               >
                 <Users className="h-4 w-4" /> My Contacts
               </Button>
 
               <Button
-                variant={activeFilter === "all" ? "default" : "outline"}
+                variant="outline"
                 size="lg"
-                onClick={() => setActiveFilter("all")}
-                className={cn(
-                  "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
-                  activeFilter === "all"
-                    ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
-                    : "border-border/60 bg-white hover:bg-muted text-foreground",
-                )}
+                className="flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border border-border/60 bg-white hover:bg-muted text-foreground"
               >
                 <Funnel className="h-4 w-4" /> All Contacts
               </Button>
             </>
           ) : (
             <Button
-              variant={activeFilter === "my" ? "default" : "outline"}
+              variant="outline"
               size="lg"
-              onClick={() => setActiveFilter("my")}
-              className={cn(
-                "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
-                activeFilter === "my"
-                  ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
-                  : "border-border/60 bg-white hover:bg-muted text-foreground",
-              )}
+              className="flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border border-border/60 bg-white hover:bg-muted text-foreground"
             >
               <Users className="h-4 w-4" /> My Contacts
             </Button>
           )}
         </div>
+        */}
       </div>
 
       {/* contact list */}
