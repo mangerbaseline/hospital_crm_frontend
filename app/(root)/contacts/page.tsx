@@ -24,6 +24,7 @@ import {
   ContactCard,
   ContactCardSkeleton,
 } from "@/components/contacts/ContactCard";
+import { ContactDetailsModal } from "@/components/contacts/ContactDetailsModal";
 import { fetchContacts } from "@/store/features/contact/contactSlice";
 import { fetchProducts } from "@/store/features/product/productSlice";
 import {
@@ -33,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserRole } from "@/store/types";
+import { UserRole, Contact } from "@/store/types";
 
 function Contacts() {
   const dispatch = useAppDispatch();
@@ -56,6 +57,13 @@ function Contacts() {
   const [selectedProductId, setSelectedProductId] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const handleViewContact = (contact: any) => {
+    setSelectedContact(contact);
+    setIsDetailsOpen(true);
+  };
 
   // Reset page when filters change
   useEffect(() => {
@@ -199,20 +207,6 @@ function Contacts() {
           )} */}
 
           {isAdminOrExecutive ? (
-            <Button
-              variant={activeFilter === "all" ? "default" : "outline"}
-              size="lg"
-              onClick={() => setActiveFilter("all")}
-              className={cn(
-                "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
-                activeFilter === "all"
-                  ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
-                  : "border-border/60 bg-white hover:bg-muted text-foreground",
-              )}
-            >
-              <Funnel className="h-4 w-4" /> All Contacts
-            </Button>
-          ) : (
             <>
               <Button
                 variant={activeFilter === "my" ? "default" : "outline"}
@@ -242,6 +236,20 @@ function Contacts() {
                 <Funnel className="h-4 w-4" /> All Contacts
               </Button>
             </>
+          ) : (
+            <Button
+              variant={activeFilter === "my" ? "default" : "outline"}
+              size="lg"
+              onClick={() => setActiveFilter("my")}
+              className={cn(
+                "flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border",
+                activeFilter === "my"
+                  ? "bg-black text-white hover:bg-black/80 scale-[1.02] border-transparent"
+                  : "border-border/60 bg-white hover:bg-muted text-foreground",
+              )}
+            >
+              <Users className="h-4 w-4" /> My Contacts
+            </Button>
           )}
         </div>
       </div>
@@ -254,7 +262,11 @@ function Contacts() {
           ))
         ) : contacts.length > 0 ? (
           contacts.map((contact) => (
-            <ContactCard key={contact.email} contact={contact} />
+            <ContactCard
+              key={contact.email}
+              contact={contact}
+              onViewClick={handleViewContact}
+            />
           ))
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center py-20 bg-muted/30 rounded-3xl border border-dashed border-border gap-4">
@@ -377,6 +389,15 @@ function Contacts() {
           </div>
         </div>
       )}
+
+      <ContactDetailsModal
+        contact={selectedContact}
+        isOpen={isDetailsOpen}
+        onClose={() => {
+          setIsDetailsOpen(false);
+          setSelectedContact(null);
+        }}
+      />
     </section>
   );
 }

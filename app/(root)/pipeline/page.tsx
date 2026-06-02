@@ -118,7 +118,7 @@ function Pipeline() {
           {stats ? (
             <PipelineStatsCard
               value={formatCurrency(Number(stats.closedBusiness || 0))}
-              label="Closed Business"
+              label="Closed Won"
             />
           ) : (
             <PipelineStatsCard value="-" label="Loading Closed Business..." />

@@ -27,10 +27,12 @@ import {
   AlertTriangle,
   Edit3,
 } from "lucide-react";
+import { UserRole } from "@/store/types";
 
 function HospitalDetails() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const {
     selectedHospital,
     isGetSingleHospitalLoading,
@@ -47,6 +49,7 @@ function HospitalDetails() {
     };
   }, [dispatch, id]);
 
+  const isSales = user?.role === UserRole.SALES;
   return (
     <section className="max-w-7xl mx-auto w-full">
       <DashboardHeader title="Hospital Details" />
@@ -58,15 +61,17 @@ function HospitalDetails() {
         !getSingleHospitalError && (
           <Card className="flex flex-col gap-4 p-6 shadow-md border border-border rounded-xl bg-white">
             <div className="flex justify-end w-full">
-              <EditHospitalModal hospital={selectedHospital}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 shadow-sm text-xs font-semibold rounded-lg flex items-center gap-2 cursor-pointer"
-                >
-                  <Edit3 className="h-3.5 w-3.5" /> Edit Details
-                </Button>
-              </EditHospitalModal>
+              {!isSales && (
+                <EditHospitalModal hospital={selectedHospital}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 shadow-sm text-xs font-semibold rounded-lg flex items-center gap-2 cursor-pointer"
+                  >
+                    <Edit3 className="h-3.5 w-3.5" /> Edit Details
+                  </Button>
+                </EditHospitalModal>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

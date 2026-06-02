@@ -136,7 +136,9 @@ export default function DealsPage() {
         title="All Deals"
         subTitle="View and manage all your deals"
       >
-        <div className="hidden gap-2 w-full sm:w-auto lg:grid grid-cols-2 xl:grid-cols-4 items-center">
+        <div
+          className={`hidden ${isAdminOrExecutive ? "xl:grid-cols-4" : "xl:grid-cols-3"} gap-2 w-full sm:w-auto lg:grid grid-cols-2 items-center`}
+        >
           {isAdminOrExecutive && (
             <UserSelect
               value={selectedUserId}
