@@ -105,8 +105,35 @@ function Contacts() {
     pageSize,
   ]);
 
+  const [myusers, setmyusers] = useState([
+    { id: 1, name: "Alice", role: "admin" },
+    { id: 2, name: "Bob", role: "executive" },
+    { id: 3, name: "Charlie", role: "customer_success" },
+    { id: 4, name: "David", role: "sales_rep" },
+  ]);
+
+  function handleDelete(id: number) {
+    setmyusers((prev) => prev.filter((user) => user.id !== id));
+  }
+
+  function HandleRole(id: number) {}
+
   return (
     <section className="max-w-7xl mx-auto w-full">
+      {myusers.map((user) => (
+        <section className="flex gap-4 my-5" key={user.id}>
+          <div>{user.id}</div>
+          <div>{user.name}</div>
+          <div>{user.role}</div>
+          <div className="cursor-pointer" onClick={() => handleDelete(user.id)}>
+            Delete
+          </div>
+          <div className="cursor-pointer" onClick={() => HandleRole(user.id)}>
+            Make Manager
+          </div>
+        </section>
+      ))}
+
       {/* header */}
       <DashboardHeader
         title="Contacts"
