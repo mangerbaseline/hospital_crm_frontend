@@ -631,6 +631,7 @@ export interface DealState {
   stats: {
     totalHospitals: number;
     closedBusiness: number;
+    totalDeals: number;
     productRevenue: ProductRevenue[];
   } | null;
   page: number;

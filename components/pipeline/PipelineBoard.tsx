@@ -59,8 +59,10 @@ const columnOrder = [
   "implemented",
 ];
 
-const stageToColumnId = (stage?: string) => {
-  switch (stage) {
+const stageToColumnId = (stage?: string): string | undefined => {
+  const normalizedStage = stage?.trim();
+
+  switch (normalizedStage) {
     case DealProductStage.DEMO:
       return "demo";
     case DealProductStage.CPA:
@@ -78,7 +80,7 @@ const stageToColumnId = (stage?: string) => {
     case DealProductStage.IMPLEMENTED:
       return "implemented";
     default:
-      return "demo";
+      return undefined;
   }
 };
 
@@ -124,10 +126,11 @@ export function PipelineBoard({ onStageChange }: PipelineBoardProps = {}) {
         ...deal,
         id: `${deal._id}-${deal.product?._id || Math.random()}`,
       };
-      if (cols[colId]) {
+      if (colId && cols[colId]) {
         cols[colId].deals.push(pipelineCardDeal);
       }
     });
+
     return cols;
   }, [deals]);
 
