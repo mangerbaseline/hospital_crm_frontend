@@ -199,6 +199,7 @@ const dealSlice = createSlice({
           totalHospitals: action.payload.totalHospitals,
           closedBusiness: action.payload.closedBusiness,
           productRevenue: action.payload.productRevenue,
+          totalDeals: action.payload.totalDeals,
         };
         state.page = action.payload.page || 1;
         state.limit = action.payload.limit || 10;

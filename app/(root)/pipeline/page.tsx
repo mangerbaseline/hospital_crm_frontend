@@ -96,7 +96,7 @@ function Pipeline() {
         {/* stats */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5 w-full">
           <PipelineStatsCard
-            value={stats ? String(stats.totalHospitals) : "-"}
+            value={stats ? Number(stats.totalDeals) : "-"}
             label="Total Deals"
           />
           {stats?.productRevenue ? (
