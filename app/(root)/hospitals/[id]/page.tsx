@@ -19,20 +19,17 @@ import { EditHospitalModal } from "@/components/hospitals/EditHospitalModal";
 import { HospitalEmails } from "@/components/hospitals/HospitalEmails";
 import {
   Building2,
+  MapPin,
+  Briefcase,
+  Edit3,
   FileText,
   CheckCircle2,
   Check,
-  MapPin,
-  Briefcase,
-  AlertTriangle,
-  Edit3,
 } from "lucide-react";
-import { UserRole } from "@/store/types";
 
 function HospitalDetails() {
   const { id } = useParams();
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.auth);
   const {
     selectedHospital,
     isGetSingleHospitalLoading,
@@ -49,7 +46,6 @@ function HospitalDetails() {
     };
   }, [dispatch, id]);
 
-  const isSales = user?.role === UserRole.SALES;
   return (
     <section className="max-w-7xl mx-auto w-full">
       <DashboardHeader title="Hospital Details" />
@@ -61,17 +57,15 @@ function HospitalDetails() {
         !getSingleHospitalError && (
           <Card className="flex flex-col gap-4 p-6 shadow-md border border-border rounded-xl bg-white">
             <div className="flex justify-end w-full">
-              {!isSales && (
-                <EditHospitalModal hospital={selectedHospital}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 shadow-sm text-xs font-semibold rounded-lg flex items-center gap-2 cursor-pointer"
-                  >
-                    <Edit3 className="h-3.5 w-3.5" /> Edit Details
-                  </Button>
-                </EditHospitalModal>
-              )}
+              <EditHospitalModal hospital={selectedHospital}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 shadow-sm text-xs font-semibold rounded-lg flex items-center gap-2 cursor-pointer"
+                >
+                  <Edit3 className="h-3.5 w-3.5" /> Edit Details
+                </Button>
+              </EditHospitalModal>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -107,10 +101,6 @@ function HospitalDetails() {
                       {selectedHospital?.address}
                     </p>
                   )}
-                  {/* <p className="text-sm font-semibold text-slate-700 leading-snug">
-                    {selectedHospital.city}, {selectedHospital.state}{" "}
-                    {selectedHospital.zip}
-                  </p> */}
                   <p className="text-sm font-semibold text-slate-700 leading-snug">
                     {[
                       selectedHospital.city,
@@ -142,7 +132,7 @@ function HospitalDetails() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-muted border border-border rounded-xl p-4">
                 <div className="bg-white p-2.5 rounded-lg border border-border shrink-0">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -151,8 +141,50 @@ function HospitalDetails() {
                   <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wide">
                     Total Beds
                   </p>
-                  <h4 className="text-sm font-semibold text-slate-700">
+                  <h4 className="font-semibold text-slate-700 text-xl">
                     {selectedHospital?.beds || "N/A"}
+                  </h4>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-orange-50/50 border border-orange-200 rounded-xl p-4">
+                <div className="bg-white p-2.5 rounded-lg border border-orange-200 shrink-0">
+                  <FileText className="h-4 w-4 text-orange-500" />
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-[10px] font-extrabold text-orange-500 uppercase tracking-wide">
+                    ICU Beds
+                  </p>
+                  <h4 className="text-xl font-extrabold text-orange-600">
+                    {selectedHospital.ICUBeds || "N/A"}
+                  </h4>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shrink-0">
+                  <Check className="h-4 w-4 text-emerald-500" />
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wide">
+                    TEAM Hospital
+                  </p>
+                  <h4 className="text-xl font-extrabold text-emerald-700">
+                    {selectedHospital.teamHospital ? "Yes" : "No"}
+                  </h4>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-purple-50 border border-purple-200 rounded-xl p-4">
+                <div className="bg-white p-2.5 rounded-lg border border-purple-200 shrink-0">
+                  <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-[10px] font-extrabold text-purple-600 uppercase tracking-wide">
+                    MAGNET Hospital
+                  </p>
+                  <h4 className="text-xl font-extrabold text-purple-700">
+                    {selectedHospital.magnetHospital ? "Yes" : "No"}
                   </h4>
                 </div>
               </div>

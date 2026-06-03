@@ -218,10 +218,10 @@ export interface CreateHospitalPayload {
   gpo: string;
   userId?: string;
   // competitiveProduct: string;
-  // teamHospital: boolean;
-  // magnetHospital: boolean;
+  teamHospital: boolean;
+  magnetHospital: boolean;
   // bedsWithMac: number;
-  // ICUBeds: number;
+  ICUBeds: number;
 }
 
 export interface UpdateHospitalPayload extends Partial<CreateHospitalPayload> {

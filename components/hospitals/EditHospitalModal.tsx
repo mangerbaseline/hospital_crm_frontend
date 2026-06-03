@@ -37,7 +37,10 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchIDNs, resetIDNsForSelection } from "@/store/features/idn/idnSlice";
+import {
+  fetchIDNs,
+  resetIDNsForSelection,
+} from "@/store/features/idn/idnSlice";
 import { fetchGPOs } from "@/store/features/gpo/gpoSlice";
 import { fetchUsers } from "@/store/features/user/userSlice";
 import { updateHospital } from "@/store/features/hospital/hospitalSlice";
@@ -58,11 +61,12 @@ export function EditHospitalModal({
   children,
 }: EditHospitalModalProps) {
   const dispatch = useAppDispatch();
-  const { idns, isFetchingIDNs, hasMoreSelection, selectionPage } = useAppSelector((state) => state.idn);
+  const { idns, isFetchingIDNs, hasMoreSelection, selectionPage } =
+    useAppSelector((state) => state.idn);
   const { gpos } = useAppSelector((state) => state.gpo);
   const { users } = useAppSelector((state) => state.user);
   const { user } = useAppSelector((state) => state.auth);
-  const isAdmin = user?.role === UserRole.ADMIN;
+  const isSales = user?.role === UserRole.SALES;
 
   const { isUpdateHospitalLoading } = useAppSelector((state) => state.hospital);
 
@@ -109,6 +113,9 @@ export function EditHospitalModal({
         typeof hospital.user === "object"
           ? (hospital.user as any)?._id || ""
           : hospital.user || "",
+      teamHospital: hospital.teamHospital ?? false,
+      magnetHospital: hospital.magnetHospital ?? false,
+      ICUBeds: hospital.ICUBeds ?? 0,
     },
   });
 
@@ -127,7 +134,9 @@ export function EditHospitalModal({
     if (idnOpen) {
       isLoadingIdnRef.current = true;
       dispatch(resetIDNsForSelection());
-      dispatch(fetchIDNs({ page: 1, limit: IDN_PAGE_LIMIT, search: idnSearch }));
+      dispatch(
+        fetchIDNs({ page: 1, limit: IDN_PAGE_LIMIT, search: idnSearch }),
+      );
     }
   }, [idnOpen, idnSearch, dispatch]);
 
@@ -160,9 +169,19 @@ export function EditHospitalModal({
     const el = idnListRef.current;
     if (!el) return;
     const { scrollTop, scrollHeight, clientHeight } = el;
-    if (scrollHeight - scrollTop - clientHeight < 30 && hasMoreSelection && !isLoadingIdnRef.current) {
+    if (
+      scrollHeight - scrollTop - clientHeight < 30 &&
+      hasMoreSelection &&
+      !isLoadingIdnRef.current
+    ) {
       isLoadingIdnRef.current = true;
-      dispatch(fetchIDNs({ page: selectionPage + 1, limit: IDN_PAGE_LIMIT, search: idnSearch }));
+      dispatch(
+        fetchIDNs({
+          page: selectionPage + 1,
+          limit: IDN_PAGE_LIMIT,
+          search: idnSearch,
+        }),
+      );
     }
   }, [hasMoreSelection, selectionPage, idnSearch, dispatch]);
 
@@ -187,6 +206,9 @@ export function EditHospitalModal({
             ? (hospital.gpo as any)?._id || ""
             : hospital.gpo || "",
         userId: userIdVal,
+        teamHospital: hospital.teamHospital ?? false,
+        magnetHospital: hospital.magnetHospital ?? false,
+        ICUBeds: hospital.ICUBeds ?? 0,
       });
       setSelectedUser(userIdVal);
     }
@@ -225,7 +247,7 @@ export function EditHospitalModal({
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 mt-2"
         >
-          {isAdmin && (
+          {!isSales && (
             <div>
               <Label className="text-xs font-semibold">Sales Rep</Label>
               <Select value={selectedUser} onValueChange={setSelectedUser}>
@@ -256,6 +278,7 @@ export function EditHospitalModal({
                       variant="outline"
                       role="combobox"
                       aria-expanded={idnOpen}
+                      disabled={isSales}
                       className="w-full justify-between mt-1.5 text-xs h-9 bg-white font-medium border-border shadow-none hover:bg-muted cursor-pointer"
                     >
                       <span className="truncate text-left flex-1 min-w-0">
@@ -273,7 +296,10 @@ export function EditHospitalModal({
                     className="w-(--radix-popover-trigger-width) p-0 z-100"
                     align="start"
                   >
-                    <Command onWheel={(e) => e.stopPropagation()} shouldFilter={false}>
+                    <Command
+                      onWheel={(e) => e.stopPropagation()}
+                      shouldFilter={false}
+                    >
                       <CommandInput
                         placeholder="Search IDN..."
                         className="h-9 text-xs"
@@ -333,6 +359,7 @@ export function EditHospitalModal({
                 <Input
                   placeholder="Enter hospital name"
                   className="text-xs h-9 mt-1.5 bg-white"
+                  disabled={isSales}
                   {...register("hospitalName")}
                 />
                 {errors.hospitalName && (
@@ -350,6 +377,7 @@ export function EditHospitalModal({
               <Input
                 placeholder="Enter address"
                 className="text-xs h-9 mt-1.5 bg-white"
+                disabled={isSales}
                 {...register("address")}
               />
               {errors.address && (
@@ -366,6 +394,7 @@ export function EditHospitalModal({
               <Input
                 placeholder="Enter city"
                 className="text-xs h-9 mt-1.5 bg-muted"
+                disabled={isSales}
                 {...register("city")}
               />
               {errors.city && (
@@ -379,6 +408,7 @@ export function EditHospitalModal({
               <Input
                 placeholder="Enter state"
                 className="text-xs h-9 mt-1.5 bg-muted"
+                disabled={isSales}
                 {...register("state")}
               />
               {errors.state && (
@@ -392,6 +422,7 @@ export function EditHospitalModal({
               <Input
                 placeholder="Enter zip code"
                 className="text-xs h-9 mt-1.5 bg-muted"
+                disabled={isSales}
                 {...register("zip")}
               />
               {errors.zip && (
@@ -402,75 +433,138 @@ export function EditHospitalModal({
             </div>
           </div>
 
-          <div>
-            <Label className="text-xs font-semibold">GPO</Label>
-            <Popover open={gpoOpen} onOpenChange={setGpoOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={gpoOpen}
-                  className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted"
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-xs font-semibold">GPO</Label>
+              <Popover open={gpoOpen} onOpenChange={setGpoOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={gpoOpen}
+                    disabled={isSales}
+                    className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted"
+                  >
+                    {gpoValue
+                      ? gpos.find((gpo) => gpo._id === gpoValue)?.name ||
+                        (typeof hospital.gpo === "object"
+                          ? (hospital.gpo as any)?.name
+                          : "Select GPO")
+                      : "Select GPO"}
+                    <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-(--radix-popover-trigger-width) p-0 z-100"
+                  align="start"
                 >
-                  {gpoValue
-                    ? gpos.find((gpo) => gpo._id === gpoValue)?.name ||
-                      (typeof hospital.gpo === "object"
-                        ? (hospital.gpo as any)?.name
-                        : "Select GPO")
-                    : "Select GPO"}
-                  <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-(--radix-popover-trigger-width) p-0 z-100"
-                align="start"
-              >
-                <Command onWheel={(e) => e.stopPropagation()}>
-                  <CommandInput
-                    placeholder="Search GPO..."
-                    className="h-9 text-xs"
-                  />
-                  <CommandList>
-                    <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                      No GPO found.
-                    </CommandEmpty>
-                    <CommandGroup>
-                      {gpos.map((gpo) => (
-                        <CommandItem
-                          key={gpo._id}
-                          value={gpo.name}
-                          onSelect={() => {
-                            setValue(
-                              "gpo",
-                              gpo._id === gpoValue ? "" : gpo._id,
-                              { shouldValidate: true },
-                            );
-                            setGpoOpen(false);
-                          }}
-                          className="text-xs"
-                        >
-                          {gpo.name}
-                          <Check
-                            className={cn(
-                              "ml-auto h-4 w-4",
-                              gpoValue === gpo._id
-                                ? "opacity-100"
-                                : "opacity-0",
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            {errors.gpo && (
-              <p className="text-xs text-destructive mt-1">
-                {errors.gpo.message}
-              </p>
-            )}
+                  <Command onWheel={(e) => e.stopPropagation()}>
+                    <CommandInput
+                      placeholder="Search GPO..."
+                      className="h-9 text-xs"
+                    />
+                    <CommandList>
+                      <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+                        No GPO found.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {gpos.map((gpo) => (
+                          <CommandItem
+                            key={gpo._id}
+                            value={gpo.name}
+                            onSelect={() => {
+                              setValue(
+                                "gpo",
+                                gpo._id === gpoValue ? "" : gpo._id,
+                                { shouldValidate: true },
+                              );
+                              setGpoOpen(false);
+                            }}
+                            className="text-xs"
+                          >
+                            {gpo.name}
+                            <Check
+                              className={cn(
+                                "ml-auto h-4 w-4",
+                                gpoValue === gpo._id
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {errors.gpo && (
+                <p className="text-xs text-destructive mt-1">
+                  {errors.gpo.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label className="text-xs font-semibold">ICU Beds</Label>
+              <Input
+                type="number"
+                placeholder="Enter number"
+                className="text-xs h-9 mt-1.5 bg-muted"
+                {...register("ICUBeds", { valueAsNumber: true })}
+              />
+              {errors.ICUBeds && (
+                <p className="text-xs text-destructive mt-1">
+                  {errors.ICUBeds.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-xs font-semibold">TEAM Hospital</Label>
+              <Controller
+                control={control}
+                name="teamHospital"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ? "yes" : "no"}
+                    onValueChange={(val) => field.onChange(val === "yes")}
+                  >
+                    <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
+                      <SelectValue placeholder="Select Yes or No" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold">MAGNET Hospital</Label>
+              <Controller
+                control={control}
+                name="magnetHospital"
+                render={({ field }) => (
+                  <Select
+                    value={field.value ? "yes" : "no"}
+                    onValueChange={(val) => field.onChange(val === "yes")}
+                  >
+                    <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
+                      <SelectValue placeholder="Select Yes or No" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes</SelectItem>
+                      <SelectItem value="no">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
           </div>
 
           <div className="flex justify-end mt-2">

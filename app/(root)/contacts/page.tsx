@@ -10,16 +10,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import {
-  Plus,
-  Search,
-  Users,
-  Filter,
-  Funnel,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   ContactCard,
   ContactCardSkeleton,
@@ -44,7 +35,6 @@ function Contacts() {
     useAppSelector((state) => state.contact);
   const { products } = useAppSelector((state) => state.product);
 
-  // const isAdmin = user?.role === UserRole.ADMIN;
   const isAdminOrExecutive =
     user?.role === UserRole.ADMIN ||
     user?.role === UserRole.EXECUTIVE ||
@@ -54,7 +44,6 @@ function Contacts() {
   const [selectedUserId, setSelectedUserId] = useState<string>(
     isAdminOrExecutive ? "all" : user?._id || "all",
   );
-  const [selectedProductId, setSelectedProductId] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -65,10 +54,9 @@ function Contacts() {
     setIsDetailsOpen(true);
   };
 
-  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedUserId, selectedProductId]);
+  }, [searchQuery, selectedUserId]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -94,73 +82,10 @@ function Contacts() {
         userId: selectedUserId === "all" ? "" : selectedUserId,
       }),
     );
-  }, [
-    dispatch,
-    searchQuery,
-    selectedUserId,
-    selectedProductId,
-    currentPage,
-    pageSize,
-  ]);
+  }, [dispatch, searchQuery, selectedUserId, currentPage, pageSize]);
 
-  /*
-  const [myusers, setmyusers] = useState([
-    { id: 1, name: "Alice", role: "admin" },
-    { id: 2, name: "Bob", role: "executive" },
-    { id: 3, name: "Charlie", role: "customer_success" },
-    { id: 4, name: "David", role: "sales_rep" },
-  ]);
-
-  function handleDelete(id: number) {
-    setmyusers((prev) => prev.filter((user) => user.id !== id));
-  }
-
-  function HandleRole(id: number) {
-    setmyusers((prev) =>
-      prev.map((user) =>
-        user.id === id
-          ? {
-              ...user,
-              role: user.role === "admin" ? "executive" : "admin",
-            }
-          : user,
-      ),
-    );
-  }
-
-  function AddUser() {
-    setmyusers((prev) => [
-      ...prev,
-      {
-        id: prev.length + 1,
-        name: "Raj",
-        role: "Manager",
-      },
-    ]);
-  }
-*/
   return (
     <section className="max-w-7xl mx-auto w-full">
-      {/* <section>
-        <div onClick={AddUser}>AddUSer</div>
-        {myusers.map((user) => (
-          <section className="flex gap-4 my-5" key={user.id}>
-            <div>{user.id}</div>
-            <div>{user.name}</div>
-            <div>{user.role}</div>
-            <div
-              className="cursor-pointer"
-              onClick={() => handleDelete(user.id)}
-            >
-              Delete
-            </div>
-            <div className="cursor-pointer" onClick={() => HandleRole(user.id)}>
-              ChangeROLE
-            </div>
-          </section>
-        ))}
-      </section> */}
-
       {/* header */}
       <DashboardHeader
         title="Contacts"

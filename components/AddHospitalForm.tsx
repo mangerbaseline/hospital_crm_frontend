@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "./ui/label";
@@ -67,11 +74,9 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
       zip: "",
       gpo: "",
       userId: currentUser?._id || "",
-      // teamHospital: false,
-      // magnetHospital: false,
-      // bedsWithMac: 0,
-      // ICUBeds: 0,
-      // competitiveProduct: "",
+      teamHospital: false,
+      magnetHospital: false,
+      ICUBeds: 0,
     },
   });
 
@@ -345,32 +350,6 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
               </p>
             )}
           </div>
-
-          {/* <div>
-            <Label className="text-xs font-semibold">Competitive Product</Label>
-            <Input
-              placeholder="Enter competitive product"
-              className="text-xs mt-1.5 h-9 bg-muted"
-              {...register("competitiveProduct")}
-            />
-          </div> */}
-        </div>
-
-        {/* <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label className="text-xs font-semibold">Beds with MAC</Label>
-            <Input
-              type="number"
-              placeholder="Enter number"
-              className="text-xs h-9 mt-1.5 bg-muted"
-              {...register("bedsWithMac", { valueAsNumber: true })}
-            />
-            {errors.bedsWithMac && (
-              <p className="text-xs text-destructive mt-1">
-                {errors.bedsWithMac.message}
-              </p>
-            )}
-          </div>
           <div>
             <Label className="text-xs font-semibold">ICU Beds</Label>
             <Input
@@ -431,7 +410,7 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
               )}
             />
           </div>
-        </div> */}
+        </div>
 
         <div className={`flex ${onCancel ? "gap-2" : "flex-col"} w-full mt-2`}>
           {onCancel && (
