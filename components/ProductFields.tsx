@@ -72,7 +72,7 @@ export function ProductFields({ index }: ProductFieldsProps) {
         </div>
 
         <div>
-          <Label className="text-[11px] font-semibold">Beds</Label>
+          <Label className="text-[11px] font-semibold">Beds Implemented</Label>
           <Input
             type="number"
             min={0}

@@ -358,7 +358,9 @@ export function EditExpectedARRModal({
               </div>
 
               <div>
-                <Label className="text-xs font-semibold">Beds</Label>
+                <Label className="text-xs font-semibold">
+                  Beds Implemented
+                </Label>
                 <Input
                   type="number"
                   min={0}
