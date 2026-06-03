@@ -91,7 +91,7 @@ function Home() {
               href="/deals"
             />
             <StatsCard
-              title="Total"
+              title="Total in Pipeline"
               icon={DollarSign}
               iconClassName="text-muted-foreground"
               value={`$${(dashboardStats?.totalPipelineAmount || 0).toLocaleString()}`}
