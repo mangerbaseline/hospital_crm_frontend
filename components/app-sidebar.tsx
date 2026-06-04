@@ -289,8 +289,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <span className="text-sm text-muted-foreground">
                 Total Hospitals:
               </span>
-              <span className="text-sm font-semibold ">
-                {quickStats?.hospitalCount ?? 0}
+              <span className="text-sm font-semibold">
+                {(quickStats?.hospitalCount ?? 0).toLocaleString()}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -298,7 +298,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 Total Deals:
               </span>
               <span className="text-sm font-semibold ">
-                {quickStats?.productCount ?? 0}
+                <span className="text-sm font-semibold">
+                  {(quickStats?.dealsCount ?? 0).toLocaleString()}
+                </span>
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                Total Products:
+              </span>
+              <span className="text-sm font-semibold ">
+                <span className="text-sm font-semibold">
+                  {(quickStats?.productCount ?? 0).toLocaleString()}
+                </span>
               </span>
             </div>
           </div>

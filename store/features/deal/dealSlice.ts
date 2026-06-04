@@ -150,6 +150,7 @@ export const fetchHospitalProductCount = createAsyncThunk(
         success: boolean;
         hospitalCount: number;
         productCount: number;
+        dealsCount: number;
       }>("/api/deal/stats/hospital-product-count");
       return response.data;
     } catch (error: any) {
@@ -266,6 +267,7 @@ const dealSlice = createSlice({
         state.isFetchingQuickStats = false;
         state.quickStats = {
           hospitalCount: action.payload.hospitalCount,
+          dealsCount: action.payload.dealsCount,
           productCount: action.payload.productCount,
         };
       })

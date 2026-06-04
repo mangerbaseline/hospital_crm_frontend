@@ -642,6 +642,7 @@ export interface DealState {
   deleteDealError: string | null;
   quickStats: {
     hospitalCount: number;
+    dealsCount: number;
     productCount: number;
   } | null;
   isFetchingQuickStats: boolean;
