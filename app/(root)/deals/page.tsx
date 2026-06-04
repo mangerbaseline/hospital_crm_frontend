@@ -35,7 +35,6 @@ export default function DealsPage() {
   const { deals, isFetchingDeals, page, limit, totalDeals, totalPages } =
     useAppSelector((state) => state.deal);
 
-  const isAdmin = currentUser?.role === UserRole.ADMIN;
   const isAdminOrExecutive =
     currentUser?.role === UserRole.ADMIN ||
     currentUser?.role === UserRole.EXECUTIVE ||
@@ -139,13 +138,11 @@ export default function DealsPage() {
         <div
           className={`hidden ${isAdminOrExecutive ? "xl:grid-cols-4" : "xl:grid-cols-3"} gap-2 w-full sm:w-auto lg:grid grid-cols-2 items-center`}
         >
-          {isAdminOrExecutive && (
-            <UserSelect
-              value={selectedUserId}
-              onValueChange={setSelectedUserId}
-              className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
-            />
-          )}
+          <UserSelect
+            value={selectedUserId}
+            onValueChange={setSelectedUserId}
+            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
+          />
           <GPOSelect
             value={selectedGpoId}
             onValueChange={setSelectedGpoId}

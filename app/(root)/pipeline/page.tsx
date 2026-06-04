@@ -22,7 +22,6 @@ const formatCurrency = (value: number) => {
 function Pipeline() {
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const { stats } = useAppSelector((state) => state.deal);
-  const isAdmin = currentUser?.role === UserRole.ADMIN;
   const isAdminOrExecutive =
     currentUser?.role === UserRole.ADMIN ||
     currentUser?.role === UserRole.EXECUTIVE ||
@@ -55,13 +54,11 @@ function Pipeline() {
           subTitle="Track deals across all stages"
         >
           <div className="hidden gap-2 w-full sm:w-auto lg:flex">
-            {isAdminOrExecutive && (
-              <UserSelect
-                value={selectedUserId}
-                onValueChange={setSelectedUserId}
-                className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
-              />
-            )}
+            <UserSelect
+              value={selectedUserId}
+              onValueChange={setSelectedUserId}
+              className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
+            />
             <GPOSelect
               value={selectedGpoId}
               onValueChange={setSelectedGpoId}
