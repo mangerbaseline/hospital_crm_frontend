@@ -46,6 +46,12 @@ const emptyColumnsSkeleton: Record<string, ColumnData> = {
     color: "#16a34a",
     deals: [],
   },
+  noLongerBuying: {
+    id: "noLongerBuying",
+    title: "No Longer Buying",
+    color: "#64748b",
+    deals: [],
+  },
 };
 
 const columnOrder = [
@@ -57,6 +63,7 @@ const columnOrder = [
   "closed",
   "lost",
   "implemented",
+  "noLongerBuying",
 ];
 
 const stageToColumnId = (stage?: string): string | undefined => {
@@ -77,6 +84,8 @@ const stageToColumnId = (stage?: string): string | undefined => {
       return "closed";
     case DealProductStage.CLOSED_LOST:
       return "lost";
+    case DealProductStage.NO_LONGER_BUYING:
+      return "noLongerBuying";
     case DealProductStage.IMPLEMENTED:
       return "implemented";
     default:
@@ -100,6 +109,8 @@ const columnIdToStage = (id: string) => {
       return DealProductStage.CLOSED_WON;
     case "lost":
       return DealProductStage.CLOSED_LOST;
+    case "noLongerBuying":
+      return DealProductStage.NO_LONGER_BUYING;
     case "implemented":
       return DealProductStage.IMPLEMENTED;
     default:

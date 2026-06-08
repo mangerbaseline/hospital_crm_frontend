@@ -507,6 +507,7 @@ export enum DealProductStage {
   CLOSED_WON = "Closed Won",
   CLOSED_LOST = "Closed Lost",
   GHOSTED = "Ghosted",
+  NO_LONGER_BUYING = "No Longer Buying",
   IMPLEMENTED = "Implemented",
 }
 

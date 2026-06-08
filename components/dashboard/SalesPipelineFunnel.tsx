@@ -112,6 +112,14 @@ const stages: FunnelStageProps[] = [
     widthClass: "w-[40%] max-w-[500px]",
     href: "/deals?dealStage=Implemented",
   },
+  {
+    label: "No Longer Buying",
+    amount: "$0",
+    count: 0,
+    colorClass: "bg-blue-300 hover:bg-blue-400",
+    widthClass: "w-[35%] max-w-[450px]",
+    href: "/deals?dealStage=No%20Longer%20Buying",
+  },
 ];
 
 export function SalesPipelineFunnel() {
@@ -148,7 +156,7 @@ export function SalesPipelineFunnel() {
       <CardContent className="px-6 pb-8 pt-0 flex flex-col items-center">
         <div className="flex flex-col items-center gap-2 w-full max-w-200">
           {isFetchingDashboardStats
-            ? Array.from({ length: 8 }).map((_, idx) => (
+            ? Array.from({ length: 9 }).map((_, idx) => (
                 <Skeleton
                   key={idx}
                   className="h-15 rounded-xl mb-1 mt-1"
