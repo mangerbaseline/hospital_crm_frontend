@@ -74,7 +74,7 @@ export function ImplementedModal({ children }: { children: React.ReactNode }) {
                 {implementedData.data.map((hospital: any, hIdx: number) =>
                   hospital.products.map((prod: any, pIdx: number) => (
                     <Link
-                      href={`/hospitals/${hospital._id}`}
+                      href={`/hospitals/${hospital.hospitalId}`}
                       key={`${hIdx}-${pIdx}`}
                       className="flex items-center justify-between p-4 rounded-xl border border-blue-200 shadow-sm transition-all hover:bg-blue-50/50 cursor-pointer"
                       onClick={() => setOpen(false)}

@@ -861,6 +861,7 @@ export interface ClosedWonDeal {
   hospitalName: string;
   totalAmount: number;
   productsCount: number;
+  hospitalId: string;
   products: ClosedWonProduct[];
 }
 
