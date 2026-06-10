@@ -48,12 +48,12 @@ function Home() {
             <span className="md:block hidden">Add Deal</span>
           </Button>
         </AddDealModal>
-        <AddContactModal>
+        {/* <AddContactModal>
           <Button className="flex gap-3 p-3 md:p-4.5 text-sm bg-sidebar border border-border text-foreground cursor-pointer hover:bg-muted shadow-xl shadow-muted">
             <UserPlus className="h-2 w-2 md:h-4 md:w-4" />{" "}
             <span className="md:block hidden">Add Contact</span>
           </Button>
-        </AddContactModal>
+        </AddContactModal> */}
       </DashboardHeader>
 
       {/* stats */}

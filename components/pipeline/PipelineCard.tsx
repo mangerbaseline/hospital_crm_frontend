@@ -5,6 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation"
 
 import { PipelineDeal } from "@/store/types";
 
@@ -33,6 +34,7 @@ const formatCurrency = (value: number) => {
 };
 
 export function PipelineCard({ deal, index }: KanbanCardProps) {
+  const router = useRouter();
   const {
     attributes,
     listeners,
@@ -66,6 +68,11 @@ export function PipelineCard({ deal, index }: KanbanCardProps) {
           "p-4 border-border shadow-sm bg-card transition-colors cursor-grab active:cursor-grabbing",
           isDragging ? "shadow-lg border-primary/30" : "hover:border-gray-300",
         )}
+        onClick={() => {
+          if (!isDragging) {
+            router.push(`hospitals/${deal.hospital?._id}`);
+          }
+        }}
       >
         <div className="flex gap-2 items-start mb-4">
           <Building2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -76,8 +83,8 @@ export function PipelineCard({ deal, index }: KanbanCardProps) {
             <span className="text-[10px] text-muted-foreground mt-0.5">
               {deal.hospital?.city || deal.hospital?.state
                 ? [deal.hospital?.city, deal.hospital?.state]
-                    .filter(Boolean)
-                    .join(", ")
+                  .filter(Boolean)
+                  .join(", ")
                 : "N/A"}
             </span>
           </div>
