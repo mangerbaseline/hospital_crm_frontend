@@ -13,11 +13,23 @@ export const createContactSchema = z.object({
 
 export type CreateContactValues = z.infer<typeof createContactSchema>;
 
+//old
+// export const updateContactSchema = z.object({
+//   firstName: z.string().min(2, "First name must be at least 2 characters"),
+//   lastName: z.string().min(2, "Last name must be at least 2 characters"),
+//   designation: z.string().min(2, "Designation must be at least 2 characters"),
+//   phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
+//   email: z.email("Please enter a valid email address"),
+//   isPrimary: z.boolean(),
+// });
+
+//changed
 export const updateContactSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  designation: z.string().min(2, "Designation must be at least 2 characters"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
+  designation: z.string().optional(),
+  hospital: z.string().optional(),
+  phoneNumber: z.string().optional(),
   email: z.email("Please enter a valid email address"),
   isPrimary: z.boolean(),
 });

@@ -34,8 +34,8 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchHospitalsForSelection } from "@/store/features/hospital/hospitalSlice";
 import { updateContact } from "@/store/features/contact/contactSlice";
 import {
-  createContactSchema,
-  CreateContactValues,
+  updateContactSchema,
+  UpdateContactValues,
 } from "@/validations/contact.validations";
 import { toast } from "sonner";
 import { MultiProductSelect } from "@/components/products/MultiProductSelect";
@@ -69,8 +69,8 @@ export function EditContactModal({
     reset,
     setValue,
     formState: { errors },
-  } = useForm<CreateContactValues>({
-    resolver: zodResolver(createContactSchema),
+  } = useForm<UpdateContactValues>({
+    resolver: zodResolver(updateContactSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -158,7 +158,7 @@ export function EditContactModal({
     };
   }, [hospitals, isFetchingHospitals, hasMoreSelection]);
 
-  const onSubmit = async (data: CreateContactValues) => {
+  const onSubmit = async (data: UpdateContactValues) => {
     const payload = {
       ...data,
       product: selectedProductIds,
@@ -217,11 +217,11 @@ export function EditContactModal({
                     >
                       {field.value
                         ? hospitals.find((h) => h._id === field.value)
-                            ?.hospitalName ||
-                          (typeof contact.hospital === "object" &&
+                          ?.hospitalName ||
+                        (typeof contact.hospital === "object" &&
                           contact.hospital?._id === field.value
-                            ? contact.hospital.hospitalName
-                            : "Select a hospital...")
+                          ? contact.hospital.hospitalName
+                          : "Select a hospital...")
                         : "Select a hospital..."}
                       <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
                     </Button>

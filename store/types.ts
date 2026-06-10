@@ -257,6 +257,17 @@ export interface CreateContactPayload {
   product?: string[];
 }
 
+export interface UpdateContactPayload {
+  firstName: string;
+  lastName: string;
+  designation?: string;
+  hospital: string;
+  phoneNumber?: string;
+  email: string;
+  isPrimary: boolean;
+  product?: string[];
+}
+
 export interface FetchContactsParams {
   page?: number;
   limit?: number;

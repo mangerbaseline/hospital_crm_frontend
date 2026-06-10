@@ -4,6 +4,7 @@ import {
   Contact,
   ContactState,
   CreateContactPayload,
+  UpdateContactPayload,
   ApiResponse,
   PaginatedApiResponse,
   FetchContactsParams,
@@ -69,7 +70,7 @@ export const createContact = createAsyncThunk(
 export const updateContact = createAsyncThunk(
   "contact/updateContact",
   async (
-    { id, payload }: { id: string; payload: Partial<CreateContactPayload> },
+    { id, payload }: { id: string; payload: Partial<UpdateContactPayload> },
     { rejectWithValue },
   ) => {
     try {
