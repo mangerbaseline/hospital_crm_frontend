@@ -76,6 +76,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const { isCreateDealLoading } = useAppSelector((state) => state.deal);
 
   const isAdmin = currentUser?.role === UserRole.ADMIN;
+  const isSales = currentUser?.role === UserRole.SALES;
 
   const [idnOpen, setIdnOpen] = useState(false);
   const [idnSearch, setIdnSearch] = useState("");
@@ -586,15 +587,15 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={gpoOpen}
-                    disabled={!hospitalValue}
+                    disabled={!hospitalValue || isSales}
                     className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted cursor-pointer"
                   >
                     <span className="truncate text-left flex-1">
                       {gpoValue
                         ? gpos.find((gpo) => gpo._id === gpoValue)?.name ||
-                          (typeof selectedHospital?.gpo === "object"
-                            ? (selectedHospital?.gpo as any)?.name
-                            : "Select GPO")
+                        (typeof selectedHospital?.gpo === "object"
+                          ? (selectedHospital?.gpo as any)?.name
+                          : "Select GPO")
                         : hospitalValue
                           ? "Select GPO"
                           : "Select Hospital first"}
