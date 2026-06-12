@@ -41,6 +41,7 @@ import {
   clearSelectedHospital,
   resetHospitalsForSelection,
 } from "@/store/features/hospital/hospitalSlice";
+import { fetchGPOs } from "@/store/features/gpo/gpoSlice";
 import { createDeal } from "@/store/features/deal/dealSlice";
 import { dealSchema, DealFormValues } from "@/validations/deal.validations";
 import { toast } from "sonner";
@@ -70,6 +71,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
     selectionPage: hospitalSelectionPage,
     hasMoreSelection: hospitalHasMoreSelection,
   } = useAppSelector((state) => state.hospital);
+  const { gpos } = useAppSelector((state) => state.gpo);
   const { products } = useAppSelector((state) => state.product);
   const { isCreateDealLoading } = useAppSelector((state) => state.deal);
 
@@ -79,6 +81,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const [idnSearch, setIdnSearch] = useState("");
   const [hospitalOpen, setHospitalOpen] = useState(false);
   const [hospitalSearch, setHospitalSearch] = useState("");
+  const [gpoOpen, setGpoOpen] = useState(false);
 
   const methods = useForm<DealFormValues>({
     resolver: zodResolver(dealSchema),
@@ -108,6 +111,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   });
 
   const idnValue = watch("idn");
+  const gpoValue = watch("gpo");
   const hospitalValue = watch("hospital");
   const selectedProducts = watch("products");
   const userIdValue = watch("userId");
@@ -126,6 +130,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   useEffect(() => {
     dispatch(fetchIDNs({ page: 1, limit: 10, search: "" }));
     dispatch(fetchProducts({ limit: 1000 }));
+    dispatch(fetchGPOs({ limit: 1000 }));
 
     return () => {
       dispatch(clearSelectedHospital());
@@ -463,10 +468,10 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                     <span className="truncate text-left flex-1">
                       {idnValue
                         ? selectedIDN?.name ||
-                          idns.find((idn) => idn._id === idnValue)?.name
+                        idns.find((idn) => idn._id === idnValue)?.name
                         : hospitalValue
-                        ? "Select IDN"
-                        : "Select Hospital first"}
+                          ? "Select IDN"
+                          : "Select Hospital first"}
                     </span>
                     <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
                   </Button>
@@ -574,18 +579,78 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
           <div className="grid grid-cols-1 gap-4">
             <div>
               <Label className="text-xs font-semibold">GPO</Label>
-              <Input
-                placeholder="GPO"
-                className="text-xs mt-1.5 h-9 bg-muted"
-                value={
-                  selectedHospital?.gpo
-                    ? typeof selectedHospital.gpo === "string"
-                      ? selectedHospital.gpo
-                      : selectedHospital.gpo.name
-                    : ""
-                }
-                readOnly
-              />
+              <Popover open={gpoOpen} onOpenChange={setGpoOpen} modal={false}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={gpoOpen}
+                    disabled={!hospitalValue}
+                    className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted cursor-pointer"
+                  >
+                    <span className="truncate text-left flex-1">
+                      {gpoValue
+                        ? gpos.find((gpo) => gpo._id === gpoValue)?.name ||
+                          (typeof selectedHospital?.gpo === "object"
+                            ? (selectedHospital?.gpo as any)?.name
+                            : "Select GPO")
+                        : hospitalValue
+                          ? "Select GPO"
+                          : "Select Hospital first"}
+                    </span>
+                    <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-(--radix-popover-trigger-width) p-0 z-100"
+                  align="start"
+                >
+                  <Command
+                    onWheel={(e) => e.stopPropagation()}
+                  >
+                    <CommandInput
+                      placeholder="Search GPO..."
+                      className="h-9 text-xs"
+                    />
+                    <CommandList>
+                      <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+                        No GPO found.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {gpos.map((gpo) => (
+                          <CommandItem
+                            key={gpo._id}
+                            value={gpo.name}
+                            onSelect={() => {
+                              setValue("gpo", gpo._id === gpoValue ? "" : gpo._id, {
+                                shouldValidate: true,
+                              });
+                              setGpoOpen(false);
+                            }}
+                            className="text-xs"
+                          >
+                            {gpo.name}
+                            <Check
+                              className={cn(
+                                "ml-auto h-4 w-4",
+                                gpoValue === gpo._id
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {errors.gpo && (
+                <p className="text-[10px] text-destructive mt-1">
+                  {errors.gpo.message}
+                </p>
+              )}
             </div>
 
             {/* <div>
