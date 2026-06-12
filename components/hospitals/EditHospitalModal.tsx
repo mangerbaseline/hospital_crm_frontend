@@ -116,6 +116,7 @@ export function EditHospitalModal({
       teamHospital: hospital.teamHospital ?? false,
       magnetHospital: hospital.magnetHospital ?? false,
       ICUBeds: hospital.ICUBeds ?? 0,
+      totalBeds: hospital.totalBeds ?? 0,
     },
   });
 
@@ -209,6 +210,7 @@ export function EditHospitalModal({
         teamHospital: hospital.teamHospital ?? false,
         magnetHospital: hospital.magnetHospital ?? false,
         ICUBeds: hospital.ICUBeds ?? 0,
+        totalBeds: hospital.totalBeds ?? 0,
       });
       setSelectedUser(userIdVal);
     }
@@ -433,7 +435,7 @@ export function EditHospitalModal({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label className="text-xs font-semibold">GPO</Label>
               <Popover open={gpoOpen} onOpenChange={setGpoOpen}>
@@ -516,6 +518,20 @@ export function EditHospitalModal({
               {errors.ICUBeds && (
                 <p className="text-xs text-destructive mt-1">
                   {errors.ICUBeds.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label className="text-xs font-semibold">Total Beds</Label>
+              <Input
+                type="number"
+                placeholder="Enter number"
+                className="text-xs h-9 mt-1.5 bg-muted"
+                {...register("totalBeds", { valueAsNumber: true })}
+              />
+              {errors.totalBeds && (
+                <p className="text-xs text-destructive mt-1">
+                  {errors.totalBeds.message}
                 </p>
               )}
             </div>

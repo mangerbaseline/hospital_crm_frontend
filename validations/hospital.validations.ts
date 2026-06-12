@@ -14,6 +14,7 @@ export const hospitalSchema = z.object({
   teamHospital: z.boolean(),
   magnetHospital: z.boolean(),
   ICUBeds: z.number().min(0, "ICU Beds must be 0 or more"),
+  totalBeds: z.number().min(0, "Total Beds must be 0 or more").optional(),
 });
 
 export type HospitalFormValues = z.infer<typeof hospitalSchema>;

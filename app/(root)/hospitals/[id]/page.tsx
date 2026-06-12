@@ -142,7 +142,7 @@ function HospitalDetails() {
                     Total Beds
                   </p>
                   <h4 className="font-semibold text-slate-700 text-xl">
-                    {selectedHospital?.beds || "N/A"}
+                    {selectedHospital?.totalBeds ?? "N/A"}
                   </h4>
                 </div>
               </div>

@@ -364,6 +364,20 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
               </p>
             )}
           </div>
+          <div>
+            <Label className="text-xs font-semibold">Total Beds</Label>
+            <Input
+              type="number"
+              placeholder="Enter number"
+              className="text-xs h-9 mt-1.5 bg-muted"
+              {...register("totalBeds", { valueAsNumber: true })}
+            />
+            {errors.totalBeds && (
+              <p className="text-xs text-destructive mt-1">
+                {errors.totalBeds.message}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

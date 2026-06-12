@@ -143,6 +143,7 @@ export interface Hospital {
   magnetHospital?: boolean;
   bedsWithMac?: number;
   ICUBeds?: number;
+  totalBeds?: number;
   products?: string[];
   notes?: string;
   contacts: {

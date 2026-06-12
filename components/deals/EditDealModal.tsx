@@ -37,6 +37,8 @@ import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { fetchUsers } from "@/store/features/user/userSlice";
 import { fetchProducts } from "@/store/features/product/productSlice";
+import { fetchGPOs } from "@/store/features/gpo/gpoSlice";
+import { updateHospital } from "@/store/features/hospital/hospitalSlice";
 import { updateDealProduct } from "@/store/features/deal/dealSlice";
 import { toast } from "sonner";
 import { PipelineDeal, DealProductStage, UserRole } from "@/store/types";
@@ -59,17 +61,20 @@ export function EditDealModal({
   const dispatch = useAppDispatch();
   const { users } = useAppSelector((state) => state.user);
   const { products } = useAppSelector((state) => state.product);
+  const { gpos } = useAppSelector((state) => state.gpo);
   const { user: currentUser } = useAppSelector((state) => state.auth);
 
   const isAdmin = currentUser?.role === UserRole.ADMIN;
 
   const [userOpen, setUserOpen] = useState(false);
+  const [gpoOpen, setGpoOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const [selectedUserId, setSelectedUserId] = useState(deal.user?._id || "");
   const [selectedProductId, setSelectedProductId] = useState(
     deal.product?._id || "",
   );
+  const [selectedGpoId, setSelectedGpoId] = useState(deal.hospital?.gpo?._id || "");
   const [dealAmount, setDealAmount] = useState(deal.dealAmount || 0);
   const [quantity, setQuantity] = useState(deal.quantity || 1);
   const [beds, setBeds] = useState(deal.beds || "");
@@ -84,9 +89,11 @@ export function EditDealModal({
     if (open) {
       dispatch(fetchUsers({ limit: 1000 }));
       if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
+      if (gpos.length === 0) dispatch(fetchGPOs({ limit: 1000 }));
 
       setSelectedUserId(deal.user?._id || "");
       setSelectedProductId(deal.product?._id || "");
+      setSelectedGpoId(deal.hospital?.gpo?._id || "");
       setDealAmount(deal.dealAmount || 0);
       setQuantity(deal.quantity || 1);
       setBeds(deal.beds || "");
@@ -97,11 +104,20 @@ export function EditDealModal({
           : "",
       );
     }
-  }, [open, deal, dispatch, users.length, products.length]);
+  }, [open, deal, dispatch, users.length, products.length, gpos.length]);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      if (selectedGpoId !== deal.hospital?.gpo?._id) {
+        await dispatch(
+          updateHospital({
+            id: deal.hospital._id,
+            gpo: selectedGpoId,
+          } as any)
+        ).unwrap();
+      }
+
       await dispatch(
         updateDealProduct({
           dealId: deal.dealId,
@@ -213,6 +229,67 @@ export function EditDealModal({
               </Popover>
             </div>
           )}
+
+          <div>
+            <Label className="text-xs font-semibold">Hospital GPO</Label>
+            <Popover open={gpoOpen} onOpenChange={setGpoOpen} modal={true}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={gpoOpen}
+                  className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted cursor-pointer"
+                >
+                  <span className="truncate text-left flex-1">
+                    {selectedGpoId
+                      ? gpos.find((gpo) => gpo._id === selectedGpoId)?.name || "Select GPO"
+                      : "Select GPO"}
+                  </span>
+                  <ChevronsUpDown className="ml-2 opacity-50 h-4 w-4 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-(--radix-popover-trigger-width) p-0 z-100"
+                align="start"
+              >
+                <Command onWheel={(e) => e.stopPropagation()}>
+                  <CommandInput
+                    placeholder="Search GPO..."
+                    className="h-9 text-xs"
+                  />
+                  <CommandList>
+                    <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
+                      No GPO found.
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {gpos.map((gpo) => (
+                        <CommandItem
+                          key={gpo._id}
+                          value={gpo.name}
+                          onSelect={() => {
+                            setSelectedGpoId(gpo._id === selectedGpoId ? "" : gpo._id);
+                            setGpoOpen(false);
+                          }}
+                          className="text-xs"
+                        >
+                          {gpo.name}
+                          <Check
+                            className={cn(
+                              "ml-auto h-4 w-4",
+                              selectedGpoId === gpo._id
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
 
           <div>
             <Label className="text-xs font-semibold">Product</Label>
