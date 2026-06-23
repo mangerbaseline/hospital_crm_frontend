@@ -74,8 +74,8 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
       zip: "",
       gpo: "",
       userId: currentUser?._id || "",
-      teamHospital: false,
-      magnetHospital: false,
+      teamHospital: null as any,
+      magnetHospital: null as any,
       ICUBeds: 0,
     },
   });
@@ -388,13 +388,18 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
               name="teamHospital"
               render={({ field }) => (
                 <Select
-                  value={field.value ? "yes" : "no"}
-                  onValueChange={(val) => field.onChange(val === "yes")}
+                  value={field.value === true ? "yes" : field.value === false ? "no" : ""}
+                  onValueChange={(val) => {
+                    if (val === "yes") field.onChange(true);
+                    else if (val === "no") field.onChange(false);
+                    else field.onChange(null);
+                  }}
                 >
                   <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                     <SelectValue placeholder="Select Yes or No" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Select Option</SelectItem>
                     <SelectItem value="yes">Yes</SelectItem>
                     <SelectItem value="no">No</SelectItem>
                   </SelectContent>
@@ -410,13 +415,18 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
               name="magnetHospital"
               render={({ field }) => (
                 <Select
-                  value={field.value ? "yes" : "no"}
-                  onValueChange={(val) => field.onChange(val === "yes")}
+                  value={field.value === true ? "yes" : field.value === false ? "no" : ""}
+                  onValueChange={(val) => {
+                    if (val === "yes") field.onChange(true);
+                    else if (val === "no") field.onChange(false);
+                    else field.onChange(null);
+                  }}
                 >
                   <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                     <SelectValue placeholder="Select Yes or No" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Select Option</SelectItem>
                     <SelectItem value="yes">Yes</SelectItem>
                     <SelectItem value="no">No</SelectItem>
                   </SelectContent>

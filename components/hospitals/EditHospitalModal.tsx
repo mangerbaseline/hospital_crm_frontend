@@ -113,8 +113,8 @@ export function EditHospitalModal({
         typeof hospital.user === "object"
           ? (hospital.user as any)?._id || ""
           : hospital.user || "",
-      teamHospital: hospital.teamHospital ?? false,
-      magnetHospital: hospital.magnetHospital ?? false,
+      teamHospital: hospital.teamHospital ?? null as any,
+      magnetHospital: hospital.magnetHospital ?? null as any,
       ICUBeds: hospital.ICUBeds ?? 0,
       totalBeds: hospital.totalBeds ?? 0,
     },
@@ -207,8 +207,8 @@ export function EditHospitalModal({
             ? (hospital.gpo as any)?._id || ""
             : hospital.gpo || "",
         userId: userIdVal,
-        teamHospital: hospital.teamHospital ?? false,
-        magnetHospital: hospital.magnetHospital ?? false,
+        teamHospital: hospital.teamHospital ?? null as any,
+        magnetHospital: hospital.magnetHospital ?? null as any,
         ICUBeds: hospital.ICUBeds ?? 0,
         totalBeds: hospital.totalBeds ?? 0,
       });
@@ -286,9 +286,9 @@ export function EditHospitalModal({
                       <span className="truncate text-left flex-1 min-w-0">
                         {idnValue
                           ? idns.find((idn) => idn._id === idnValue)?.name ||
-                            (typeof hospital.idn === "object"
-                              ? (hospital.idn as any)?.name
-                              : "Select IDN")
+                          (typeof hospital.idn === "object"
+                            ? (hospital.idn as any)?.name
+                            : "Select IDN")
                           : "Select IDN"}
                       </span>
                       <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
@@ -450,9 +450,9 @@ export function EditHospitalModal({
                   >
                     {gpoValue
                       ? gpos.find((gpo) => gpo._id === gpoValue)?.name ||
-                        (typeof hospital.gpo === "object"
-                          ? (hospital.gpo as any)?.name
-                          : "Select GPO")
+                      (typeof hospital.gpo === "object"
+                        ? (hospital.gpo as any)?.name
+                        : "Select GPO")
                       : "Select GPO"}
                     <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
                   </Button>
@@ -545,13 +545,18 @@ export function EditHospitalModal({
                 name="teamHospital"
                 render={({ field }) => (
                   <Select
-                    value={field.value ? "yes" : "no"}
-                    onValueChange={(val) => field.onChange(val === "yes")}
+                    value={field.value === true ? "yes" : field.value === false ? "no" : ""}
+                    onValueChange={(val) => {
+                      if (val === "yes") field.onChange(true);
+                      else if (val === "no") field.onChange(false);
+                      else field.onChange(null);
+                    }}
                   >
                     <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                       <SelectValue placeholder="Select Yes or No" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">Select Option</SelectItem>
                       <SelectItem value="yes">Yes</SelectItem>
                       <SelectItem value="no">No</SelectItem>
                     </SelectContent>
@@ -567,13 +572,18 @@ export function EditHospitalModal({
                 name="magnetHospital"
                 render={({ field }) => (
                   <Select
-                    value={field.value ? "yes" : "no"}
-                    onValueChange={(val) => field.onChange(val === "yes")}
+                    value={field.value === true ? "yes" : field.value === false ? "no" : ""}
+                    onValueChange={(val) => {
+                      if (val === "yes") field.onChange(true);
+                      else if (val === "no") field.onChange(false);
+                      else field.onChange(null);
+                    }}
                   >
                     <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                       <SelectValue placeholder="Select Yes or No" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">Select Option</SelectItem>
                       <SelectItem value="yes">Yes</SelectItem>
                       <SelectItem value="no">No</SelectItem>
                     </SelectContent>

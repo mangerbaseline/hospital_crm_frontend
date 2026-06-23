@@ -170,7 +170,11 @@ function HospitalDetails() {
                     TEAM Hospital
                   </p>
                   <h4 className="text-xl font-extrabold text-emerald-700">
-                    {selectedHospital.teamHospital ? "Yes" : "No"}
+                    {selectedHospital.teamHospital === true
+                      ? "Yes"
+                      : selectedHospital.teamHospital === false
+                        ? "No"
+                        : "-"}
                   </h4>
                 </div>
               </div>
@@ -184,7 +188,11 @@ function HospitalDetails() {
                     MAGNET Hospital
                   </p>
                   <h4 className="text-xl font-extrabold text-purple-700">
-                    {selectedHospital.magnetHospital ? "Yes" : "No"}
+                    {selectedHospital.magnetHospital === true
+                      ? "Yes"
+                      : selectedHospital.magnetHospital === false
+                        ? "No"
+                        : "-"}
                   </h4>
                 </div>
               </div>

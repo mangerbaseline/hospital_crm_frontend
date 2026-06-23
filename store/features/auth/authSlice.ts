@@ -24,6 +24,9 @@ export const login = createAsyncThunk(
         credentials,
       );
       const { token, ...user } = response.data.data;
+      if (token && typeof window !== "undefined") {
+        localStorage.setItem("token", token);
+      }
       return user;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || "Login failed");
@@ -51,7 +54,13 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await axiosInstance.get("/api/auth/logout");
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+      }
     } catch (error: any) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+      }
       return rejectWithValue(error.response?.data?.message || "Logout failed");
     }
   },

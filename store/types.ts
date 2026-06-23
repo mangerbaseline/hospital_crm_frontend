@@ -219,8 +219,8 @@ export interface CreateHospitalPayload {
   gpo: string;
   userId?: string;
   // competitiveProduct: string;
-  teamHospital: boolean;
-  magnetHospital: boolean;
+  teamHospital?: boolean | null;
+  magnetHospital?: boolean | null;
   // bedsWithMac: number;
   ICUBeds: number;
 }

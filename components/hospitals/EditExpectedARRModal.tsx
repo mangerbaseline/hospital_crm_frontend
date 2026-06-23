@@ -231,7 +231,7 @@ export function EditExpectedARRModal({
       <DialogContent className="sm:max-w-130 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">
-            Edit Expected ARR
+            Edit Deal
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
             Update product amounts, stages, and expected close dates

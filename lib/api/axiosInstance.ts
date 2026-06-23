@@ -10,6 +10,12 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error) => {
@@ -23,11 +29,11 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      if (
-        typeof window !== "undefined" &&
-        !window.location.pathname.startsWith("/auth/")
-      ) {
-        window.location.href = "/auth/sign-in";
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        if (!window.location.pathname.startsWith("/auth/")) {
+          window.location.href = "/auth/sign-in";
+        }
       }
     }
     return Promise.reject(error);
