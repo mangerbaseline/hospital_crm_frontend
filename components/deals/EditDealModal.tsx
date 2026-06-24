@@ -77,7 +77,8 @@ export function EditDealModal({
   );
   const [selectedGpoId, setSelectedGpoId] = useState(deal.hospital?.gpo?._id || "");
   const [dealAmount, setDealAmount] = useState(deal.dealAmount || 0);
-  const [quantity, setQuantity] = useState(deal.quantity || 1);
+  const [totalBeds, setTotalBeds] = useState<number | string>(typeof deal.hospital === "object" ? (deal.hospital.totalBeds ?? (deal as any).quantity ?? "") : "");
+
   const [beds, setBeds] = useState(deal.beds || "");
   const [stage, setStage] = useState(deal.stage || DealProductStage.DEMO);
   const [expectedCloseDate, setExpectedCloseDate] = useState(
@@ -96,7 +97,8 @@ export function EditDealModal({
       setSelectedProductId(deal.product?._id || "");
       setSelectedGpoId(deal.hospital?.gpo?._id || "");
       setDealAmount(deal.dealAmount || 0);
-      setQuantity(deal.quantity || 1);
+      setTotalBeds(typeof deal.hospital === "object" ? (deal.hospital.totalBeds ?? (deal as any).quantity ?? "") : "");
+
       setBeds(deal.beds || "");
       setStage(deal.stage || DealProductStage.DEMO);
       setExpectedCloseDate(
@@ -110,11 +112,20 @@ export function EditDealModal({
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const hospitalUpdates: any = {};
       if (selectedGpoId !== deal.hospital?.gpo?._id) {
+        hospitalUpdates.gpo = selectedGpoId;
+      }
+      const newTotalBeds = totalBeds === "" ? 0 : Number(totalBeds);
+      const currentTotalBeds = typeof deal.hospital === "object" ? (deal.hospital.totalBeds ?? (deal as any).quantity ?? 0) : 0;
+      if (newTotalBeds !== currentTotalBeds) {
+        hospitalUpdates.totalBeds = newTotalBeds;
+      }
+      if (Object.keys(hospitalUpdates).length > 0) {
         await dispatch(
           updateHospital({
             id: deal.hospital._id,
-            gpo: selectedGpoId,
+            ...hospitalUpdates,
           } as any)
         ).unwrap();
       }
@@ -127,7 +138,7 @@ export function EditDealModal({
               ? selectedProductId
               : undefined,
           dealAmount,
-          quantity,
+
           beds: beds === "" ? undefined : Number(beds),
           stage: stage as string,
           expectedCloseDate: expectedCloseDate
@@ -329,17 +340,17 @@ export function EditDealModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs font-semibold">Quantity</Label>
+              <Label className="text-xs font-semibold">Total Beds</Label>
               <Input
                 type="number"
-                min={1}
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
+                min={0}
+                value={totalBeds}
+                onChange={(e) => setTotalBeds(e.target.value === "" ? "" : Number(e.target.value))}
                 className="text-xs h-9 bg-muted mt-1.5"
               />
             </div>
             <div>
-              <Label className="text-xs font-semibold">Beds</Label>
+              <Label className="text-xs font-semibold">Implemented Beds</Label>
               <Input
                 type="number"
                 min={0}

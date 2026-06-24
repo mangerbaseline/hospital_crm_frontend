@@ -127,11 +127,6 @@ export function DealCard({ deal, onDealUpdated }: DealCardProps) {
             <span className="text-3xl font-extrabold text-emerald-600">
               {formatCurrency(deal.dealAmount || 0)}
             </span>
-            {(deal.quantity ?? 1) > 1 && (
-              <span className="text-[10px] font-bold text-emerald-700 mt-1">
-                Qty: {deal.quantity}
-              </span>
-            )}
           </div>
 
           <div
@@ -147,6 +142,11 @@ export function DealCard({ deal, onDealUpdated }: DealCardProps) {
                   {productName}
                 </span>
               </div>
+            </div>
+
+            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider opacity-90 -mt-1 border-t border-white/20 pt-1.5">
+              <span>Implemented Beds</span>
+              <span>{deal.beds || 0}</span>
             </div>
 
             <div className="flex flex-wrap gap-2 items-center justify-between mt-1">
@@ -169,32 +169,32 @@ export function DealCard({ deal, onDealUpdated }: DealCardProps) {
           </div>
         </CardContent>
 
-          <CardFooter className="px-5 py-4 bg-muted/30 border-t border-border mt-auto group-hover:bg-muted/50 transition-colors">
-            <div className="flex flex-col w-full gap-2">
-              <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden">
-                  <User className="h-4 w-4 text-slate-600" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">
-                    Sales Rep
-                  </span>
-                  <span className="text-xs font-bold text-slate-900 leading-none">
-                    {deal.user?.name}
-                  </span>
-                </div>
+        <CardFooter className="px-5 py-4 bg-muted/30 border-t border-border mt-auto group-hover:bg-muted/50 transition-colors">
+          <div className="flex flex-col w-full gap-2">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden">
+                <User className="h-4 w-4 text-slate-600" />
               </div>
-              <Link href={`/hospitals/${deal.hospital?._id}`} className="w-full">
-                <Button
-                  variant="secondary"
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-white border-none h-10 text-xs font-semibold rounded-lg flex gap-2 items-center justify-center cursor-pointer"
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  View More
-                </Button>
-              </Link>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">
+                  Sales Rep
+                </span>
+                <span className="text-xs font-bold text-slate-900 leading-none">
+                  {deal.user?.name}
+                </span>
+              </div>
             </div>
-          </CardFooter>
+            <Link href={`/hospitals/${deal.hospital?._id}`} className="w-full">
+              <Button
+                variant="secondary"
+                className="w-full bg-slate-800 hover:bg-slate-700 text-white border-none h-10 text-xs font-semibold rounded-lg flex gap-2 items-center justify-center cursor-pointer"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                View More
+              </Button>
+            </Link>
+          </div>
+        </CardFooter>
       </Card>
 
       <EditDealModal

@@ -181,8 +181,13 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   }, [idns, isFetchingIDNs, idnHasMoreSelection]);
 
   useEffect(() => {
+    if (!hospitalOpen) {
+      setHospitalSearch("");
+    }
+  }, [hospitalOpen]);
+
+  useEffect(() => {
     if (!hospitalOpen) return;
-    if (hospitals.length > 0 && hospitalSearch === "") return;
 
     if (hospitalSearch === "") {
       dispatch(
@@ -205,7 +210,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
       );
     }, 500);
     return () => clearTimeout(timer);
-  }, [hospitalSearch, dispatch, hospitalOpen, hospitals.length]);
+  }, [hospitalSearch, dispatch, hospitalOpen]);
 
   const loadMoreHospitals = () => {
     if (hospitalHasMoreSelection && !isFetchingHospitals) {
@@ -304,7 +309,6 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
       append({
         product: productId,
         dealAmount: 0,
-        quantity: 1,
         beds: 0,
         stage: DealProductStage.DEMO,
         expectedCloseDate: undefined,

@@ -72,19 +72,19 @@ export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
 
           const themeStyle = isMacSystem
             ? {
-                bg: "bg-blue-50",
-                border: "border-blue-200",
-                title: "text-blue-900",
-                amount: "text-blue-700",
-                label: "text-blue-800",
-              }
+              bg: "bg-blue-50",
+              border: "border-blue-200",
+              title: "text-blue-900",
+              amount: "text-blue-700",
+              label: "text-blue-800",
+            }
             : {
-                bg: "bg-orange-50",
-                border: "border-orange-200",
-                title: "text-orange-900",
-                amount: "text-orange-600",
-                label: "text-orange-800",
-              };
+              bg: "bg-orange-50",
+              border: "border-orange-200",
+              title: "text-orange-900",
+              amount: "text-orange-600",
+              label: "text-orange-800",
+            };
 
           return (
             <div
@@ -101,15 +101,20 @@ export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
                   <p className={`text-xl font-extrabold ${themeStyle.amount}`}>
                     ${p.dealAmount?.toLocaleString()}
                   </p>
-                  {p.quantity && p.quantity > 1 && (
-                    <span className={`text-xs font-bold ${themeStyle.label}`}>
-                      x{p.quantity}
-                    </span>
-                  )}
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-0.5">
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground`}
+                  >
+                    Implemented Beds
+                  </span>
+                  <span className={`text-sm font-semibold ${themeStyle.label}`}>
+                    {(p as any).beds || 0}
+                  </span>
+                </div>
                 <div className="flex flex-col gap-0.5">
                   <span
                     className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground`}

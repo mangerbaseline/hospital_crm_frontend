@@ -15,6 +15,9 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "./ui/calendar";
 import { DealProductStage } from "@/store/types";
+import { useAppSelector, useAppDispatch } from "@/lib/hooks";
+import { updateHospital } from "@/store/features/hospital/hospitalSlice";
+import { useState, useEffect } from "react";
 
 interface ProductFieldsProps {
   index: number;
@@ -26,6 +29,29 @@ export function ProductFields({ index }: ProductFieldsProps) {
     control,
     formState: { errors },
   } = useFormContext();
+
+  const dispatch = useAppDispatch();
+  const { selectedHospital } = useAppSelector((state) => state.hospital);
+
+  const [totalBeds, setTotalBeds] = useState<number | string>(
+    selectedHospital?.totalBeds ?? ""
+  );
+
+  useEffect(() => {
+    setTotalBeds(selectedHospital?.totalBeds ?? "");
+  }, [selectedHospital?.totalBeds]);
+
+  const handleTotalBedsBlur = () => {
+    const newValue = totalBeds === "" ? 0 : Number(totalBeds);
+    if (selectedHospital && newValue !== selectedHospital.totalBeds) {
+      dispatch(
+        updateHospital({
+          id: selectedHospital._id,
+          totalBeds: newValue,
+        } as any)
+      );
+    }
+  };
 
   const productErrors = (errors.products as any)?.[index];
 
@@ -55,24 +81,19 @@ export function ProductFields({ index }: ProductFieldsProps) {
         </div>
 
         <div>
-          <Label className="text-[11px] font-semibold">Quantity</Label>
+          <Label className="text-[11px] font-semibold">Total Beds</Label>
           <Input
             type="number"
-            min={1}
+            min={0}
+            value={totalBeds}
+            onChange={(e) => setTotalBeds(e.target.value === "" ? "" : Number(e.target.value))}
+            onBlur={handleTotalBedsBlur}
             className="mt-1.5 text-xs h-9 bg-muted border-border"
-            {...register(`products.${index}.quantity`, {
-              valueAsNumber: true,
-            })}
           />
-          {productErrors?.quantity && (
-            <p className="text-[10px] text-destructive mt-1">
-              {productErrors.quantity.message}
-            </p>
-          )}
         </div>
 
         <div>
-          <Label className="text-[11px] font-semibold">Beds Implemented</Label>
+          <Label className="text-[11px] font-semibold">Implemented Beds</Label>
           <Input
             type="number"
             min={0}

@@ -119,7 +119,6 @@ export interface HospitalWithDeals {
     products: {
       product: string;
       dealAmount: number;
-      quantity?: number;
       stage: string;
       expectedCloseDate: string;
       _id: string;
@@ -160,7 +159,6 @@ export interface Hospital {
     products: {
       product: { _id: string; name: string } | any;
       dealAmount: number;
-      quantity?: number;
       stage: string;
       expectedCloseDate: string;
       _id: string;
@@ -526,7 +524,7 @@ export enum DealProductStage {
 export interface DealProduct {
   product: string | Product;
   dealAmount?: number;
-  quantity?: number;
+  beds?: number;
   stage?: DealProductStage;
   expectedCloseDate?: string | Date;
 }
@@ -552,7 +550,6 @@ export interface CreateDealPayload {
   products: {
     product: string;
     dealAmount?: number;
-    quantity?: number;
     stage?: DealProductStage;
     expectedCloseDate?: string | Date;
     beds?: number;
@@ -571,6 +568,7 @@ export interface PipelineDeal {
     city: string;
     state: string;
     zip: string;
+    totalBeds?: number;
   };
   user: {
     _id: string;
@@ -589,7 +587,6 @@ export interface PipelineDeal {
     updatedAt: string;
   };
   dealAmount: number;
-  quantity?: number;
   stage: string | DealProductStage;
   expectedCloseDate: string;
   dealDate?: string;
@@ -666,7 +663,6 @@ export interface AddDealProductPayload {
   hospitalId: string;
   product: string;
   dealAmount?: number;
-  quantity?: number;
   stage?: string;
   expectedCloseDate?: string;
   dealDate?: string;
@@ -679,7 +675,6 @@ export interface UpdateDealProductPayload {
   dealId: string;
   product?: string;
   dealAmount?: number;
-  quantity?: number;
   stage?: string;
   expectedCloseDate?: string;
   dealDate?: string;

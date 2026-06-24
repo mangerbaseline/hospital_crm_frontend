@@ -28,7 +28,7 @@ import {
   updateDealProduct,
   removeDealProduct,
 } from "@/store/features/deal/dealSlice";
-import { getSingleHospital } from "@/store/features/hospital/hospitalSlice";
+import { getSingleHospital, updateHospital } from "@/store/features/hospital/hospitalSlice";
 import { toast } from "sonner";
 import { Hospital, DealProductStage } from "@/store/types";
 
@@ -38,7 +38,6 @@ interface ProductItem {
   productId: string;
   productName: string;
   dealAmount: number;
-  quantity: number;
   beds: string;
   stage: string;
   expectedCloseDate: string;
@@ -65,6 +64,7 @@ export function EditExpectedARRModal({
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<ProductItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [totalBeds, setTotalBeds] = useState<number | string>(hospital.totalBeds ?? "");
 
   useEffect(() => {
     if (open) {
@@ -84,7 +84,6 @@ export function EditExpectedARRModal({
               ? p.product.name
               : "Unknown Product",
           dealAmount: p.dealAmount || 0,
-          quantity: p.quantity || 1,
           beds: (p as any).beds || "",
           stage: p.stage || DealProductStage.DEMO,
           expectedCloseDate: p.expectedCloseDate
@@ -96,6 +95,7 @@ export function EditExpectedARRModal({
         })),
       );
       setItems(allProducts);
+      setTotalBeds(hospital.totalBeds ?? "");
     }
   }, [open, hospital, dispatch, products.length]);
 
@@ -108,7 +108,6 @@ export function EditExpectedARRModal({
         productId: "",
         productName: "",
         dealAmount: 0,
-        quantity: 1,
         beds: "",
         stage: DealProductStage.DEMO,
         expectedCloseDate: "",
@@ -170,7 +169,6 @@ export function EditExpectedARRModal({
                 dealId: item.dealId,
                 product: item.productId,
                 dealAmount: item.dealAmount,
-                quantity: item.quantity,
                 beds: item.beds === "" ? undefined : Number(item.beds),
                 stage: item.stage,
                 expectedCloseDate: item.expectedCloseDate
@@ -193,7 +191,6 @@ export function EditExpectedARRModal({
               hospitalId: hospital._id,
               product: item.productId,
               dealAmount: item.dealAmount,
-              quantity: item.quantity,
               stage: item.stage,
               expectedCloseDate: item.expectedCloseDate
                 ? new Date(item.expectedCloseDate).toISOString()
@@ -213,6 +210,17 @@ export function EditExpectedARRModal({
       }
 
       await Promise.all(promises);
+
+      const newTotalBeds = totalBeds === "" ? 0 : Number(totalBeds);
+      if (newTotalBeds !== (hospital.totalBeds ?? 0)) {
+        await dispatch(
+          updateHospital({
+            id: hospital._id,
+            totalBeds: newTotalBeds,
+          } as any)
+        ).unwrap();
+      }
+
       toast.success("Products updated successfully");
       dispatch(getSingleHospital(hospital._id));
       setOpen(false);
@@ -341,25 +349,19 @@ export function EditExpectedARRModal({
               </div>
 
               <div>
-                <Label className="text-xs font-semibold">Quantity</Label>
+                <Label className="text-xs font-semibold">Total Beds</Label>
                 <Input
                   type="number"
-                  min={1}
-                  value={item.quantity}
-                  onChange={(e) =>
-                    handleFieldChange(
-                      item._id,
-                      "quantity",
-                      Number(e.target.value),
-                    )
-                  }
+                  min={0}
+                  value={totalBeds}
+                  onChange={(e) => setTotalBeds(e.target.value === "" ? "" : Number(e.target.value))}
                   className="text-xs h-9 bg-muted mt-1.5"
                 />
               </div>
 
               <div>
                 <Label className="text-xs font-semibold">
-                  Beds Implemented
+                  Implemented Beds
                 </Label>
                 <Input
                   type="number"
