@@ -591,7 +591,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={gpoOpen}
-                    disabled={!hospitalValue || isSales}
+                    disabled={!hospitalValue}
                     className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted cursor-pointer"
                   >
                     <span className="truncate text-left flex-1">
