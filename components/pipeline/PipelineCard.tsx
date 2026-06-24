@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/ui/card";
 import { Building2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getProductTheme } from "@/lib/utils";
 import { useRouter } from "next/navigation"
 
 import { PipelineDeal } from "@/store/types";
@@ -15,15 +15,6 @@ interface KanbanCardProps {
   deal: PipelineCardDeal;
   index: number;
 }
-
-const getProductColor = (productName: string) => {
-  const name = productName.toLowerCase();
-  if (name.includes("mac")) return "bg-blue-500";
-  if (name.includes("elevate")) return "bg-orange-500";
-  if (name.includes("heelpod") || name.includes("hellpod"))
-    return "bg-[#ff6a00]";
-  return "bg-gray-500";
-};
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -93,7 +84,7 @@ export function PipelineCard({ deal, index }: KanbanCardProps) {
         <div
           className={cn(
             "w-full flex items-center justify-between px-2.5 py-1.5 rounded text-[11px] font-bold text-white mb-4",
-            getProductColor(deal.product?.name || ""),
+            getProductTheme(deal.product?.name || "").bgKanban,
           )}
         >
           <span className="truncate max-w-30">{deal.product?.name}</span>

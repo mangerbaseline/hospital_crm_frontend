@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PipelineDeal, UserRole } from "@/store/types";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, getProductTheme } from "@/lib/utils";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { EditDealModal } from "./EditDealModal";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -132,7 +132,7 @@ export function DealCard({ deal, onDealUpdated }: DealCardProps) {
           <div
             className={cn(
               "rounded-xl p-4 text-white flex flex-col gap-3 shadow-sm",
-              isMacSystem ? "bg-blue-600" : "bg-orange-500",
+              getProductTheme(productName).bgSolid,
             )}
           >
             <div className="flex justify-between items-center">

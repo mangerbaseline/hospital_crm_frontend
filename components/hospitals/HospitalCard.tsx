@@ -12,6 +12,7 @@ import {
 import { HospitalWithDeals } from "@/store/types";
 import Link from "next/link";
 import { format } from "date-fns";
+import { getProductTheme } from "@/lib/utils";
 
 interface HospitalCardProps {
   hospital: HospitalWithDeals;
@@ -97,12 +98,10 @@ type DealProduct = HospitalWithDeals["deals"][0]["products"][0];
 
 function ProductBlock({ product }: { product: DealProduct }) {
   const productName = product.product || "Unknown Product";
-  const isMacSystem = productName.toLowerCase().includes("mac");
-
   return (
     <div
       className={`rounded-xl p-3.5 text-white flex flex-col gap-2 shadow-sm ${
-        isMacSystem ? "bg-blue-600" : "bg-orange-500"
+        getProductTheme(productName).bgSolid
       }`}
     >
       <div className="flex justify-between items-start">

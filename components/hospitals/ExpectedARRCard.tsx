@@ -6,7 +6,7 @@ import { Edit3 } from "lucide-react";
 import { format } from "date-fns";
 import { Hospital } from "@/store/types";
 import { EditExpectedARRModal } from "@/components/hospitals/EditExpectedARRModal";
-
+import { getProductTheme } from "@/lib/utils";
 interface ExpectedARRCardProps {
   hospital: Hospital;
 }
@@ -68,23 +68,14 @@ export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
             typeof p.product === "object" && p.product !== null
               ? p.product.name
               : "Unknown Product";
-          const isMacSystem = productName.toLowerCase().includes("mac");
-
-          const themeStyle = isMacSystem
-            ? {
-              bg: "bg-blue-50",
-              border: "border-blue-200",
-              title: "text-blue-900",
-              amount: "text-blue-700",
-              label: "text-blue-800",
-            }
-            : {
-              bg: "bg-orange-50",
-              border: "border-orange-200",
-              title: "text-orange-900",
-              amount: "text-orange-600",
-              label: "text-orange-800",
-            };
+          const theme = getProductTheme(productName);
+          const themeStyle = {
+            bg: theme.bgLight,
+            border: theme.border,
+            title: theme.textTitle,
+            amount: theme.textAmount,
+            label: theme.textLabel,
+          };
 
           return (
             <div
