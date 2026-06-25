@@ -1,3 +1,5 @@
+import axiosInstance from "./api/axiosInstance";
+
 const urlBase64ToUint8Array = (base64String: string) => {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -52,19 +54,8 @@ export const subscribeUser = async () => {
     console.log("Push Notifications: Generated subscription:", subscription);
 
     console.log("Push Notifications: Sending subscription to backend...");
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/push/subscribe`,
-      {
-        method: "POST",
-        body: JSON.stringify(subscription),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      },
-    );
-
-    const result = await response.json();
+    const response = await axiosInstance.post("/api/push/subscribe", subscription);
+    const result = response.data;
     console.log("Push Notifications: Backend response:", result);
 
     console.log("User subscribed successfully");

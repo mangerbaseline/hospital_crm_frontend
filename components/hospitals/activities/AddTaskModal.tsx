@@ -2,6 +2,7 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { MentionTextarea } from "./MentionTextarea";
 import * as z from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2, Mail, Bell } from "lucide-react";
@@ -136,11 +137,18 @@ export function AddTaskModal({
             <Label htmlFor="description" className="text-sm font-bold">
               Description (Optional)
             </Label>
-            <Textarea
-              id="description"
-              placeholder="Add details about this task..."
-              className="min-h-20 bg-muted border-border rounded-xl resize-none"
-              {...register("description")}
+            <Controller
+              control={control}
+              name="description"
+              render={({ field }) => (
+                <MentionTextarea
+                  id="description"
+                  placeholder="Add details about this task... Use @ to mention coworkers."
+                  className="min-h-20 bg-muted border-border rounded-xl resize-none"
+                  {...field}
+                  value={field.value || ""}
+                />
+              )}
             />
           </div>
 
