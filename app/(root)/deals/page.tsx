@@ -14,6 +14,8 @@ import {
   Search,
   X,
   Building2,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +28,8 @@ import {
 } from "@/components/ui/select";
 import { DealCard } from "@/components/deals/DealCard";
 import { DealCardSkeleton } from "@/components/deals/DealCardSkeleton";
+import { DealsListView } from "@/components/deals/DealsListView";
+import { DealsListSkeleton } from "@/components/deals/DealsListSkeleton";
 import { UserRole } from "@/store/types";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { AddDealModal } from "@/components/dashboard/AddDealModel";
@@ -45,8 +49,13 @@ export default function DealsPage() {
   const pathname = usePathname();
 
   const dealStage = searchParams.get("dealStage") || "";
+  const viewParam = searchParams.get("view");
 
   const dispatch = useAppDispatch();
+
+  const [viewMode, setViewMode] = useState<"card" | "list">(
+    viewParam === "list" ? "list" : "card",
+  );
 
   const [selectedUserId, setSelectedUserId] = useState<string>(
     isAdminOrExecutive ? "all" : currentUser?._id || "all",
@@ -59,6 +68,9 @@ export default function DealsPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  const [sortBy, setSortBy] = useState("dealAmount");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -79,6 +91,8 @@ export default function DealsPage() {
         }),
         ...(selectedGpoId !== "all" && { gpoId: selectedGpoId }),
         ...(dealStage && { dealStage }),
+        sortBy,
+        sortOrder,
       }),
     );
   }, [
@@ -90,6 +104,8 @@ export default function DealsPage() {
     selectedProductIds,
     selectedGpoId,
     dealStage,
+    sortBy,
+    sortOrder,
   ]);
 
   useEffect(() => {
@@ -113,6 +129,23 @@ export default function DealsPage() {
     setCurrentPage(1);
   };
 
+  const handleSortChange = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(column);
+      setSortOrder("asc");
+    }
+    setCurrentPage(1);
+  };
+
+  const handleViewToggle = (mode: "card" | "list") => {
+    setViewMode(mode);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", mode);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   const refetchDeals = () => {
     dispatch(
       fetchAllDeals({
@@ -125,6 +158,8 @@ export default function DealsPage() {
         }),
         ...(selectedGpoId !== "all" && { gpoId: selectedGpoId }),
         ...(dealStage && { dealStage }),
+        sortBy,
+        sortOrder,
       }),
     );
   };
@@ -198,6 +233,30 @@ export default function DealsPage() {
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+          {/* View Toggle */}
+          <div className="flex items-center border rounded-lg overflow-hidden shadow-sm bg-background">
+            <button
+              onClick={() => handleViewToggle("card")}
+              className={`p-2.5 transition-colors cursor-pointer ${viewMode === "card"
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:bg-muted"
+                }`}
+              title="Card View"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => handleViewToggle("list")}
+              className={`p-2.5 transition-colors cursor-pointer ${viewMode === "list"
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:bg-muted"
+                }`}
+              title="List View"
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
+
           <div className="flex w-full md:w-auto items-center gap-2 text-sm font-medium text-muted-foreground border px-3 py-2 rounded-lg shadow-sm bg-background">
             <SlidersHorizontal className="h-4 w-4" />
             <span>Rows:</span>
@@ -230,24 +289,52 @@ export default function DealsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {isFetchingDeals ? (
-          Array.from({ length: 6 }).map((_, i) => <DealCardSkeleton key={i} />)
-        ) : deals.length > 0 ? (
-          deals.map((deal) => (
-            <DealCard key={deal._id} deal={deal} onDealUpdated={refetchDeals} />
-          ))
-        ) : (
-          <div className="col-span-full py-20 text-center bg-muted/30 rounded-3xl border border-dashed border-border">
-            <h3 className="text-lg font-semibold text-muted-foreground">
-              No deals found
-            </h3>
-            <p className="text-sm text-muted-foreground/60 mt-1">
-              Try adjusting your search or filters
-            </p>
-          </div>
-        )}
-      </div>
+      {/* Content Area */}
+      {viewMode === "card" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {isFetchingDeals ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <DealCardSkeleton key={i} />
+            ))
+          ) : deals.length > 0 ? (
+            deals.map((deal) => (
+              <DealCard key={deal._id} deal={deal} onDealUpdated={refetchDeals} />
+            ))
+          ) : (
+            <div className="col-span-full py-20 text-center bg-muted/30 rounded-3xl border border-dashed border-border">
+              <h3 className="text-lg font-semibold text-muted-foreground">
+                No deals found
+              </h3>
+              <p className="text-sm text-muted-foreground/60 mt-1">
+                Try adjusting your search or filters
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="mt-6">
+          {isFetchingDeals ? (
+            <DealsListSkeleton />
+          ) : deals.length > 0 ? (
+            <DealsListView
+              deals={deals}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={handleSortChange}
+              onDealUpdated={refetchDeals}
+            />
+          ) : (
+            <div className="py-20 text-center bg-muted/30 rounded-3xl border border-dashed border-border">
+              <h3 className="text-lg font-semibold text-muted-foreground">
+                No deals found
+              </h3>
+              <p className="text-sm text-muted-foreground/60 mt-1">
+                Try adjusting your search or filters
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {totalPages > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-2">
@@ -290,9 +377,8 @@ export default function DealsPage() {
                       size="sm"
                       onClick={() => handlePageChange(pageNum)}
                       disabled={isFetchingDeals}
-                      className={`h-8 w-8 rounded-md font-bold shadow-sm transition-all cursor-pointer ${
-                        page === pageNum ? "shadow-primary/20 scale-110" : ""
-                      }`}
+                      className={`h-8 w-8 rounded-md font-bold shadow-sm transition-all cursor-pointer ${page === pageNum ? "shadow-primary/20 scale-110" : ""
+                        }`}
                     >
                       {pageNum}
                     </Button>

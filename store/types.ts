@@ -602,6 +602,8 @@ export interface FetchAllDealsParams {
   limit?: number;
   search?: string;
   dealStage?: string;
+  sortBy?: string;
+  sortOrder?: string;
 }
 
 export interface ProductRevenue {
