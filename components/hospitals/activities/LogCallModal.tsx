@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   createActivity,
+  updateActivity,
   fetchAllActivities,
 } from "@/store/features/activity/activitySlice";
 import { ActivityType } from "@/store/types";
@@ -51,6 +53,12 @@ interface LogCallModalProps {
   onClose: () => void;
   hospitalId: string;
   contacts: { _id: string; firstName: string; lastName: string }[];
+  callLogId?: string;
+  initialData?: {
+    Date: string;
+    contact?: string;
+    notes: string;
+  };
 }
 
 export function LogCallModal({
@@ -58,9 +66,13 @@ export function LogCallModal({
   onClose,
   hospitalId,
   contacts,
+  callLogId,
+  initialData,
 }: LogCallModalProps) {
   const dispatch = useAppDispatch();
-  const { isCreateActivityLoading } = useAppSelector((state) => state.activity);
+  const { isCreateActivityLoading, isUpdateActivityLoading } = useAppSelector(
+    (state) => state.activity,
+  );
 
   const {
     register,
@@ -77,26 +89,53 @@ export function LogCallModal({
     },
   });
 
+  const isEditing = !!callLogId;
+
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        Date: initialData?.Date ? new Date(initialData.Date) : new Date(),
+        contact: initialData?.contact || "",
+        notes: initialData?.notes || "",
+      });
+    }
+  }, [isOpen, initialData, reset]);
+
   const onSubmit = async (data: LogCallFormValues) => {
     try {
-      await dispatch(
-        createActivity({
-          type: ActivityType.CALL_LOG,
-          data: {
-            Date: data.Date.toISOString(),
-            contact: data.contact || "",
-            notes: data.notes,
-            hospital: hospitalId,
-          },
-        }),
-      ).unwrap();
-
-      toast.success("Call logged successfully");
+      if (isEditing && callLogId) {
+        await dispatch(
+          updateActivity({
+            id: callLogId,
+            type: ActivityType.CALL_LOG,
+            data: {
+              Date: data.Date.toISOString(),
+              contact: data.contact || "",
+              notes: data.notes,
+              hospital: hospitalId,
+            },
+          }),
+        ).unwrap();
+        toast.success("Call updated successfully");
+      } else {
+        await dispatch(
+          createActivity({
+            type: ActivityType.CALL_LOG,
+            data: {
+              Date: data.Date.toISOString(),
+              contact: data.contact || "",
+              notes: data.notes,
+              hospital: hospitalId,
+            },
+          }),
+        ).unwrap();
+        toast.success("Call logged successfully");
+      }
       dispatch(fetchAllActivities({ hospitalId: hospitalId }));
       reset();
       onClose();
     } catch (error: any) {
-      toast.error(error || "Failed to log call");
+      toast.error(error || `Failed to ${isEditing ? "update" : "log"} call`);
     }
   };
 
@@ -104,9 +143,13 @@ export function LogCallModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Log Call</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            {isEditing ? "Edit Call Log" : "Log Call"}
+          </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Record details about a call with this hospital.
+            {isEditing
+              ? "Update details about this call log."
+              : "Record details about a call with this hospital."}
           </DialogDescription>
         </DialogHeader>
 
@@ -160,7 +203,7 @@ export function LogCallModal({
               render={({ field }) => (
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <SelectTrigger className="w-full h-10 bg-muted border-border rounded-xl px-3">
                     <SelectValue placeholder="Select a contact" />
@@ -197,14 +240,16 @@ export function LogCallModal({
           <DialogFooter className="p-2">
             <Button
               type="submit"
-              disabled={isCreateActivityLoading}
+              disabled={isCreateActivityLoading || isUpdateActivityLoading}
               className="bg-black text-white hover:bg-black/90 rounded-lg p-4 cursor-pointer"
             >
-              {isCreateActivityLoading ? (
+              {isCreateActivityLoading || isUpdateActivityLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging...
+                  {isEditing ? "Saving..." : "Logging..."}
                 </>
+              ) : isEditing ? (
+                "Save Changes"
               ) : (
                 "Log Call"
               )}

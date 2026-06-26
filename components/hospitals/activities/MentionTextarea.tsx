@@ -53,9 +53,12 @@ export function MentionTextarea({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(query.toLowerCase()),
-  );
+  const filteredUsers = users.filter((user) => {
+    const name = user.name || "";
+    const email = user.email || "";
+    return name.toLowerCase().includes(query.toLowerCase()) ||
+           email.toLowerCase().includes(query.toLowerCase());
+  });
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -93,12 +96,12 @@ export function MentionTextarea({
   );
 
   const handleSelect = useCallback(
-    (userName: string) => {
+    (userEmail: string) => {
       if (atIndex === -1) return;
 
       const textBefore = value.substring(0, atIndex);
       const textAfter = value.substring(cursorPos);
-      const newValue = `${textBefore}@${userName} ${textAfter}`;
+      const newValue = `${textBefore}@${userEmail} ${textAfter}`;
 
       onChange(newValue);
       setOpen(false);
@@ -107,7 +110,7 @@ export function MentionTextarea({
       setTimeout(() => {
         if (textareaRef.current) {
           textareaRef.current.focus();
-          const newPos = textBefore.length + userName.length + 2;
+          const newPos = textBefore.length + userEmail.length + 2;
           textareaRef.current.setSelectionRange(newPos, newPos);
           setCursorPos(newPos);
         }
@@ -132,7 +135,7 @@ export function MentionTextarea({
         );
       } else if (e.key === "Enter" && open) {
         e.preventDefault();
-        handleSelect(filteredUsers[selectedIndex].name);
+        handleSelect(filteredUsers[selectedIndex].email);
       } else if (e.key === "Escape") {
         setOpen(false);
       }
@@ -167,7 +170,7 @@ export function MentionTextarea({
                 type="button"
                 onMouseDown={(e) => {
                   e.preventDefault();
-                  handleSelect(user.name);
+                  handleSelect(user.email);
                 }}
                 onMouseEnter={() => setSelectedIndex(index)}
                 className={cn(
@@ -183,7 +186,10 @@ export function MentionTextarea({
                     .map((n) => n[0])
                     .join("")}
                 </div>
-                <span className="font-medium">@{user.name}</span>
+                <div className="flex flex-col items-start text-left min-w-0">
+                  <span className="font-semibold text-foreground truncate">{user.name}</span>
+                  <span className="text-[9px] text-muted-foreground truncate">{user.email}</span>
+                </div>
               </button>
             ))}
           </div>

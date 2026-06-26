@@ -10,7 +10,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
@@ -19,8 +18,12 @@ import {
 } from "@/store/features/activity/activitySlice";
 import { ActivityType, ActivityItem } from "@/store/types";
 import { format } from "date-fns";
-import { X, Phone, MessageSquare, CheckSquare } from "lucide-react";
+import { X, Phone, MessageSquare, ClipboardList, Edit } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { AddNoteModal } from "./AddNoteModal";
+import { LogCallModal } from "./LogCallModal";
+import { AddTaskModal } from "./AddTaskModal";
 
 interface AllActivitiesModalProps {
   isOpen: boolean;
@@ -38,8 +41,26 @@ export function AllActivitiesModal({
     (state) => state.activity,
   );
 
+  const { selectedHospital } = useAppSelector((state) => state.hospital);
+
   const limit = 10; // items per page
   const [page, setPage] = useState(1);
+
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [isCallModalOpen, setIsCallModalOpen] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<ActivityItem | null>(null);
+
+  const handleEditClick = (activity: ActivityItem) => {
+    setEditingActivity(activity);
+    if (activity.activityType === ActivityType.NOTE) {
+      setIsNoteModalOpen(true);
+    } else if (activity.activityType === ActivityType.CALL_LOG) {
+      setIsCallModalOpen(true);
+    } else if (activity.activityType === ActivityType.TASK) {
+      setIsTaskModalOpen(true);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -96,12 +117,28 @@ export function AllActivitiesModal({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => handleDelete(activity._id, ActivityType.CALL_LOG)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-1"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => handleEditClick(activity)}
+                className="text-muted-foreground hover:text-foreground transition-all duration-200 p-1 cursor-pointer"
+                title="Edit Call Log"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <ConfirmDialog
+                title="Delete Call Log"
+                description="Are you sure you want to delete this call log? This action cannot be undone."
+                onConfirm={() => handleDelete(activity._id, ActivityType.CALL_LOG)}
+                confirmText="Delete"
+              >
+                <button
+                  className="text-muted-foreground hover:text-destructive transition-all duration-200 p-1 cursor-pointer"
+                  title="Delete Call Log"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </ConfirmDialog>
+            </div>
           </div>
         );
       case ActivityType.NOTE:
@@ -137,12 +174,28 @@ export function AllActivitiesModal({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => handleDelete(activity._id, ActivityType.NOTE)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-1"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => handleEditClick(activity)}
+                className="text-muted-foreground hover:text-foreground transition-all duration-200 p-1 cursor-pointer"
+                title="Edit Note"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <ConfirmDialog
+                title="Delete Note"
+                description="Are you sure you want to delete this note? This action cannot be undone."
+                onConfirm={() => handleDelete(activity._id, ActivityType.NOTE)}
+                confirmText="Delete"
+              >
+                <button
+                  className="text-muted-foreground hover:text-destructive transition-all duration-200 p-1 cursor-pointer"
+                  title="Delete Note"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </ConfirmDialog>
+            </div>
           </div>
         );
       case ActivityType.TASK:
@@ -152,7 +205,7 @@ export function AllActivitiesModal({
             className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
             <div className="flex items-start gap-3">
-              <CheckSquare className="h-5 w-5 text-indigo-600" />
+              <ClipboardList className="h-5 w-5 text-indigo-600" />
               <div className="flex flex-col flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-foreground leading-tight">
                   {activity.title}
@@ -169,12 +222,28 @@ export function AllActivitiesModal({
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => handleDelete(activity._id, ActivityType.TASK)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-1"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => handleEditClick(activity)}
+                className="text-muted-foreground hover:text-foreground transition-all duration-200 p-1 cursor-pointer"
+                title="Edit Task"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <ConfirmDialog
+                title="Delete Task"
+                description="Are you sure you want to delete this task? This action cannot be undone."
+                onConfirm={() => handleDelete(activity._id, ActivityType.TASK)}
+                confirmText="Delete"
+              >
+                <button
+                  className="text-muted-foreground hover:text-destructive transition-all duration-200 p-1 cursor-pointer"
+                  title="Delete Task"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </ConfirmDialog>
+            </div>
           </div>
         );
       default:
@@ -183,7 +252,8 @@ export function AllActivitiesModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[600px] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">All Activities</DialogTitle>
@@ -227,6 +297,57 @@ export function AllActivitiesModal({
           </div>
           <DialogFooter />
         </DialogContent>
-    </Dialog>
+      </Dialog>
+
+      <AddNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => {
+          setIsNoteModalOpen(false);
+          setEditingActivity(null);
+        }}
+        hospitalId={hospitalId}
+        noteId={editingActivity?.activityType === ActivityType.NOTE ? editingActivity._id : undefined}
+        initialNotes={editingActivity?.activityType === ActivityType.NOTE ? editingActivity.notes : undefined}
+      />
+      <LogCallModal
+        isOpen={isCallModalOpen}
+        onClose={() => {
+          setIsCallModalOpen(false);
+          setEditingActivity(null);
+        }}
+        hospitalId={hospitalId}
+        contacts={selectedHospital?.contacts || []}
+        callLogId={editingActivity?.activityType === ActivityType.CALL_LOG ? editingActivity._id : undefined}
+        initialData={
+          editingActivity?.activityType === ActivityType.CALL_LOG
+            ? {
+              Date: editingActivity.Date,
+              contact: editingActivity.contact?._id,
+              notes: editingActivity.notes,
+            }
+            : undefined
+        }
+      />
+      <AddTaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setEditingActivity(null);
+        }}
+        hospitalId={hospitalId}
+        hospitalName={selectedHospital?.hospitalName || ""}
+        taskId={editingActivity?.activityType === ActivityType.TASK ? editingActivity._id : undefined}
+        initialData={
+          editingActivity?.activityType === ActivityType.TASK
+            ? {
+              title: editingActivity.title,
+              description: editingActivity.description,
+              dueDate: editingActivity.dueDate,
+              reminders: editingActivity.reminders || [],
+            }
+            : undefined
+        }
+      />
+    </>
   );
 }

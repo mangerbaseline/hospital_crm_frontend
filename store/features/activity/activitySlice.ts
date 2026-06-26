@@ -4,6 +4,7 @@ import {
   ActivityState,
   CreateActivityPayload,
   DeleteActivityPayload,
+  UpdateActivityPayload,
   ApiResponse,
   FetchAllActivitiesResponse,
   FetchActivitiesParams,
@@ -18,6 +19,8 @@ const initialState: ActivityState = {
   createActivityError: null,
   isDeleteActivityLoading: false,
   deleteActivityError: null,
+  isUpdateActivityLoading: false,
+  updateActivityError: null,
 };
 
 export const createActivity = createAsyncThunk(
@@ -77,6 +80,23 @@ export const fetchAllActivities = createAsyncThunk(
   },
 );
 
+export const updateActivity = createAsyncThunk(
+  "activity/updateActivity",
+  async (payload: UpdateActivityPayload, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put<ApiResponse<any>>(
+        "/api/activity/update",
+        payload,
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update activity",
+      );
+    }
+  },
+);
+
 const activitySlice = createSlice({
   name: "activity",
   initialState,
@@ -88,6 +108,8 @@ const activitySlice = createSlice({
       state.createActivityError = null;
       state.isDeleteActivityLoading = false;
       state.deleteActivityError = null;
+      state.isUpdateActivityLoading = false;
+      state.updateActivityError = null;
     },
   },
   extraReducers: (builder) => {
@@ -126,6 +148,17 @@ const activitySlice = createSlice({
       .addCase(fetchAllActivities.rejected, (state, action) => {
         state.isFetchingActivities = false;
         state.fetchActivitiesError = action.payload as string;
+      })
+      .addCase(updateActivity.pending, (state) => {
+        state.isUpdateActivityLoading = true;
+        state.updateActivityError = null;
+      })
+      .addCase(updateActivity.fulfilled, (state) => {
+        state.isUpdateActivityLoading = false;
+      })
+      .addCase(updateActivity.rejected, (state, action) => {
+        state.isUpdateActivityLoading = false;
+        state.updateActivityError = action.payload as string;
       });
   },
 });

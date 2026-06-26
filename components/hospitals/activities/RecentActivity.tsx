@@ -11,8 +11,10 @@ import {
   Calendar,
   Mail,
   MoreVertical,
-  CheckSquare,
+  ClipboardList,
+  Edit,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   fetchAllActivities,
@@ -48,6 +50,18 @@ export function RecentActivity({
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isAllModalOpen, setIsAllModalOpen] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<ActivityItem | null>(null);
+
+  const handleEditClick = (activity: ActivityItem) => {
+    setEditingActivity(activity);
+    if (activity.activityType === ActivityType.NOTE) {
+      setIsNoteModalOpen(true);
+    } else if (activity.activityType === ActivityType.CALL_LOG) {
+      setIsCallModalOpen(true);
+    } else if (activity.activityType === ActivityType.TASK) {
+      setIsTaskModalOpen(true);
+    }
+  };
 
   useEffect(() => {
     if (hospitalId) {
@@ -97,12 +111,28 @@ export function RecentActivity({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => handleDelete(activity._id, ActivityType.CALL_LOG)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive transition-opacity p-1 cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="absolute top-3 right-3 flex items-center gap-1">
+              <button
+                onClick={() => handleEditClick(activity)}
+                className="text-muted-foreground hover:text-foreground transition-all duration-200 p-1 cursor-pointer"
+                title="Edit Call Log"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <ConfirmDialog
+                title="Delete Call Log"
+                description="Are you sure you want to delete this call log? This action cannot be undone."
+                onConfirm={() => handleDelete(activity._id, ActivityType.CALL_LOG)}
+                confirmText="Delete"
+              >
+                <button
+                  className="text-muted-foreground hover:text-destructive transition-all duration-200 p-1 cursor-pointer"
+                  title="Delete Call Log"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </ConfirmDialog>
+            </div>
           </div>
         );
 
@@ -154,12 +184,28 @@ export function RecentActivity({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => handleDelete(activity._id, ActivityType.NOTE)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive transition-opacity p-1 cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="absolute top-3 right-3 flex items-center gap-1">
+              <button
+                onClick={() => handleEditClick(activity)}
+                className="text-muted-foreground hover:text-foreground transition-all duration-200 p-1 cursor-pointer"
+                title="Edit Note"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <ConfirmDialog
+                title="Delete Note"
+                description="Are you sure you want to delete this note? This action cannot be undone."
+                onConfirm={() => handleDelete(activity._id, ActivityType.NOTE)}
+                confirmText="Delete"
+              >
+                <button
+                  className="text-muted-foreground hover:text-destructive transition-all duration-200 p-1 cursor-pointer"
+                  title="Delete Note"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </ConfirmDialog>
+            </div>
           </div>
         );
 
@@ -170,7 +216,7 @@ export function RecentActivity({
             className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
           >
             <div className="flex items-start gap-3">
-              <CheckSquare className="h-5 w-5 text-indigo-600" />
+              <ClipboardList className="h-5 w-5 text-indigo-600" />
               <div className="flex flex-col flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-foreground leading-tight">
                   {activity.title}
@@ -196,12 +242,28 @@ export function RecentActivity({
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => handleDelete(activity._id, ActivityType.TASK)}
-              className="absolute top-3 right-3 text-muted-foreground hover:text-destructive transition-opacity p-1 cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="absolute top-3 right-3 flex items-center gap-1">
+              <button
+                onClick={() => handleEditClick(activity)}
+                className="text-muted-foreground hover:text-foreground transition-all duration-200 p-1 cursor-pointer"
+                title="Edit Task"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <ConfirmDialog
+                title="Delete Task"
+                description="Are you sure you want to delete this task? This action cannot be undone."
+                onConfirm={() => handleDelete(activity._id, ActivityType.TASK)}
+                confirmText="Delete"
+              >
+                <button
+                  className="text-muted-foreground hover:text-destructive transition-all duration-200 p-1 cursor-pointer"
+                  title="Delete Task"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </ConfirmDialog>
+            </div>
           </div>
         );
 
@@ -279,20 +341,52 @@ export function RecentActivity({
 
       <AddNoteModal
         isOpen={isNoteModalOpen}
-        onClose={() => setIsNoteModalOpen(false)}
+        onClose={() => {
+          setIsNoteModalOpen(false);
+          setEditingActivity(null);
+        }}
         hospitalId={hospitalId}
+        noteId={editingActivity?.activityType === ActivityType.NOTE ? editingActivity._id : undefined}
+        initialNotes={editingActivity?.activityType === ActivityType.NOTE ? editingActivity.notes : undefined}
       />
       <LogCallModal
         isOpen={isCallModalOpen}
-        onClose={() => setIsCallModalOpen(false)}
+        onClose={() => {
+          setIsCallModalOpen(false);
+          setEditingActivity(null);
+        }}
         hospitalId={hospitalId}
         contacts={selectedHospital?.contacts || []}
+        callLogId={editingActivity?.activityType === ActivityType.CALL_LOG ? editingActivity._id : undefined}
+        initialData={
+          editingActivity?.activityType === ActivityType.CALL_LOG
+            ? {
+              Date: editingActivity.Date,
+              contact: editingActivity.contact?._id,
+              notes: editingActivity.notes,
+            }
+            : undefined
+        }
       />
       <AddTaskModal
         isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setEditingActivity(null);
+        }}
         hospitalId={hospitalId}
         hospitalName={hospitalName}
+        taskId={editingActivity?.activityType === ActivityType.TASK ? editingActivity._id : undefined}
+        initialData={
+          editingActivity?.activityType === ActivityType.TASK
+            ? {
+              title: editingActivity.title,
+              description: editingActivity.description,
+              dueDate: editingActivity.dueDate,
+              reminders: editingActivity.reminders || [],
+            }
+            : undefined
+        }
       />
       <AllActivitiesModal
         isOpen={isAllModalOpen}

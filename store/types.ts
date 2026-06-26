@@ -91,6 +91,7 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   totalGPOs?: number;
   totalIDNs?: number;
   totalDeals?: number;
+  totalTasks?: number;
   totalPages: number;
   pagination?: {
     total: number;
@@ -782,6 +783,12 @@ export interface FetchAllActivitiesResponse {
   data: ActivityItem[];
 }
 
+export interface UpdateActivityPayload {
+  id: string;
+  type: ActivityType;
+  data: Partial<CallLogData> | Partial<NoteData> | Partial<TaskData>;
+}
+
 export interface ActivityState {
   activities: ActivityItem[];
   totalActivities: number;
@@ -791,6 +798,8 @@ export interface ActivityState {
   createActivityError: string | null;
   isDeleteActivityLoading: boolean;
   deleteActivityError: string | null;
+  isUpdateActivityLoading: boolean;
+  updateActivityError: string | null;
 }
 
 export enum DocumentCategory {
@@ -1055,4 +1064,60 @@ export interface MailboxState {
   replyError: string | null;
   isSending: boolean;
   sendError: string | null;
+}
+
+export interface Task {
+  _id: string;
+  title: string;
+  description?: string;
+  dueDate: string;
+  hospital: {
+    _id: string;
+    hospitalName: string;
+  };
+  user: string;
+  reminders: ("email" | "push")[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaskState {
+  tasks: Task[];
+  isFetchingTasks: boolean;
+  fetchTasksError: string | null;
+  isCreateTaskLoading: boolean;
+  createTaskError: string | null;
+  isUpdateTaskLoading: boolean;
+  updateTaskError: string | null;
+  isDeleteTaskLoading: boolean;
+  deleteTaskError: string | null;
+  page: number;
+  limit: number;
+  totalTasks: number;
+  totalPages: number;
+}
+
+export interface FetchTasksParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  userId?: string;
+  hospitalId?: string;
+}
+
+export interface CreateTaskPayload {
+  title: string;
+  description?: string;
+  dueDate: string;
+  hospital: string;
+  reminders: ("email" | "push")[];
+}
+
+export interface UpdateTaskPayload {
+  id: string;
+  title?: string;
+  description?: string;
+  dueDate?: string;
+  hospital?: string;
+  reminders?: ("email" | "push")[];
 }

@@ -4,6 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 import { MentionTextarea } from "./MentionTextarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   createActivity,
+  updateActivity,
   fetchAllActivities,
 } from "@/store/features/activity/activitySlice";
 import { ActivityType } from "@/store/types";
@@ -33,15 +35,21 @@ interface AddNoteModalProps {
   isOpen: boolean;
   onClose: () => void;
   hospitalId: string;
+  noteId?: string;
+  initialNotes?: string;
 }
 
 export function AddNoteModal({
   isOpen,
   onClose,
   hospitalId,
+  noteId,
+  initialNotes,
 }: AddNoteModalProps) {
   const dispatch = useAppDispatch();
-  const { isCreateActivityLoading } = useAppSelector((state) => state.activity);
+  const { isCreateActivityLoading, isUpdateActivityLoading } = useAppSelector(
+    (state) => state.activity,
+  );
 
   const {
     handleSubmit,
@@ -55,24 +63,47 @@ export function AddNoteModal({
     },
   });
 
+  const isEditing = !!noteId;
+
+  useEffect(() => {
+    if (isOpen) {
+      reset({
+        notes: initialNotes || "",
+      });
+    }
+  }, [isOpen, initialNotes, reset]);
+
   const onSubmit = async (data: NoteFormValues) => {
     try {
-      await dispatch(
-        createActivity({
-          type: ActivityType.NOTE,
-          data: {
-            ...data,
-            hospital: hospitalId,
-          },
-        }),
-      ).unwrap();
-
-      toast.success("Note added successfully");
+      if (isEditing && noteId) {
+        await dispatch(
+          updateActivity({
+            id: noteId,
+            type: ActivityType.NOTE,
+            data: {
+              notes: data.notes,
+              hospital: hospitalId,
+            },
+          }),
+        ).unwrap();
+        toast.success("Note updated successfully");
+      } else {
+        await dispatch(
+          createActivity({
+            type: ActivityType.NOTE,
+            data: {
+              ...data,
+              hospital: hospitalId,
+            },
+          }),
+        ).unwrap();
+        toast.success("Note added successfully");
+      }
       dispatch(fetchAllActivities({ hospitalId: hospitalId }));
       reset();
       onClose();
     } catch (error: any) {
-      toast.error(error || "Failed to add note");
+      toast.error(error || `Failed to ${isEditing ? "update" : "add"} note`);
     }
   };
 
@@ -80,9 +111,13 @@ export function AddNoteModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Add Note</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            {isEditing ? "Edit Note" : "Add Note"}
+          </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Add a note for this hospital. Use @ to mention coworkers.
+            {isEditing
+              ? "Update details of this note. Use @ to mention coworkers."
+              : "Add a note for this hospital. Use @ to mention coworkers."}
           </DialogDescription>
         </DialogHeader>
 
@@ -113,14 +148,16 @@ export function AddNoteModal({
           <DialogFooter className="p-2">
             <Button
               type="submit"
-              disabled={isCreateActivityLoading}
+              disabled={isCreateActivityLoading || isUpdateActivityLoading}
               className="bg-black text-white hover:bg-black/90 rounded-lg p-4 cursor-pointer"
             >
-              {isCreateActivityLoading ? (
+              {isCreateActivityLoading || isUpdateActivityLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
+                  {isEditing ? "Saving..." : "Adding..."}
                 </>
+              ) : isEditing ? (
+                "Save Changes"
               ) : (
                 "Add Note"
               )}

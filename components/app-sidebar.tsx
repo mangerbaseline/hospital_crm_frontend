@@ -26,6 +26,7 @@ import {
   Package,
   Handshake,
   Briefcase,
+  ClipboardList,
 } from "lucide-react";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -77,6 +78,11 @@ const data = {
       title: "Add Deal",
       url: "/hospitals/add-deal",
       icon: Handshake,
+    },
+    {
+      title: "Tasks",
+      url: "/tasks",
+      icon: ClipboardList,
     },
   ],
   navAdmin: [
@@ -168,10 +174,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       isActive={isActive}
                       className={`
                         h-9 w-full justify-start gap-4 rounded-lg px-3 text-base font-medium transition-colors
-                        ${
-                          isActive
-                            ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
-                            : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
+                        ${isActive
+                          ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
+                          : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
                         }
                       `}
                     >
@@ -210,11 +215,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           isActive={isActive}
                           className={`
                         h-9 w-full justify-start gap-4 rounded-lg px-3 text-base font-medium transition-colors
-                        ${
-                          isActive
-                            ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
-                            : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
-                        }
+                        ${isActive
+                              ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
+                              : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
+                            }
                       `}
                         >
                           <Link
@@ -250,11 +254,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           isActive={isActive}
                           className={`
                         h-9 w-full justify-start gap-4 rounded-lg px-3 text-base font-medium transition-colors
-                        ${
-                          isActive
-                            ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
-                            : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
-                        }
+                        ${isActive
+                              ? "bg-[#050510]! text-white! hover:bg-[#050510]! hover:text-white!"
+                              : "text-[#1e293b]! hover:bg-[#f1f5f9]! hover:text-[#1e293b]!"
+                            }
                       `}
                         >
                           <Link

@@ -11,6 +11,7 @@ import activityReducer from "./features/activity/activitySlice";
 import documentReducer from "./features/document/documentSlice";
 import dashboardReducer from "./features/dashboard/dashboardSlice";
 import mailboxReducer from "./features/mailbox/mailboxSlice";
+import taskReducer from "./features/task/taskSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     document: documentReducer,
     dashboard: dashboardReducer,
     mailbox: mailboxReducer,
+    task: taskReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });
