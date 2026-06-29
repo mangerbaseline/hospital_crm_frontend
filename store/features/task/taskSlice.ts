@@ -35,10 +35,12 @@ export const fetchTasks = createAsyncThunk(
       const search = params?.search || "";
       const userId = params?.userId || "";
       const hospitalId = params?.hospitalId || "";
+      const productId = params?.productId || "";
 
       let url = `/api/task/all-tasks?page=${page}&limit=${limit}&search=${search}`;
       if (userId) url += `&userId=${userId}`;
       if (hospitalId) url += `&hospitalId=${hospitalId}`;
+      if (productId) url += `&productId=${productId}`;
 
       const response = await axiosInstance.get<PaginatedApiResponse<Task[]>>(url);
       return response.data;

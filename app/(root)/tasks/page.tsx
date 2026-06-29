@@ -30,6 +30,7 @@ import {
   Bell,
   ClipboardList,
   AlertCircle,
+  SlidersHorizontal,
 } from "lucide-react";
 import { format, isPast, isToday } from "date-fns";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -38,6 +39,10 @@ import { Task } from "@/store/types";
 import { toast } from "sonner";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { fetchUsers } from "@/store/features/user/userSlice";
+import { fetchProducts } from "@/store/features/product/productSlice";
+import { UserSelect } from "@/components/UserSelect";
+import { ProductSelect } from "@/components/products/ProductSelect";
 
 export default function TasksPage() {
   const dispatch = useAppDispatch();
@@ -56,9 +61,20 @@ export default function TasksPage() {
     user?.role === "Executive" ||
     user?.role === "Customer Success";
 
+  const { users } = useAppSelector((state) => state.user);
+  const { products } = useAppSelector((state) => state.product);
+
+  const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
+  const [selectedProductFilter, setSelectedProductFilter] = useState<string>("all");
+
+  useEffect(() => {
+    if (users.length === 0) dispatch(fetchUsers({ limit: 1000 }));
+    if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
+  }, [dispatch, users.length, products.length]);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, selectedUserFilter, selectedProductFilter]);
 
   const loadTasks = () => {
     dispatch(
@@ -66,7 +82,8 @@ export default function TasksPage() {
         page: currentPage,
         limit: pageSize,
         search: searchQuery,
-        userId: isAdminOrExecutive ? undefined : user?._id,
+        userId: selectedUserFilter === "all" ? (isAdminOrExecutive ? undefined : user?._id) : selectedUserFilter,
+        productId: selectedProductFilter === "all" ? undefined : selectedProductFilter,
       }),
     );
   };
@@ -75,7 +92,7 @@ export default function TasksPage() {
     if (user) {
       loadTasks();
     }
-  }, [dispatch, searchQuery, currentPage, pageSize, user]);
+  }, [dispatch, searchQuery, currentPage, pageSize, user, selectedUserFilter, selectedProductFilter]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -125,9 +142,69 @@ export default function TasksPage() {
             ? "Manage and track all tasks sorted by nearest due date."
             : "Manage and track your tasks sorted by nearest due date."
         }
-      />
+      >
+        <div className="hidden lg:flex items-center gap-3">
+          {isAdminOrExecutive && (
+            <UserSelect
+              value={selectedUserFilter}
+              onValueChange={setSelectedUserFilter}
+              className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
+            />
+          )}
+          <ProductSelect
+            value={selectedProductFilter}
+            onValueChange={setSelectedProductFilter}
+            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer text-xs h-9"
+          />
+        </div>
+      </DashboardHeader>
 
-      {/* Search Bar */}
+      <div className="flex flex-col gap-2 w-full lg:hidden -mt-4 mb-4 px-2">
+        {isAdminOrExecutive && (
+          <UserSelect
+            value={selectedUserFilter}
+            onValueChange={setSelectedUserFilter}
+            className="w-full bg-muted border-border shadow-sm cursor-pointer"
+          />
+        )}
+        <ProductSelect
+          value={selectedProductFilter}
+          onValueChange={setSelectedProductFilter}
+          className="w-full bg-muted border-border shadow-sm cursor-pointer text-xs h-9"
+        />
+      </div>
+
+      {tasks && tasks.length > 0 && (
+        (() => {
+          const upcomingCount = tasks.filter((t) => {
+            const due = new Date(t.dueDate);
+            const now = new Date();
+            const diffTime = due.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays >= 0 && diffDays <= 7;
+          }).length;
+
+          if (upcomingCount === 0) return null;
+
+          return (
+            <div className="mx-2 md:mx-0 mt-6 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+              <div className="bg-amber-500 text-white p-1.5 rounded-lg">
+                <AlertCircle className="h-4 w-4" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
+                  7-Day Calendar Alert
+                </h4>
+                <p className="text-xs text-amber-700 dark:text-amber-500/90 mt-1 font-medium">
+                  You have <span className="font-extrabold text-amber-900 dark:text-amber-300">{upcomingCount}</span> task{upcomingCount > 1 ? "s" : ""} scheduled to be completed in the next 7 days.
+                </p>
+              </div>
+            </div>
+          );
+        })()
+      )}
+
+      {/* Search Bar & Filters */}
       <div className="flex flex-col md:flex-row items-center gap-4 w-full px-2 md:px-0 mt-4">
         <InputGroup className="flex-1 bg-muted h-11 px-3 duration-300">
           <InputGroupAddon
@@ -143,6 +220,24 @@ export default function TasksPage() {
             className="text-sm placeholder:text-muted-foreground/50 transition-all border-none focus-visible:ring-0"
           />
         </InputGroup>
+
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="flex w-full md:w-auto items-center gap-2 text-sm font-medium text-muted-foreground border px-3 py-2 rounded-lg shadow-sm">
+            <SlidersHorizontal className="h-4 w-4" />
+            <span>Rows:</span>
+            <Select value={String(pageSize)} onValueChange={handleLimitChange}>
+              <SelectTrigger className="w-full sm:w-17.5 h-7 border-none p-0 shadow-none cursor-pointer">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-border">
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8 px-2 md:px-0">
@@ -163,6 +258,8 @@ export default function TasksPage() {
                   <tr>
                     <th scope="col" className="py-4 px-6">Task</th>
                     <th scope="col" className="py-4 px-6">Hospital</th>
+                    <th scope="col" className="py-4 px-6">Product</th>
+                    <th scope="col" className="py-4 px-6">Assignee</th>
                     <th scope="col" className="py-4 px-6">Due Date</th>
                     <th scope="col" className="py-4 px-6 w-24">Reminders</th>
                     <th scope="col" className="py-4 px-6 w-28 text-right">Actions</th>
@@ -174,7 +271,16 @@ export default function TasksPage() {
                     return (
                       <tr
                         key={task._id}
-                        className="hover:bg-muted/10 transition-colors"
+                        className="hover:bg-muted/10 transition-colors border-l-4"
+                        style={{
+                          borderLeftColor: task.product?.name?.toLowerCase().includes("elevate")
+                            ? "#f59e0b"
+                            : task.product?.name?.toLowerCase().includes("heelpod") || task.product?.name?.toLowerCase().includes("hellpod")
+                              ? "#f43f5e"
+                              : task.product?.name?.toLowerCase().includes("mac")
+                                ? "#2563eb"
+                                : "transparent"
+                        }}
                       >
                         <td className="py-4 px-6 min-w-[200px]">
                           <div className="flex flex-col">
@@ -205,6 +311,36 @@ export default function TasksPage() {
                           ) : (
                             <span className="text-xs text-muted-foreground">-</span>
                           )}
+                        </td>
+                        <td className="py-4 px-6">
+                          {task.product ? (
+                            <span className={cn(
+                              "inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border",
+                              task.product.name.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                              (task.product.name.toLowerCase().includes("heelpod") || task.product.name.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+                              task.product.name.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50",
+                              !task.product.name.toLowerCase().includes("elevate") &&
+                              !task.product.name.toLowerCase().includes("heelpod") &&
+                              !task.product.name.toLowerCase().includes("hellpod") &&
+                              !task.product.name.toLowerCase().includes("mac") && "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/50"
+                            )}>
+                              {task.product.name}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-xs font-bold text-foreground">
+                              {task.user?.name || (typeof task.user === "object" ? (task.user as any)?.name : "-")}
+                            </span>
+                            {task.secondaryAssignees && task.secondaryAssignees.length > 0 && (
+                              <span className="text-[10px] text-muted-foreground" title={task.secondaryAssignees.map((u: any) => u.name || u).join(", ")}>
+                                +{task.secondaryAssignees.length} secondary
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-4 px-6">
                           <div

@@ -705,22 +705,27 @@ export enum ActivityType {
 
 export interface CallLogData {
   Date: string | Date;
-  contact: string;
+  contact?: string;
   notes: string;
   hospital: string;
+  product?: string;
 }
 
 export interface NoteData {
   notes: string;
   hospital: string;
+  product?: string;
 }
 
 export interface TaskData {
   title: string;
-  description: string;
+  description?: string;
   dueDate: string | Date;
   hospital: string;
   reminders: ("email" | "push")[];
+  product?: string;
+  user?: string;
+  secondaryAssignees?: string[];
 }
 
 export interface CreateActivityPayload {
@@ -750,7 +755,9 @@ export interface TaskActivity {
   description: string;
   dueDate: string;
   hospital: ActivityHospital;
-  user: string;
+  user: any;
+  product?: any;
+  secondaryAssignees?: any[];
   reminders: ("email" | "push")[];
   createdAt: string;
   updatedAt: string;
@@ -763,7 +770,8 @@ export interface CallLogActivity {
   contact: ActivityContact;
   notes: string;
   hospital: ActivityHospital;
-  user: string;
+  user: any;
+  product?: any;
   createdAt: string;
   updatedAt: string;
 }
@@ -773,7 +781,8 @@ export interface NoteActivity {
   activityType: ActivityType.NOTE;
   notes: string;
   hospital: ActivityHospital;
-  user: string;
+  user: any;
+  product?: any;
   createdAt: string;
   updatedAt: string;
 }
@@ -1085,7 +1094,9 @@ export interface Task {
     _id: string;
     hospitalName: string;
   };
-  user: string;
+  user: any;
+  product?: any;
+  secondaryAssignees?: any[];
   reminders: ("email" | "push")[];
   createdAt: string;
   updatedAt: string;
@@ -1113,6 +1124,7 @@ export interface FetchTasksParams {
   search?: string;
   userId?: string;
   hospitalId?: string;
+  productId?: string;
 }
 
 export interface CreateTaskPayload {
@@ -1121,6 +1133,9 @@ export interface CreateTaskPayload {
   dueDate: string;
   hospital: string;
   reminders: ("email" | "push")[];
+  product?: string;
+  user?: string;
+  secondaryAssignees?: string[];
 }
 
 export interface UpdateTaskPayload {
@@ -1130,4 +1145,7 @@ export interface UpdateTaskPayload {
   dueDate?: string;
   hospital?: string;
   reminders?: ("email" | "push")[];
+  product?: string;
+  user?: string;
+  secondaryAssignees?: string[];
 }

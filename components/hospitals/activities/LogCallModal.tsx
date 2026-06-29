@@ -37,6 +37,7 @@ import {
   updateActivity,
   fetchAllActivities,
 } from "@/store/features/activity/activitySlice";
+import { fetchProducts } from "@/store/features/product/productSlice";
 import { ActivityType } from "@/store/types";
 import { toast } from "sonner";
 
@@ -44,6 +45,7 @@ const logCallSchema = z.object({
   Date: z.date(),
   contact: z.string().optional(),
   notes: z.string().min(1, "Call notes cannot be empty"),
+  product: z.string().min(1, "Product category is required"),
 });
 
 type LogCallFormValues = z.infer<typeof logCallSchema>;
@@ -58,6 +60,7 @@ interface LogCallModalProps {
     Date: string;
     contact?: string;
     notes: string;
+    product?: string;
   };
 }
 
@@ -74,6 +77,17 @@ export function LogCallModal({
     (state) => state.activity,
   );
 
+  const { products } = useAppSelector((state) => state.product);
+  const { selectedHospital } = useAppSelector((state) => state.hospital);
+
+  const hospitalProducts = selectedHospital?.deals?.flatMap((deal) => 
+    deal.products.map((p) => p.product)
+  ).filter((prod): prod is { _id: string; name: string } => !!prod && typeof prod === "object" && !!prod._id) || [];
+
+  const uniqueHospitalProducts = Array.from(
+    new Map(hospitalProducts.map((p) => [p._id, p])).values()
+  );
+
   const {
     register,
     handleSubmit,
@@ -86,6 +100,7 @@ export function LogCallModal({
       Date: new Date(),
       contact: "",
       notes: "",
+      product: "",
     },
   });
 
@@ -93,13 +108,15 @@ export function LogCallModal({
 
   useEffect(() => {
     if (isOpen) {
+      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
       reset({
         Date: initialData?.Date ? new Date(initialData.Date) : new Date(),
         contact: initialData?.contact || "",
         notes: initialData?.notes || "",
+        product: initialData?.product || "",
       });
     }
-  }, [isOpen, initialData, reset]);
+  }, [isOpen, initialData, reset, products.length, dispatch]);
 
   const onSubmit = async (data: LogCallFormValues) => {
     try {
@@ -113,6 +130,7 @@ export function LogCallModal({
               contact: data.contact || "",
               notes: data.notes,
               hospital: hospitalId,
+              product: data.product,
             },
           }),
         ).unwrap();
@@ -126,6 +144,7 @@ export function LogCallModal({
               contact: data.contact || "",
               notes: data.notes,
               hospital: hospitalId,
+              product: data.product,
             },
           }),
         ).unwrap();
@@ -191,6 +210,41 @@ export function LogCallModal({
             {errors.Date && (
               <p className="text-xs text-destructive font-medium">
                 {errors.Date.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 mb-4">
+            <Label className="text-sm font-bold">Product Category</Label>
+            <Controller
+              control={control}
+              name="product"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger className="w-full h-10 bg-muted border-border rounded-xl px-3 text-xs">
+                    <SelectValue placeholder="Select Product Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {uniqueHospitalProducts.map((prod) => (
+                      <SelectItem key={prod._id} value={prod._id}>
+                        {prod.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.product && (
+              <p className="text-xs text-destructive font-medium">
+                {errors.product.message}
+              </p>
+            )}
+            {uniqueHospitalProducts.length === 0 && (
+              <p className="text-[11px] text-amber-600 dark:text-amber-500 font-semibold mt-1.5 leading-tight">
+                ⚠️ This hospital has no deals created yet. Please create a deal (expected ARR) for this hospital first.
               </p>
             )}
           </div>

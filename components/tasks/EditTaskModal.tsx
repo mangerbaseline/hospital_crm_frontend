@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Mail, Bell } from "lucide-react";
+import { CalendarIcon, Loader2, Mail, Bell, ChevronsUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,17 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { fetchUsers } from "@/store/features/user/userSlice";
+import { fetchProducts } from "@/store/features/product/productSlice";
+import { getSingleHospital } from "@/store/features/hospital/hospitalSlice";
+import { UserRole } from "@/store/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,9 +47,20 @@ const editTaskSchema = z.object({
   description: z.string().optional(),
   dueDate: z.date({ message: "Due date is required" }),
   reminders: z.array(z.enum(["email", "push"])),
+  product: z.string().min(1, "Product category is required"),
+  user: z.string().min(1, "Primary assignee is required"),
+  secondaryAssignees: z.array(z.string()).optional(),
 });
 
-type EditTaskFormValues = z.infer<typeof editTaskSchema>;
+interface EditTaskFormValues {
+  title: string;
+  description?: string;
+  dueDate: Date;
+  reminders: ("email" | "push")[];
+  product: string;
+  user: string;
+  secondaryAssignees?: string[];
+}
 
 interface EditTaskModalProps {
   isOpen: boolean;
@@ -56,11 +78,31 @@ export function EditTaskModal({
   const dispatch = useAppDispatch();
   const { isUpdateTaskLoading } = useAppSelector((state) => state.task);
 
+  const { users } = useAppSelector((state) => state.user);
+  const { user: currentUser } = useAppSelector((state) => state.auth);
+  const { products } = useAppSelector((state) => state.product);
+  const { selectedHospital } = useAppSelector((state) => state.hospital);
+
+  const hospitalProducts = selectedHospital?.deals?.flatMap((deal) =>
+    deal.products.map((p) => p.product)
+  ).filter((prod): prod is { _id: string; name: string } => !!prod && typeof prod === "object" && !!prod._id) || [];
+
+  const uniqueHospitalProducts = Array.from(
+    new Map(hospitalProducts.map((p) => [p._id, p])).values()
+  );
+
+  const isSales = currentUser?.role === UserRole.SALES;
+  const taskCreatorId = typeof task?.user === "object" ? (task.user as any)?._id : task?.user;
+  const isCreator = taskCreatorId === currentUser?._id;
+  const disableSecondaryAssignees = isSales && !isCreator;
+
   const {
     register,
     handleSubmit,
     control,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<EditTaskFormValues>({
     resolver: zodResolver(editTaskSchema),
@@ -69,8 +111,25 @@ export function EditTaskModal({
       description: "",
       dueDate: new Date(),
       reminders: [],
+      product: "",
+      user: "",
+      secondaryAssignees: [],
     },
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
+      if (users.length === 0) dispatch(fetchUsers({ limit: 1000 }));
+
+      if (task) {
+        const taskHospitalId = typeof task.hospital === "object" ? (task.hospital as any)?._id : task.hospital;
+        if (taskHospitalId && (!selectedHospital || selectedHospital._id !== taskHospitalId)) {
+          dispatch(getSingleHospital(taskHospitalId));
+        }
+      }
+    }
+  }, [isOpen, dispatch, products.length, users.length, task, selectedHospital]);
 
   useEffect(() => {
     if (task) {
@@ -79,6 +138,9 @@ export function EditTaskModal({
         description: task.description || "",
         dueDate: new Date(task.dueDate),
         reminders: task.reminders || [],
+        product: typeof task.product === "object" ? (task.product as any)?._id : task.product || "",
+        user: typeof task.user === "object" ? (task.user as any)?._id : task.user || "",
+        secondaryAssignees: (task.secondaryAssignees || []).map((u: any) => typeof u === "object" ? u._id : u),
       });
     }
   }, [task, reset]);
@@ -95,6 +157,9 @@ export function EditTaskModal({
             description: data.description || "",
             dueDate: data.dueDate.toISOString(),
             reminders: data.reminders,
+            product: data.product,
+            user: data.user,
+            secondaryAssignees: data.secondaryAssignees,
           },
         }),
       ).unwrap();
@@ -111,7 +176,7 @@ export function EditTaskModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-125 rounded-2xl">
+      <DialogContent className="sm:max-w-125 rounded-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Edit Task</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -154,6 +219,124 @@ export function EditTaskModal({
                 />
               )}
             />
+          </div>
+
+          <div className="flex flex-col gap-2 mb-4">
+            <Label className="text-sm font-bold">Product Category</Label>
+            <Controller
+              control={control}
+              name="product"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
+                    <SelectValue placeholder="Select Product Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {uniqueHospitalProducts.map((prod) => (
+                      <SelectItem key={prod._id} value={prod._id}>
+                        {prod.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.product && (
+              <p className="text-xs text-destructive font-medium">
+                {errors.product.message}
+              </p>
+            )}
+            {selectedHospital && uniqueHospitalProducts.length === 0 && (
+              <p className="text-[11px] text-amber-600 dark:text-amber-500 font-semibold mt-1.5 leading-tight">
+                ⚠️ This hospital has no deals created yet. Please create a deal (expected ARR) for this hospital first.
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 mb-4">
+            <Label className="text-sm font-bold">Primary Assignee</Label>
+            <Controller
+              control={control}
+              name="user"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isSales}
+                >
+                  <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
+                    <SelectValue placeholder="Select Primary Assignee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((u) => (
+                      <SelectItem key={u._id} value={u._id}>
+                        {u.name} ({u.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.user && (
+              <p className="text-xs text-destructive font-medium">
+                {errors.user.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 mb-4">
+            <Label className="text-sm font-bold">Secondary Assignees (Optional)</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={disableSecondaryAssignees}
+                  className="w-full justify-between text-xs h-10 font-normal border-border bg-muted/70 rounded-xl px-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <span>
+                    {(watch("secondaryAssignees") || []).length > 0
+                      ? `${(watch("secondaryAssignees") || []).length} selected`
+                      : "Select secondary assignees"}
+                  </span>
+                  <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-2 z-100" align="start">
+                <div
+                  className="flex flex-col gap-2 max-h-60 overflow-y-auto"
+                  onWheel={(e) => e.stopPropagation()}
+                >
+                  {users
+                    .filter((u) => u._id !== watch("user")) // Exclude primary assignee
+                    .map((u) => {
+                      const isChecked = (watch("secondaryAssignees") || []).includes(u._id);
+                      return (
+                        <div key={u._id} className="flex items-center gap-2 px-2 py-1.5 hover:bg-muted rounded-md cursor-pointer">
+                          <Checkbox
+                            id={`sec-${u._id}`}
+                            checked={isChecked}
+                            onCheckedChange={(checked) => {
+                              const current = watch("secondaryAssignees") || [];
+                              if (checked) {
+                                setValue("secondaryAssignees", [...current, u._id]);
+                              } else {
+                                setValue("secondaryAssignees", current.filter((id) => id !== u._id));
+                              }
+                            }}
+                          />
+                          <Label htmlFor={`sec-${u._id}`} className="text-xs cursor-pointer flex-1">
+                            {u.name} ({u.email})
+                          </Label>
+                        </div>
+                      );
+                    })}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="flex flex-col gap-2 mb-4">

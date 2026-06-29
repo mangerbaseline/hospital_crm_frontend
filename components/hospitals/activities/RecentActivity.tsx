@@ -29,6 +29,7 @@ import { AllActivitiesModal } from "./AllActivitiesModal";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 interface RecentActivityProps {
   hospitalId: string;
@@ -85,7 +86,16 @@ export function RecentActivity({
         return (
           <div
             key={activity._id}
-            className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4"
+            style={{
+              borderLeftColor: activity.product?.name?.toLowerCase().includes("elevate")
+                ? "#f59e0b"
+                : activity.product?.name?.toLowerCase().includes("heelpod") || activity.product?.name?.toLowerCase().includes("hellpod")
+                ? "#f43f5e"
+                : activity.product?.name?.toLowerCase().includes("mac")
+                ? "#2563eb"
+                : "transparent"
+            }}
           >
             <div className="flex items-start gap-3">
               <div className="bg-emerald-50 p-2 rounded-full border border-emerald-100 mt-0.5 shrink-0">
@@ -99,13 +109,25 @@ export function RecentActivity({
                 <p className="text-sm text-foreground mt-2 font-medium wrap-break-word leading-relaxed">
                   {activity.notes}
                 </p>
+                
+                {activity.product && (
+                  <Badge variant="outline" className={cn(
+                    "w-fit text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border mt-2",
+                    activity.product.name.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                    (activity.product.name.toLowerCase().includes("heelpod") || activity.product.name.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+                    activity.product.name.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
+                  )}>
+                    {activity.product.name}
+                  </Badge>
+                )}
+
                 <p className="text-[11px] font-semibold text-muted-foreground mt-2 flex items-center gap-1">
                   <span>by</span>
                   <span className="text-muted-foreground">
                     {typeof activity.user === "object"
                       ? (activity.user as any).name
                       : activity.user === currentUser?._id
-                        ? currentUser.name
+                        ? currentUser?.name || "User"
                         : "User"}
                   </span>
                 </p>
@@ -140,7 +162,16 @@ export function RecentActivity({
         return (
           <div
             key={activity._id}
-            className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4"
+            style={{
+              borderLeftColor: activity.product?.name?.toLowerCase().includes("elevate")
+                ? "#f59e0b"
+                : activity.product?.name?.toLowerCase().includes("heelpod") || activity.product?.name?.toLowerCase().includes("hellpod")
+                ? "#f43f5e"
+                : activity.product?.name?.toLowerCase().includes("mac")
+                ? "#2563eb"
+                : "transparent"
+            }}
           >
             <div className="flex items-start gap-3">
               <div className="bg-blue-50 p-2 rounded-full border border-blue-100 mt-0.5 shrink-0">
@@ -172,13 +203,24 @@ export function RecentActivity({
                   </div>
                 )}
 
+                {activity.product && (
+                  <Badge variant="outline" className={cn(
+                    "w-fit text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border mt-2",
+                    activity.product.name.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                    (activity.product.name.toLowerCase().includes("heelpod") || activity.product.name.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+                    activity.product.name.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
+                  )}>
+                    {activity.product.name}
+                  </Badge>
+                )}
+
                 <p className="text-[11px] font-semibold text-muted-foreground mt-2 flex items-center gap-1">
                   <span>by</span>
                   <span className="text-muted-foreground">
                     {typeof activity.user === "object"
                       ? (activity.user as any).name
                       : activity.user === currentUser?._id
-                        ? currentUser.name
+                        ? currentUser?.name || "User"
                         : "User"}
                   </span>
                 </p>
@@ -213,7 +255,16 @@ export function RecentActivity({
         return (
           <div
             key={activity._id}
-            className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4"
+            style={{
+              borderLeftColor: activity.product?.name?.toLowerCase().includes("elevate")
+                ? "#f59e0b"
+                : activity.product?.name?.toLowerCase().includes("heelpod") || activity.product?.name?.toLowerCase().includes("hellpod")
+                ? "#f43f5e"
+                : activity.product?.name?.toLowerCase().includes("mac")
+                ? "#2563eb"
+                : "transparent"
+            }}
           >
             <div className="flex items-start gap-3">
               <ClipboardList className="h-5 w-5 text-indigo-600" />
@@ -221,10 +272,12 @@ export function RecentActivity({
                 <h4 className="text-sm font-bold text-foreground leading-tight">
                   {activity.title}
                 </h4>
-                <p className="text-sm text-muted-foreground mt-1 font-medium wrap-break-word leading-tight">
-                  {activity.description}
-                </p>
-                <div className="flex items-center gap-4 mt-3">
+                {activity.description && (
+                  <p className="text-sm text-muted-foreground mt-1 font-medium wrap-break-word leading-tight">
+                    {activity.description}
+                  </p>
+                )}
+                <div className="flex flex-wrap items-center gap-4 mt-3">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5" />
                     <span className="text-[10px] font-bold uppercase tracking-tight">
@@ -238,6 +291,34 @@ export function RecentActivity({
                         Email
                       </Badge>
                     </div>
+                  )}
+                  {activity.product && (
+                    <Badge variant="outline" className={cn(
+                      "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
+                      activity.product.name.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                      (activity.product.name.toLowerCase().includes("heelpod") || activity.product.name.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+                      activity.product.name.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
+                    )}>
+                      {activity.product.name}
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Primary and Secondary Assignees */}
+                <div className="text-[10px] font-semibold text-muted-foreground mt-2 flex flex-wrap items-center gap-2">
+                  <span>Assigned to:</span>
+                  <span className="text-foreground font-bold">
+                    {activity.user?.name || (typeof activity.user === "object" ? (activity.user as any).name : "User")}
+                  </span>
+                  {activity.secondaryAssignees && activity.secondaryAssignees.length > 0 && (
+                    <>
+                      <span>with</span>
+                      {activity.secondaryAssignees.map((u: any, idx: number) => (
+                        <span key={u._id || idx} className="bg-muted px-1.5 py-0.5 rounded text-foreground font-bold">
+                          {u.name || u}
+                        </span>
+                      ))}
+                    </>
                   )}
                 </div>
               </div>
@@ -348,6 +429,7 @@ export function RecentActivity({
         hospitalId={hospitalId}
         noteId={editingActivity?.activityType === ActivityType.NOTE ? editingActivity._id : undefined}
         initialNotes={editingActivity?.activityType === ActivityType.NOTE ? editingActivity.notes : undefined}
+        initialProduct={editingActivity?.activityType === ActivityType.NOTE ? (typeof editingActivity.product === "object" ? (editingActivity.product as any)?._id : editingActivity.product) : undefined}
       />
       <LogCallModal
         isOpen={isCallModalOpen}
@@ -362,8 +444,9 @@ export function RecentActivity({
           editingActivity?.activityType === ActivityType.CALL_LOG
             ? {
               Date: editingActivity.Date,
-              contact: editingActivity.contact?._id,
+              contact: typeof editingActivity.contact === "object" ? (editingActivity.contact as any)?._id : editingActivity.contact,
               notes: editingActivity.notes,
+              product: typeof editingActivity.product === "object" ? (editingActivity.product as any)?._id : editingActivity.product,
             }
             : undefined
         }
@@ -384,6 +467,9 @@ export function RecentActivity({
               description: editingActivity.description,
               dueDate: editingActivity.dueDate,
               reminders: editingActivity.reminders || [],
+              product: typeof editingActivity.product === "object" ? (editingActivity.product as any)?._id : editingActivity.product,
+              user: typeof editingActivity.user === "object" ? (editingActivity.user as any)?._id : editingActivity.user,
+              secondaryAssignees: (editingActivity.secondaryAssignees || []).map((u: any) => typeof u === "object" ? u._id : u),
             }
             : undefined
         }

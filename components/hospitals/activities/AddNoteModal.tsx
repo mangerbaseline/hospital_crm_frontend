@@ -23,10 +23,19 @@ import {
 } from "@/store/features/activity/activitySlice";
 import { ActivityType } from "@/store/types";
 import { toast } from "sonner";
+import { fetchProducts } from "@/store/features/product/productSlice";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
 const noteSchema = z.object({
   notes: z.string().min(1, "Note cannot be empty"),
+  product: z.string().min(1, "Product category is required"),
 });
 
 type NoteFormValues = z.infer<typeof noteSchema>;
@@ -37,6 +46,7 @@ interface AddNoteModalProps {
   hospitalId: string;
   noteId?: string;
   initialNotes?: string;
+  initialProduct?: string;
 }
 
 export function AddNoteModal({
@@ -45,10 +55,21 @@ export function AddNoteModal({
   hospitalId,
   noteId,
   initialNotes,
+  initialProduct,
 }: AddNoteModalProps) {
   const dispatch = useAppDispatch();
   const { isCreateActivityLoading, isUpdateActivityLoading } = useAppSelector(
     (state) => state.activity,
+  );
+  const { products } = useAppSelector((state) => state.product);
+  const { selectedHospital } = useAppSelector((state) => state.hospital);
+
+  const hospitalProducts = selectedHospital?.deals?.flatMap((deal) => 
+    deal.products.map((p) => p.product)
+  ).filter((prod): prod is { _id: string; name: string } => !!prod && typeof prod === "object" && !!prod._id) || [];
+
+  const uniqueHospitalProducts = Array.from(
+    new Map(hospitalProducts.map((p) => [p._id, p])).values()
   );
 
   const {
@@ -60,6 +81,7 @@ export function AddNoteModal({
     resolver: zodResolver(noteSchema),
     defaultValues: {
       notes: "",
+      product: "",
     },
   });
 
@@ -67,11 +89,13 @@ export function AddNoteModal({
 
   useEffect(() => {
     if (isOpen) {
+      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
       reset({
         notes: initialNotes || "",
+        product: initialProduct || "",
       });
     }
-  }, [isOpen, initialNotes, reset]);
+  }, [isOpen, initialNotes, initialProduct, reset, products.length, dispatch]);
 
   const onSubmit = async (data: NoteFormValues) => {
     try {
@@ -83,6 +107,7 @@ export function AddNoteModal({
             data: {
               notes: data.notes,
               hospital: hospitalId,
+              product: data.product,
             },
           }),
         ).unwrap();
@@ -141,6 +166,41 @@ export function AddNoteModal({
             {errors.notes && (
               <p className="text-xs text-destructive font-medium">
                 {errors.notes.message}
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 mb-4">
+            <Label className="text-sm font-bold">Product Category</Label>
+            <Controller
+              control={control}
+              name="product"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                >
+                  <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
+                    <SelectValue placeholder="Select Product Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {uniqueHospitalProducts.map((prod) => (
+                      <SelectItem key={prod._id} value={prod._id}>
+                        {prod.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.product && (
+              <p className="text-xs text-destructive font-medium">
+                {errors.product.message}
+              </p>
+            )}
+            {uniqueHospitalProducts.length === 0 && (
+              <p className="text-[11px] text-amber-600 dark:text-amber-500 font-semibold mt-1.5 leading-tight">
+                ⚠️ This hospital has no deals created yet. Please create a deal (expected ARR) for this hospital first.
               </p>
             )}
           </div>
