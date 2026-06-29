@@ -37,9 +37,10 @@ export const fetchContacts = createAsyncThunk(
         search = "",
         userId = "",
         productId = "",
+        hospitalId = "",
       } = params;
       const response = await axiosInstance.get<PaginatedApiResponse<Contact[]>>(
-        `/api/contact/all-contacts?page=${page}&limit=${limit}&search=${search}${userId ? `&userId=${userId}` : ""}${productId ? `&productId=${productId}` : ""}`,
+        `/api/contact/all-contacts?page=${page}&limit=${limit}&search=${search}${userId ? `&userId=${userId}` : ""}${productId ? `&productId=${productId}` : ""}${hospitalId ? `&hospitalId=${hospitalId}` : ""}`,
       );
       return response.data;
     } catch (error: any) {
@@ -165,6 +166,9 @@ const contactSlice = createSlice({
         (state, action: PayloadAction<Contact>) => {
           state.isCreateContactLoading = false;
           state.contacts.unshift(action.payload);
+          if (state.contacts.length > state.limit) {
+            state.contacts.pop();
+          }
           state.totalContacts += 1;
         },
       )

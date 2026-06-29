@@ -6,6 +6,7 @@ export const createContactSchema = z.object({
   designation: z.string().optional(),
   hospital: z.string().min(1, "Please select a hospital"),
   phoneNumber: z.string().optional(),
+  secondaryPhoneNumber: z.string().optional(),
   email: z.email("Please enter a valid email address"),
   isPrimary: z.boolean(),
   product: z.array(z.string()).optional(),
@@ -19,6 +20,7 @@ export const updateContactSchema = z.object({
   designation: z.string().optional(),
   hospital: z.string().optional(),
   phoneNumber: z.string().optional(),
+  secondaryPhoneNumber: z.string().optional(),
   email: z.email("Please enter a valid email address"),
   isPrimary: z.boolean(),
 });

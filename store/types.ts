@@ -180,6 +180,7 @@ export interface Contact {
   designation: string;
   hospital: string | Hospital;
   phoneNumber: string;
+  secondaryPhoneNumber?: string;
   email: string;
   isPrimary: boolean;
   product?: Product[];
@@ -254,6 +255,7 @@ export interface CreateContactPayload {
   designation: string;
   hospital: string;
   phoneNumber: string;
+  secondaryPhoneNumber?: string;
   email: string;
   isPrimary: boolean;
   product?: string[];
@@ -265,6 +267,7 @@ export interface UpdateContactPayload {
   designation?: string;
   hospital: string;
   phoneNumber?: string;
+  secondaryPhoneNumber?: string;
   email: string;
   isPrimary: boolean;
   product?: string[];
@@ -276,6 +279,7 @@ export interface FetchContactsParams {
   search?: string;
   userId?: string;
   productId?: string;
+  hospitalId?: string;
 }
 
 export interface FetchHospitalsParams {

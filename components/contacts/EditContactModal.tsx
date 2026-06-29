@@ -77,6 +77,7 @@ export function EditContactModal({
       designation: "",
       hospital: "",
       phoneNumber: "",
+      secondaryPhoneNumber: "",
       email: "",
       isPrimary: false,
     },
@@ -96,6 +97,7 @@ export function EditContactModal({
         designation: contact.designation || "",
         hospital: hospId,
         phoneNumber: contact.phoneNumber || "",
+        secondaryPhoneNumber: contact.secondaryPhoneNumber || "",
         email: contact.email || "",
         isPrimary: contact.isPrimary || false,
       });
@@ -357,6 +359,20 @@ export function EditContactModal({
             {errors.phoneNumber && (
               <p className="text-[10px] text-destructive mt-1 font-medium">
                 {errors.phoneNumber.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Secondary Phone</Label>
+            <Input
+              type="tel"
+              className="text-xs h-9 mt-1.5 bg-muted"
+              {...register("secondaryPhoneNumber")}
+            />
+            {errors.secondaryPhoneNumber && (
+              <p className="text-[10px] text-destructive mt-1 font-medium">
+                {errors.secondaryPhoneNumber.message}
               </p>
             )}
           </div>

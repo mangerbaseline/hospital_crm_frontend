@@ -10,13 +10,18 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { Plus, Search, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { Plus, Search, Users, ChevronLeft, ChevronRight, SlidersHorizontal, LayoutGrid, List } from "lucide-react";
 import {
   ContactCard,
   ContactCardSkeleton,
 } from "@/components/contacts/ContactCard";
 import { ContactDetailsModal } from "@/components/contacts/ContactDetailsModal";
 import { UserSelect } from "@/components/UserSelect";
+import { HospitalSelect } from "@/components/hospitals/HospitalSelect";
+import { ProductSelect } from "@/components/products/ProductSelect";
+import { ContactTable } from "@/components/contacts/ContactTable";
+import { cn } from "@/lib/utils";
 import { fetchContacts } from "@/store/features/contact/contactSlice";
 import { fetchProducts } from "@/store/features/product/productSlice";
 import {
@@ -40,10 +45,22 @@ function Contacts() {
     user?.role === UserRole.EXECUTIVE ||
     user?.role === UserRole.CUSTOMER_SUCCESS;
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const viewParam = searchParams.get("view");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string>(
     isAdminOrExecutive ? "all" : user?._id || "all",
   );
+  const [selectedHospitalId, setSelectedHospitalId] = useState<string>("all");
+  const [selectedProductId, setSelectedProductId] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"card" | "list">(
+    viewParam === "list" ? "list" : "card",
+  );
+
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -54,9 +71,16 @@ function Contacts() {
     setIsDetailsOpen(true);
   };
 
+  const handleViewToggle = (mode: "card" | "list") => {
+    setViewMode(mode);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", mode);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedUserId]);
+  }, [searchQuery, selectedUserId, selectedHospitalId, selectedProductId]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -80,9 +104,11 @@ function Contacts() {
         limit: pageSize,
         search: searchQuery,
         userId: selectedUserId === "all" ? "" : selectedUserId,
+        productId: selectedProductId === "all" ? "" : selectedProductId,
+        hospitalId: selectedHospitalId === "all" ? "" : selectedHospitalId,
       }),
     );
-  }, [dispatch, searchQuery, selectedUserId, currentPage, pageSize]);
+  }, [dispatch, searchQuery, selectedUserId, selectedHospitalId, selectedProductId, currentPage, pageSize]);
 
   return (
     <section className="max-w-7xl mx-auto w-full">
@@ -97,23 +123,46 @@ function Contacts() {
               : "Contacts filtered by assigned sales rep"
         }
       >
-        {isAdminOrExecutive && (
-          <div className="hidden sm:flex w-full sm:w-45">
+        <div className="hidden lg:flex items-center gap-3">
+          {isAdminOrExecutive && (
             <UserSelect
               value={selectedUserId}
               onValueChange={setSelectedUserId}
-              className="w-full bg-muted border-border shadow-sm cursor-pointer"
+              className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
             />
-          </div>
-        )}
-        <AddContactModal>
-          <Button className="flex gap-3 p-3 md:p-4.5 text-sm bg-black text-white border border-border cursor-pointer hover:bg-black/80 shadow-xl shadow-muted transition-all duration-200">
-            <Plus className="h-4 w-4" /> Add Contact
-          </Button>
-        </AddContactModal>
+          )}
+          <HospitalSelect
+            value={selectedHospitalId}
+            onValueChange={setSelectedHospitalId}
+            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
+          />
+          <ProductSelect
+            value={selectedProductId}
+            onValueChange={setSelectedProductId}
+            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer text-xs h-9"
+          />
+          <AddContactModal
+            onSuccess={() => {
+              dispatch(
+                fetchContacts({
+                  page: currentPage,
+                  limit: pageSize,
+                  search: searchQuery,
+                  userId: selectedUserId === "all" ? "" : selectedUserId,
+                  productId: selectedProductId === "all" ? "" : selectedProductId,
+                  hospitalId: selectedHospitalId === "all" ? "" : selectedHospitalId,
+                }),
+              );
+            }}
+          >
+            <Button className="flex gap-3 p-3 md:p-4.5 text-sm bg-black text-white border border-border cursor-pointer hover:bg-black/80 shadow-xl shadow-muted transition-all duration-200">
+              <Plus className="h-4 w-4" /> Add Contact
+            </Button>
+          </AddContactModal>
+        </div>
       </DashboardHeader>
 
-      <div className="flex flex-col gap-2 w-full sm:hidden -mt-4 mb-4 px-2">
+      <div className="flex flex-col gap-2 w-full lg:hidden -mt-4 mb-4 px-2">
         {isAdminOrExecutive && (
           <UserSelect
             value={selectedUserId}
@@ -121,6 +170,34 @@ function Contacts() {
             className="w-full bg-muted border-border shadow-sm cursor-pointer"
           />
         )}
+        <HospitalSelect
+          value={selectedHospitalId}
+          onValueChange={setSelectedHospitalId}
+          className="w-full bg-muted border-border shadow-sm cursor-pointer"
+        />
+        <ProductSelect
+          value={selectedProductId}
+          onValueChange={setSelectedProductId}
+          className="w-full bg-muted border-border shadow-sm cursor-pointer text-xs h-9"
+        />
+        <AddContactModal
+          onSuccess={() => {
+            dispatch(
+              fetchContacts({
+                page: currentPage,
+                limit: pageSize,
+                search: searchQuery,
+                userId: selectedUserId === "all" ? "" : selectedUserId,
+                productId: selectedProductId === "all" ? "" : selectedProductId,
+                hospitalId: selectedHospitalId === "all" ? "" : selectedHospitalId,
+              }),
+            );
+          }}
+        >
+          <Button className="w-full flex justify-center gap-3 p-3 text-sm bg-black text-white border border-border cursor-pointer hover:bg-black/80 shadow-xl shadow-muted transition-all duration-200">
+            <Plus className="h-4 w-4" /> Add Contact
+          </Button>
+        </AddContactModal>
       </div>
 
       {/* search and filters */}
@@ -140,55 +217,106 @@ function Contacts() {
           />
         </InputGroup>
 
-        {/* Commented out My Contacts / All Contacts tabs as they are replaced by the users dropdown for non-sales users
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          {isAdminOrExecutive ? (
-            <>
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border border-border/60 bg-white hover:bg-muted text-foreground"
-              >
-                <Users className="h-4 w-4" /> My Contacts
-              </Button>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          {/* Rows Limit Select */}
+          <div className="flex w-full md:w-auto items-center gap-2 text-sm font-medium text-muted-foreground border px-3 py-2 rounded-lg shadow-sm">
+            <SlidersHorizontal className="h-4 w-4" />
+            <span>Rows:</span>
+            <Select value={String(pageSize)} onValueChange={handleLimitChange}>
+              <SelectTrigger className="w-full sm:w-17.5 h-7 border-none p-0 shadow-none cursor-pointer">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-border">
+                <SelectItem value="6">6</SelectItem>
+                <SelectItem value="12">12</SelectItem>
+                <SelectItem value="24">24</SelectItem>
+                <SelectItem value="48">48</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-              <Button
-                variant="outline"
-                size="lg"
-                className="flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border border-border/60 bg-white hover:bg-muted text-foreground"
-              >
-                <Funnel className="h-4 w-4" /> All Contacts
-              </Button>
-            </>
-          ) : (
+          {/* View Toggle */}
+          <div className="flex items-center border border-border rounded-xl p-1 bg-muted/30">
             <Button
-              variant="outline"
-              size="lg"
-              className="flex-1 md:flex-none h-10 gap-2 px-5 font-medium transition-all duration-300 shadow-sm cursor-pointer border border-border/60 bg-white hover:bg-muted text-foreground"
+              variant="ghost"
+              size="icon"
+              onClick={() => handleViewToggle("card")}
+              className={cn(
+                "h-8 w-8 rounded-lg cursor-pointer transition-all",
+                viewMode === "card"
+                  ? "bg-white text-foreground shadow-xs border border-border/50"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
             >
-              <Users className="h-4 w-4" /> My Contacts
+              <LayoutGrid className="h-4 w-4" />
             </Button>
-          )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleViewToggle("list")}
+              className={cn(
+                "h-8 w-8 rounded-lg cursor-pointer transition-all",
+                viewMode === "list"
+                  ? "bg-white text-foreground shadow-xs border border-border/50"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        */}
       </div>
 
       {/* contact list */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-2 md:px-0 mt-10">
+      <div className="px-2 md:px-0">
         {isFetchingContacts ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <ContactCardSkeleton key={i} />
-          ))
+          viewMode === "card" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <ContactCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4 mt-6">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-16 w-full bg-muted border border-border rounded-2xl animate-pulse"
+                />
+              ))}
+            </div>
+          )
         ) : contacts.length > 0 ? (
-          contacts.map((contact) => (
-            <ContactCard
-              key={contact.email}
-              contact={contact}
+          viewMode === "card" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+              {contacts.map((contact) => (
+                <ContactCard
+                  key={contact._id}
+                  contact={contact}
+                  onViewClick={handleViewContact}
+                />
+              ))}
+            </div>
+          ) : (
+            <ContactTable
+              contacts={contacts}
               onViewClick={handleViewContact}
+              onContactUpdated={() => {
+                dispatch(
+                  fetchContacts({
+                    page: currentPage,
+                    limit: pageSize,
+                    search: searchQuery,
+                    userId: selectedUserId === "all" ? "" : selectedUserId,
+                    productId: selectedProductId === "all" ? "" : selectedProductId,
+                    hospitalId: selectedHospitalId === "all" ? "" : selectedHospitalId,
+                  }),
+                );
+              }}
             />
-          ))
+          )
         ) : (
-          <div className="col-span-full flex flex-col items-center justify-center py-20 bg-muted/30 rounded-3xl border border-dashed border-border gap-4">
+          <div className="flex flex-col items-center justify-center py-20 bg-muted/30 rounded-3xl border border-dashed border-border gap-4 mt-10">
             <div className="p-4 rounded-full bg-muted/50">
               <Users className="h-8 w-8 text-muted-foreground/50" />
             </div>
@@ -264,11 +392,10 @@ function Contacts() {
                       variant={currentPage === pageNum ? "default" : "outline"}
                       size="sm"
                       onClick={() => handlePageChange(pageNum)}
-                      className={`h-9 w-9 rounded-md font-bold shadow-sm transition-all cursor-pointer ${
-                        currentPage === pageNum
-                          ? "shadow-primary/20 scale-110"
-                          : ""
-                      }`}
+                      className={`h-9 w-9 rounded-md font-bold shadow-sm transition-all cursor-pointer ${currentPage === pageNum
+                        ? "shadow-primary/20 scale-110"
+                        : ""
+                        }`}
                     >
                       {pageNum}
                     </Button>

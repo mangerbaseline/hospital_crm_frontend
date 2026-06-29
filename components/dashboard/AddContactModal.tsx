@@ -50,9 +50,11 @@ import { Hospital } from "@/store/types";
 export function AddContactModal({
   children,
   hospital: defaultHospital,
+  onSuccess,
 }: {
   children: React.ReactNode;
   hospital?: Hospital | any;
+  onSuccess?: () => void;
 }) {
   const dispatch = useAppDispatch();
   const { hospitals, isFetchingHospitals, selectionPage, hasMoreSelection } =
@@ -79,6 +81,7 @@ export function AddContactModal({
       designation: "",
       hospital: "",
       phoneNumber: "",
+      secondaryPhoneNumber: "",
       email: "",
       isPrimary: false,
     },
@@ -164,6 +167,7 @@ export function AddContactModal({
       if (defaultHospital) {
         dispatch(getSingleHospital(defaultHospital._id));
       }
+      if (onSuccess) onSuccess();
     } else {
       toast.error(
         (resultAction.payload as string) || "Failed to create contact",
@@ -371,6 +375,20 @@ export function AddContactModal({
             {errors.phoneNumber && (
               <p className="text-[10px] text-destructive mt-1 font-medium">
                 {errors.phoneNumber.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Secondary Phone</Label>
+            <Input
+              type="tel"
+              className="text-xs h-9 mt-1.5 bg-muted"
+              {...register("secondaryPhoneNumber")}
+            />
+            {errors.secondaryPhoneNumber && (
+              <p className="text-[10px] text-destructive mt-1 font-medium">
+                {errors.secondaryPhoneNumber.message}
               </p>
             )}
           </div>
