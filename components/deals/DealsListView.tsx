@@ -288,9 +288,20 @@ export function DealsListView({
                         <div className="h-6 w-6 rounded-full bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 flex items-center justify-center shrink-0">
                           <User className="h-3 w-3 text-slate-500 dark:text-slate-400" />
                         </div>
-                        <span className="text-xs font-semibold text-foreground">
-                          {deal.user?.name || "—"}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-semibold text-foreground">
+                            {deal.user?.name || "—"}
+                          </span>
+                          {deal.leadSource && (
+                            <span
+                              className="text-[10px] text-muted-foreground font-medium truncate max-w-[160px]"
+                              title={deal.leadSourceDetails || "No details provided"}
+                            >
+                              Source: {deal.leadSource}
+                              {deal.leadSourceDetails ? ` - ${deal.leadSourceDetails}` : ""}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
 

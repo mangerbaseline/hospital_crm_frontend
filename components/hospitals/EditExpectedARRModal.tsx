@@ -44,6 +44,8 @@ interface ProductItem {
   isNew?: boolean;
   isRemoved?: boolean;
   isDirty?: boolean;
+  leadSource?: string;
+  leadSourceDetails?: string;
 }
 
 interface EditExpectedARRModalProps {
@@ -92,6 +94,8 @@ export function EditExpectedARRModal({
           isNew: false,
           isRemoved: false,
           isDirty: false,
+          leadSource: deal.leadSource || "",
+          leadSourceDetails: deal.leadSourceDetails || "",
         })),
       );
       setItems(allProducts);
@@ -114,6 +118,8 @@ export function EditExpectedARRModal({
         isNew: true,
         isRemoved: false,
         isDirty: false,
+        leadSource: "",
+        leadSourceDetails: "",
       },
     ]);
   };
@@ -141,6 +147,16 @@ export function EditExpectedARRModal({
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const invalidItem = items.find(
+        (item) => !item.isRemoved && item.productId && !item.leadSource
+      );
+      if (invalidItem) {
+        const prodName = invalidItem.productName || "Selected product";
+        toast.error(`Lead Source is required for ${prodName}`);
+        setIsSaving(false);
+        return;
+      }
+
       const promises: Promise<any>[] = [];
 
       const removedItems = items.filter(
@@ -175,6 +191,8 @@ export function EditExpectedARRModal({
                   ? new Date(item.expectedCloseDate).toISOString()
                   : undefined,
                 dealDate: new Date().toISOString(),
+                leadSource: item.leadSource,
+                leadSourceDetails: item.leadSourceDetails,
               }),
             ).unwrap(),
           );
@@ -196,6 +214,8 @@ export function EditExpectedARRModal({
                 ? new Date(item.expectedCloseDate).toISOString()
                 : undefined,
               dealDate: new Date().toISOString(),
+              leadSource: item.leadSource,
+              leadSourceDetails: item.leadSourceDetails,
               idn:
                 typeof hospital.idn === "object"
                   ? hospital.idn._id
@@ -413,6 +433,42 @@ export function EditExpectedARRModal({
                   className="text-xs h-9 mt-1.5 bg-muted"
                 />
               </div>
+
+              <div>
+                <Label className="text-xs font-semibold">Lead Source</Label>
+                <Select
+                  value={item.leadSource || ""}
+                  onValueChange={(val) =>
+                    handleFieldChange(item._id, "leadSource", val)
+                  }
+                >
+                  <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
+                    <SelectValue placeholder="Select Lead Source" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Trade Show">Trade Show</SelectItem>
+                    <SelectItem value="Cold Call">Cold Call</SelectItem>
+                    <SelectItem value="Referral">Referral</SelectItem>
+                    <SelectItem value="Website">Website</SelectItem>
+                    <SelectItem value="Outreach/Marketing">Outreach/Marketing</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {item.leadSource && (
+                <div>
+                  <Label className="text-xs font-semibold">Lead Source Details</Label>
+                  <Input
+                    placeholder="Enter lead source details..."
+                    className="text-xs h-9 mt-1.5 bg-muted"
+                    value={item.leadSourceDetails || ""}
+                    onChange={(e) =>
+                      handleFieldChange(item._id, "leadSourceDetails", e.target.value)
+                    }
+                  />
+                </div>
+              )}
             </div>
           ))}
 

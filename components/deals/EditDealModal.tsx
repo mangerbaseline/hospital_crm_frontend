@@ -81,6 +81,10 @@ export function EditDealModal({
 
   const [beds, setBeds] = useState(deal.beds || "");
   const [stage, setStage] = useState(deal.stage || DealProductStage.DEMO);
+  const [leadSource, setLeadSource] = useState(deal.leadSource || "");
+  const [leadSourceDetails, setLeadSourceDetails] = useState(
+    deal.leadSourceDetails || "",
+  );
   const [expectedCloseDate, setExpectedCloseDate] = useState(
     deal.expectedCloseDate
       ? new Date(deal.expectedCloseDate).toISOString().split("T")[0]
@@ -106,6 +110,8 @@ export function EditDealModal({
           ? new Date(deal.expectedCloseDate).toISOString().split("T")[0]
           : "",
       );
+      setLeadSource(deal.leadSource || "");
+      setLeadSourceDetails(deal.leadSourceDetails || "");
     }
   }, [open, deal, dispatch, users.length, products.length, gpos.length]);
 
@@ -146,6 +152,8 @@ export function EditDealModal({
             : undefined,
           userId:
             selectedUserId !== deal.user?._id ? selectedUserId : undefined,
+          leadSource,
+          leadSourceDetails,
         }),
       ).unwrap();
       toast.success("Deal updated successfully");
@@ -389,6 +397,38 @@ export function EditDealModal({
               className="text-xs h-9 mt-1.5 bg-muted"
             />
           </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Lead Source</Label>
+            <Select
+              value={leadSource}
+              onValueChange={(val) => setLeadSource(val)}
+            >
+              <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
+                <SelectValue placeholder="Select Lead Source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Trade Show">Trade Show</SelectItem>
+                <SelectItem value="Cold Call">Cold Call</SelectItem>
+                <SelectItem value="Referral">Referral</SelectItem>
+                <SelectItem value="Website">Website</SelectItem>
+                <SelectItem value="Outreach/Marketing">Outreach/Marketing</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {leadSource && (
+            <div>
+              <Label className="text-xs font-semibold">Lead Source Details</Label>
+              <Input
+                placeholder="Enter lead source details..."
+                className="text-xs h-9 mt-1.5 bg-muted"
+                value={leadSourceDetails}
+                onChange={(e) => setLeadSourceDetails(e.target.value)}
+              />
+            </div>
+          )}
         </div>
 
         <DialogFooter className="mt-4 gap-2">

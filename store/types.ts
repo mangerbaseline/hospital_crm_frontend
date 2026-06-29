@@ -157,6 +157,8 @@ export interface Hospital {
   documents?: string[];
   deals?: {
     _id: string;
+    leadSource?: string;
+    leadSourceDetails?: string;
     products: {
       product: { _id: string; name: string } | any;
       dealAmount: number;
@@ -592,6 +594,8 @@ export interface PipelineDeal {
   expectedCloseDate: string;
   dealDate?: string;
   beds?: number;
+  leadSource?: string;
+  leadSourceDetails?: string;
 }
 
 export interface FetchAllDealsParams {
@@ -672,6 +676,8 @@ export interface AddDealProductPayload {
   beds?: number;
   idn?: string;
   gpo?: string;
+  leadSource?: string;
+  leadSourceDetails?: string;
 }
 
 export interface UpdateDealProductPayload {
@@ -683,6 +689,8 @@ export interface UpdateDealProductPayload {
   dealDate?: string;
   beds?: number;
   userId?: string;
+  leadSource?: string;
+  leadSourceDetails?: string;
 }
 
 export interface RemoveDealProductPayload {

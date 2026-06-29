@@ -13,7 +13,13 @@ interface ExpectedARRCardProps {
 
 export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
   const deals = hospital.deals || [];
-  const allProducts = deals.flatMap((deal) => deal.products || []);
+  const allProducts = deals.flatMap((deal) =>
+    (deal.products || []).map((p) => ({
+      ...p,
+      leadSource: deal.leadSource,
+      leadSourceDetails: deal.leadSourceDetails,
+    }))
+  );
 
   const totalArr = allProducts.reduce((acc, p) => acc + (p.dealAmount || 0), 0);
 
@@ -128,6 +134,22 @@ export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
                       : "N/A"}
                   </span>
                 </div>
+                {(p as any).leadSource && (
+                  <div className="flex flex-col gap-0.5">
+                    <span
+                      className={`text-[10px] font-bold uppercase tracking-widest text-muted-foreground`}
+                    >
+                      Lead Source
+                    </span>
+                    <span
+                      className={`text-sm font-bold ${themeStyle.label}`}
+                      title={(p as any).leadSourceDetails}
+                    >
+                      {(p as any).leadSource}
+                      {(p as any).leadSourceDetails ? ` - ${(p as any).leadSourceDetails}` : ""}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           );

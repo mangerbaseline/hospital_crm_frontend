@@ -26,6 +26,13 @@ import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
 import { ProductFields } from "./ProductFields";
 import { Textarea } from "./ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
   fetchIDNs,
@@ -93,6 +100,8 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
       products: [],
       notes: "",
       userId: currentUser?._id || "",
+      leadSource: "",
+      leadSourceDetails: "",
     },
   });
 
@@ -581,7 +590,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="text-xs font-semibold">GPO</Label>
               <Popover open={gpoOpen} onOpenChange={setGpoOpen} modal={false}>
@@ -658,7 +667,57 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
               )}
             </div>
 
-            {/* <div>
+            <div>
+              <Label className="text-xs font-semibold">Lead Source</Label>
+              <Controller
+                control={control}
+                name="leadSource"
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                    }}
+                    value={field.value}
+                  >
+                    <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted border-border">
+                      <SelectValue placeholder="Select Lead Source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Trade Show">Trade Show</SelectItem>
+                      <SelectItem value="Cold Call">Cold Call</SelectItem>
+                      <SelectItem value="Referral">Referral</SelectItem>
+                      <SelectItem value="Website">Website</SelectItem>
+                      <SelectItem value="Outreach/Marketing">Outreach/Marketing</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.leadSource && (
+                <p className="text-[10px] text-destructive mt-1 font-medium">
+                  {errors.leadSource.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {watch("leadSource") && (
+            <div>
+              <Label className="text-xs font-semibold">Lead Source Details</Label>
+              <Input
+                placeholder="Enter lead source details..."
+                className="text-xs h-9 mt-1.5 bg-muted"
+                {...register("leadSourceDetails")}
+              />
+              {errors.leadSourceDetails && (
+                <p className="text-[10px] text-destructive mt-1 font-medium">
+                  {errors.leadSourceDetails.message}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* <div>
               <Label className="text-xs font-semibold">
                 Competitive Product
               </Label>
@@ -669,7 +728,6 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
                 readOnly
               />
             </div> */}
-          </div>
 
           {/* <div className="grid grid-cols-2 gap-4">
             <div>
