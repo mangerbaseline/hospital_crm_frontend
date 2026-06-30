@@ -67,7 +67,7 @@ export default function DealsPage() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(12);
 
   const [sortBy, setSortBy] = useState("dealAmount");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -265,10 +265,10 @@ export default function DealsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
+                <SelectItem value="12">12</SelectItem>
+                <SelectItem value="24">24</SelectItem>
+                <SelectItem value="48">48</SelectItem>
+                <SelectItem value="96">96</SelectItem>
               </SelectContent>
             </Select>
           </div>
