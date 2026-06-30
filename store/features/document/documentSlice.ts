@@ -42,6 +42,7 @@ export const uploadDocument = createAsyncThunk(
       formData.append("name", payload.name);
       formData.append("category", payload.category);
       formData.append("hospitalId", payload.hospitalId);
+      if (payload.product) formData.append("product", payload.product);
 
       const response = await axiosInstance.post<ApiResponse<HospitalDocument>>(
         "/api/document/upload",

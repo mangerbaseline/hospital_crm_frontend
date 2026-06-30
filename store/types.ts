@@ -841,6 +841,7 @@ export interface HospitalDocument {
   filename: string;
   hospital: string;
   user: { _id: string; name: string; email: string } | string;
+  product?: { _id: string; name: string };
   fileSize: number;
   fileType: string;
   createdAt: string;
@@ -852,6 +853,7 @@ export interface UploadDocumentPayload {
   name: string;
   category: DocumentCategory;
   hospitalId: string;
+  product?: string;
 }
 
 export interface DocumentState {
