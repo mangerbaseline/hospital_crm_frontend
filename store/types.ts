@@ -212,13 +212,13 @@ export interface HospitalState {
 }
 
 export interface CreateHospitalPayload {
-  idn: string;
+  idn?: string;
   hospitalName: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  gpo: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  gpo?: string;
   userId?: string;
   // competitiveProduct: string;
   teamHospital?: boolean | null;
