@@ -68,6 +68,7 @@ export default function DealsPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const [sortBy, setSortBy] = useState("dealAmount");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -81,6 +82,7 @@ export default function DealsPage() {
 
   useEffect(() => {
     dispatch(clearDeals());
+    setHasLoaded(true);
   }, [dispatch]);
 
   useEffect(() => {
@@ -296,7 +298,7 @@ export default function DealsPage() {
       {/* Content Area */}
       {viewMode === "card" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {isFetchingDeals ? (
+          {!hasLoaded || isFetchingDeals ? (
             Array.from({ length: 6 }).map((_, i) => (
               <DealCardSkeleton key={i} />
             ))
@@ -317,7 +319,7 @@ export default function DealsPage() {
         </div>
       ) : (
         <div className="mt-6">
-          {isFetchingDeals ? (
+          {!hasLoaded || isFetchingDeals ? (
             <DealsListSkeleton />
           ) : deals.length > 0 ? (
             <DealsListView
@@ -340,7 +342,7 @@ export default function DealsPage() {
         </div>
       )}
 
-      {totalPages > 0 && (
+      {hasLoaded && totalPages > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 px-2">
           <div className="text-sm text-muted-foreground font-medium order-2 sm:order-1">
             Displaying{" "}
