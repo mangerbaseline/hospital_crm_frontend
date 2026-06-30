@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchAllDeals } from "@/store/features/deal/dealSlice";
+import { fetchAllDeals, clearDeals } from "@/store/features/deal/dealSlice";
 import { DashboardHeader } from "@/components/Header";
 import { UserSelect } from "@/components/UserSelect";
 import { MultiProductSelect } from "@/components/products/MultiProductSelect";
@@ -78,6 +78,10 @@ export default function DealsPage() {
     }, 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
+
+  useEffect(() => {
+    dispatch(clearDeals());
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(

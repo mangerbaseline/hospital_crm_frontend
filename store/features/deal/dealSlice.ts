@@ -175,6 +175,13 @@ const dealSlice = createSlice({
       state.isDeleteDealLoading = false;
       state.deleteDealError = null;
     },
+    clearDeals: (state) => {
+      state.deals = [];
+      state.page = 1;
+      state.limit = 12;
+      state.totalDeals = 0;
+      state.totalPages = 1;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -278,5 +285,5 @@ const dealSlice = createSlice({
   },
 });
 
-export const { resetDealStatus } = dealSlice.actions;
+export const { resetDealStatus, clearDeals } = dealSlice.actions;
 export default dealSlice.reducer;
