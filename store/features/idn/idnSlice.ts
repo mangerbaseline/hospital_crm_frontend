@@ -84,14 +84,18 @@ export const fetchIDNsWithDeals = createAsyncThunk(
 export const fetchIDNHospitals = createAsyncThunk(
   "idn/fetchIDNHospitals",
   async (
-    params: { idnId: string; page?: number; limit?: number },
+    params: { idnId: string; page?: number; limit?: number; userId?: string },
     { rejectWithValue },
   ) => {
     try {
-      const { idnId, page = 1, limit = 10 } = params;
+      const { idnId, page = 1, limit = 10, userId } = params;
+      let url = `/api/idn/deals-by-idn?idnId=${idnId}&page=${page}&limit=${limit}`;
+      if (userId) {
+        url += `&userId=${userId}`;
+      }
       const response = await axiosInstance.get<
         PaginatedApiResponse<IDNHospitalWithARR[]>
-      >(`/api/idn/deals-by-idn?idnId=${idnId}&page=${page}&limit=${limit}`);
+      >(url);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -234,29 +238,32 @@ const idnSlice = createSlice({
         state.isFetchingIDNs = false;
         state.fetchIDNsError = action.payload as string;
       })
-      .addCase(fetchIDNsWithDeals.pending, (state) => {
+      .addCase(fetchIDNsWithDeals.pending, (state, action) => {
         state.isFetchingIDNsWithDeals = true;
         state.fetchIDNsWithDealsError = null;
+        state.idnsWithDeals = [];
+        state.currentRequestId = action.meta.requestId;
       })
       .addCase(
         fetchIDNsWithDeals.fulfilled,
-        (
-          state,
-          action: PayloadAction<PaginatedApiResponse<IDNWithDeals[]>>,
-        ) => {
-          state.isFetchingIDNsWithDeals = false;
-          state.idnsWithDeals = action.payload.data;
-          const pagination =
-            (action.payload as any).pagination || action.payload;
-          state.page = pagination.page || 1;
-          state.limit = pagination.limit || 10;
-          state.totalIDNs = pagination.total || pagination.totalIDNs || 0;
-          state.totalPages = pagination.totalPages || 1;
+        (state, action) => {
+          if (state.currentRequestId === action.meta.requestId) {
+            state.isFetchingIDNsWithDeals = false;
+            state.idnsWithDeals = action.payload.data;
+            const pagination =
+              (action.payload as any).pagination || action.payload;
+            state.page = pagination.page || 1;
+            state.limit = pagination.limit || 10;
+            state.totalIDNs = pagination.total || pagination.totalIDNs || 0;
+            state.totalPages = pagination.totalPages || 1;
+          }
         },
       )
       .addCase(fetchIDNsWithDeals.rejected, (state, action) => {
-        state.isFetchingIDNsWithDeals = false;
-        state.fetchIDNsWithDealsError = action.payload as string;
+        if (state.currentRequestId === action.meta.requestId) {
+          state.isFetchingIDNsWithDeals = false;
+          state.fetchIDNsWithDealsError = action.payload as string;
+        }
       })
       .addCase(getSingleIDN.pending, (state) => {
         state.isGetSingleIDNLoading = true;
@@ -326,6 +333,7 @@ const idnSlice = createSlice({
       .addCase(fetchIDNHospitals.pending, (state) => {
         state.isFetchingIDNHospitals = true;
         state.fetchIDNHospitalsError = null;
+        state.idnHospitals = [];
       })
       .addCase(
         fetchIDNHospitals.fulfilled,

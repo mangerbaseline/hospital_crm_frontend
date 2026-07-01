@@ -26,12 +26,14 @@ interface IDNDetailsModalProps {
   idn: IDNWithDeals | null;
   isOpen: boolean;
   onClose: () => void;
+  selectedUser?: string;
 }
 
 export function IDNDetailsModal({
   idn,
   isOpen,
   onClose,
+  selectedUser,
 }: IDNDetailsModalProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -48,10 +50,15 @@ export function IDNDetailsModal({
   useEffect(() => {
     if (isOpen && idn?._id) {
       dispatch(
-        fetchIDNHospitals({ idnId: idn._id, page: currentPage, limit: 5 }),
+        fetchIDNHospitals({
+          idnId: idn._id,
+          page: currentPage,
+          limit: 5,
+          userId: selectedUser && selectedUser !== "all" ? selectedUser : undefined,
+        }),
       );
     }
-  }, [isOpen, idn?._id, currentPage, dispatch]);
+  }, [isOpen, idn?._id, currentPage, selectedUser, dispatch]);
 
   useEffect(() => {
     if (!isOpen) {

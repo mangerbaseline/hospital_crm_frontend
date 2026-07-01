@@ -27,12 +27,14 @@ interface GPOHospitalDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   gpo: GPOWithDeals | null;
+  selectedUser?: string;
 }
 
 export function GPOHospitalDetailsModal({
   isOpen,
   onClose,
   gpo,
+  selectedUser,
 }: GPOHospitalDetailsModalProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -49,7 +51,12 @@ export function GPOHospitalDetailsModal({
   useEffect(() => {
     if (isOpen && gpo?._id) {
       dispatch(
-        fetchGPOHospitals({ gpoId: gpo._id, page: currentPage, limit: 5 }),
+        fetchGPOHospitals({
+          gpoId: gpo._id,
+          page: currentPage,
+          limit: 5,
+          userId: selectedUser && selectedUser !== "all" ? selectedUser : undefined,
+        }),
       );
     }
   }, [isOpen, gpo?._id, currentPage, dispatch]);

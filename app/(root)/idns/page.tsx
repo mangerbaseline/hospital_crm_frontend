@@ -239,6 +239,7 @@ function IDNs() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         idn={selectedIDN}
+        selectedUser={selectedUser}
       />
     </section>
   );

@@ -81,14 +81,18 @@ export const fetchGPOsWithDeals = createAsyncThunk(
 export const fetchGPOHospitals = createAsyncThunk(
   "gpo/fetchGPOHospitals",
   async (
-    params: { gpoId: string; page?: number; limit?: number },
+    params: { gpoId: string; page?: number; limit?: number; userId?: string },
     { rejectWithValue },
   ) => {
     try {
-      const { gpoId, page = 1, limit = 10 } = params;
+      const { gpoId, page = 1, limit = 10, userId } = params;
+      let url = `/api/gpo/deals-by-gpo?gpoId=${gpoId}&page=${page}&limit=${limit}`;
+      if (userId) {
+        url += `&userId=${userId}`;
+      }
       const response = await axiosInstance.get<
         PaginatedApiResponse<GPOHospitalWithARR[]>
-      >(`/api/gpo/deals-by-gpo?gpoId=${gpoId}&page=${page}&limit=${limit}`);
+      >(url);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -209,29 +213,32 @@ const gpoSlice = createSlice({
         state.isFetchingGPOs = false;
         state.fetchGPOsError = action.payload as string;
       })
-      .addCase(fetchGPOsWithDeals.pending, (state) => {
+      .addCase(fetchGPOsWithDeals.pending, (state, action) => {
         state.isFetchingGPOsWithDeals = true;
         state.fetchGPOsWithDealsError = null;
+        state.gposWithDeals = [];
+        state.currentRequestId = action.meta.requestId;
       })
       .addCase(
         fetchGPOsWithDeals.fulfilled,
-        (
-          state,
-          action: PayloadAction<PaginatedApiResponse<GPOWithDeals[]>>,
-        ) => {
-          state.isFetchingGPOsWithDeals = false;
-          state.gposWithDeals = action.payload.data;
-          const pagination =
-            (action.payload as any).pagination || action.payload;
-          state.page = pagination.page || 1;
-          state.limit = pagination.limit || 10;
-          state.totalGPOs = pagination.total || pagination.totalGPOs || 0;
-          state.totalPages = pagination.totalPages || 1;
+        (state, action) => {
+          if (state.currentRequestId === action.meta.requestId) {
+            state.isFetchingGPOsWithDeals = false;
+            state.gposWithDeals = action.payload.data;
+            const pagination =
+              (action.payload as any).pagination || action.payload;
+            state.page = pagination.page || 1;
+            state.limit = pagination.limit || 10;
+            state.totalGPOs = pagination.total || pagination.totalGPOs || 0;
+            state.totalPages = pagination.totalPages || 1;
+          }
         },
       )
       .addCase(fetchGPOsWithDeals.rejected, (state, action) => {
-        state.isFetchingGPOsWithDeals = false;
-        state.fetchGPOsWithDealsError = action.payload as string;
+        if (state.currentRequestId === action.meta.requestId) {
+          state.isFetchingGPOsWithDeals = false;
+          state.fetchGPOsWithDealsError = action.payload as string;
+        }
       })
       .addCase(getSingleGPO.pending, (state) => {
         state.isGetSingleGPOLoading = true;
@@ -295,6 +302,7 @@ const gpoSlice = createSlice({
       .addCase(fetchGPOHospitals.pending, (state) => {
         state.isFetchingGPOHospitals = true;
         state.fetchGPOHospitalsError = null;
+        state.gpoHospitals = [];
       })
       .addCase(
         fetchGPOHospitals.fulfilled,

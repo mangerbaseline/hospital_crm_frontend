@@ -221,6 +221,7 @@ function GposVasPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         gpo={selectedGPO}
+        selectedUser={selectedUser}
       />
     </section>
   );

@@ -397,6 +397,7 @@ export interface GPOState {
   limit: number;
   totalGPOs: number;
   totalPages: number;
+  currentRequestId?: string;
 
   gpoHospitals: GPOHospitalWithARR[];
   isFetchingGPOHospitals: boolean;
@@ -486,6 +487,7 @@ export interface IDNState {
   selectionPage: number;
   selectionTotalPages: number;
   hasMoreSelection: boolean;
+  currentRequestId?: string;
 
   idnHospitals: IDNHospitalWithARR[];
   isFetchingIDNHospitals: boolean;
