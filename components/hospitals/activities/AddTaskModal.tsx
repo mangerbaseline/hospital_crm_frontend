@@ -118,6 +118,7 @@ export function AddTaskModal({
     },
   });
 
+  const isSales = currentUser?.role === UserRole.SALES;
   const isEditing = !!taskId;
 
   useEffect(() => {
