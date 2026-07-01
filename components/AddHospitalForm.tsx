@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { UserSelect } from "./UserSelect";
 import { fetchIDNs } from "@/store/features/idn/idnSlice";
 import { fetchGPOs } from "@/store/features/gpo/gpoSlice";
 import { createHospital } from "@/store/features/hospital/hospitalSlice";
@@ -36,7 +37,6 @@ import {
   HospitalFormValues,
 } from "@/validations/hospital.validations";
 import { UserRole } from "@/store/types";
-import { UserSelect } from "./UserSelect";
 
 interface AddHospitalFormProps {
   onSuccess?: () => void;
@@ -73,7 +73,7 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
       state: "",
       zip: "",
       gpo: "",
-      userId: currentUser?._id || "",
+      userId: "",
       teamHospital: null as any,
       magnetHospital: null as any,
       ICUBeds: 0,
@@ -88,12 +88,6 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
     dispatch(fetchIDNs({ limit: 1000 }));
     dispatch(fetchGPOs({ limit: 1000 }));
   }, [dispatch]);
-
-  useEffect(() => {
-    if (currentUser?._id && !userIdValue) {
-      setValue("userId", currentUser._id);
-    }
-  }, [currentUser, setValue, userIdValue]);
 
   const onSubmit = async (data: HospitalFormValues) => {
     try {
@@ -356,7 +350,7 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
               type="number"
               placeholder="Enter number"
               className="text-xs h-9 mt-1.5 bg-muted"
-              {...register("ICUBeds", { valueAsNumber: true })}
+              {...register("ICUBeds", { setValueAs: (v) => (v === "" ? 0 : Number(v)) })}
             />
             {errors.ICUBeds && (
               <p className="text-xs text-destructive mt-1">
@@ -370,7 +364,7 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
               type="number"
               placeholder="Enter number"
               className="text-xs h-9 mt-1.5 bg-muted"
-              {...register("totalBeds", { valueAsNumber: true })}
+              {...register("totalBeds", { setValueAs: (v) => (v === "" ? undefined : Number(v)) })}
             />
             {errors.totalBeds && (
               <p className="text-xs text-destructive mt-1">

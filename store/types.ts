@@ -197,11 +197,13 @@ export interface HospitalState {
   isGetSingleHospitalLoading: boolean;
   isCreateHospitalLoading: boolean;
   isUpdateHospitalLoading: boolean;
+  isDeleteHospitalLoading: boolean;
   fetchHospitalsError: string | null;
   fetchHospitalsWithDealsError: string | null;
   getSingleHospitalError: string | null;
   createHospitalError: string | null;
   updateHospitalError: string | null;
+  deleteHospitalError: string | null;
   page: number;
   limit: number;
   totalHospitals: number;

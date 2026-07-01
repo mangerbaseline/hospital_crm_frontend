@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/select";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { AddHospitalModal } from "@/components/AddHospitalModal";
+import { deleteHospital } from "@/store/features/hospital/hospitalSlice";
+import { toast } from "sonner";
 import AdminGuard from "@/components/providers/AdminGuard";
 
 function AddHospitalPage() {
@@ -81,6 +83,23 @@ function AddHospitalPage() {
     setCurrentPage(1);
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await dispatch(deleteHospital(id)).unwrap();
+      toast.success("Hospital deleted successfully");
+      dispatch(
+        fetchHospitalsWithDeals({
+          page: currentPage,
+          limit: pageSize,
+          search: debouncedSearchQuery,
+          userId: "",
+        }),
+      );
+    } catch (error: any) {
+      toast.error(error || "Failed to delete hospital");
+    }
+  };
+
   return (
     <AdminGuard>
       <section className="w-full max-w-7xl mx-auto">
@@ -130,6 +149,7 @@ function AddHospitalPage() {
           <HospitalTable
             hospitals={hospitalsWithDeals}
             isLoading={isFetchingHospitalsWithDeals}
+            onDelete={handleDelete}
           />
         </div>
 
@@ -223,6 +243,7 @@ function AddHospitalPage() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSuccess={() => {
+            setIsModalOpen(false);
             dispatch(
               fetchHospitalsWithDeals({
                 page: currentPage,

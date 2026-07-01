@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const hospitalSchema = z.object({
-  idn: z.string().optional(),
+  idn: z.string().min(1, "IDN is required"),
   hospitalName: z
     .string()
     .min(2, "Hospital name must be at least 2 characters"),
@@ -10,7 +10,7 @@ export const hospitalSchema = z.object({
   state: z.string().optional(),
   zip: z.string().optional(),
   gpo: z.string().optional(),
-  userId: z.string(),
+  userId: z.string().optional(),
   teamHospital: z.boolean().nullable().optional(),
   magnetHospital: z.boolean().nullable().optional(),
   ICUBeds: z.number().min(0, "ICU Beds must be 0 or more"),

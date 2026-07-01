@@ -22,11 +22,13 @@ const initialState: HospitalState = {
   isGetSingleHospitalLoading: false,
   isCreateHospitalLoading: false,
   isUpdateHospitalLoading: false,
+  isDeleteHospitalLoading: false,
   fetchHospitalsError: null,
   fetchHospitalsWithDealsError: null,
   getSingleHospitalError: null,
   createHospitalError: null,
   updateHospitalError: null,
+  deleteHospitalError: null,
   page: 1,
   limit: 10,
   totalHospitals: 0,
@@ -132,6 +134,20 @@ export const getSingleHospital = createAsyncThunk(
   },
 );
 
+export const deleteHospital = createAsyncThunk(
+  "hospital/deleteHospital",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`/api/hospital/${id}`);
+      return id;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete hospital",
+      );
+    }
+  },
+);
+
 const hospitalSlice = createSlice({
   name: "hospital",
   initialState,
@@ -145,11 +161,13 @@ const hospitalSlice = createSlice({
       state.isGetSingleHospitalLoading = false;
       state.isCreateHospitalLoading = false;
       state.isUpdateHospitalLoading = false;
+      state.isDeleteHospitalLoading = false;
       state.fetchHospitalsError = null;
       state.fetchHospitalsWithDealsError = null;
       state.getSingleHospitalError = null;
       state.createHospitalError = null;
       state.updateHospitalError = null;
+      state.deleteHospitalError = null;
     },
     resetHospitalsForSelection: (state) => {
       state.hospitals = [];
@@ -257,6 +275,21 @@ const hospitalSlice = createSlice({
       .addCase(getSingleHospital.rejected, (state, action) => {
         state.isGetSingleHospitalLoading = false;
         state.getSingleHospitalError = action.payload as string;
+      })
+      .addCase(deleteHospital.pending, (state) => {
+        state.isDeleteHospitalLoading = true;
+        state.deleteHospitalError = null;
+      })
+      .addCase(deleteHospital.fulfilled, (state, action) => {
+        state.isDeleteHospitalLoading = false;
+        state.hospitalsWithDeals = state.hospitalsWithDeals.filter(
+          (h) => h._id !== action.payload,
+        );
+        state.totalHospitals -= 1;
+      })
+      .addCase(deleteHospital.rejected, (state, action) => {
+        state.isDeleteHospitalLoading = false;
+        state.deleteHospitalError = action.payload as string;
       });
   },
 });

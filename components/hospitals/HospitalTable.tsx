@@ -13,21 +13,24 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Eye, Building2 } from "lucide-react";
+import { MoreHorizontal, Eye, Building2, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { HospitalWithDeals } from "@/store/types";
 import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface HospitalTableProps {
   hospitals: HospitalWithDeals[];
   isLoading: boolean;
+  onDelete?: (id: string) => void;
 }
 
-export function HospitalTable({ hospitals, isLoading }: HospitalTableProps) {
+export function HospitalTable({ hospitals, isLoading, onDelete }: HospitalTableProps) {
   const router = useRouter();
 
   if (isLoading) {
@@ -171,6 +174,25 @@ export function HospitalTable({ hospitals, isLoading }: HospitalTableProps) {
                         >
                           <Eye className="h-4 w-4" /> View Details
                         </DropdownMenuItem>
+                        {onDelete && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <ConfirmDialog
+                              title="Delete Hospital"
+                              description={`Are you sure you want to delete ${hospital.hospitalName}? This action cannot be undone.`}
+                              confirmText="Delete"
+                              onConfirm={() => onDelete(hospital._id)}
+                              variant="destructive"
+                            >
+                              <div
+                                className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-destructive/10 text-destructive font-medium"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Trash2 className="h-4 w-4" /> Delete Hospital
+                              </div>
+                            </ConfirmDialog>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
