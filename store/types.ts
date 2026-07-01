@@ -231,7 +231,7 @@ export interface CreateHospitalPayload {
 
 export interface UpdateHospitalPayload extends Partial<CreateHospitalPayload> {
   id: string;
-  user?: string;
+  user?: string | null;
 }
 
 export interface ContactState {

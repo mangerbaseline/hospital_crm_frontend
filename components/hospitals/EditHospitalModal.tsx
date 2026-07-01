@@ -81,8 +81,8 @@ export function EditHospitalModal({
   const IDN_PAGE_LIMIT = 20;
   const [selectedUser, setSelectedUser] = useState<string>(
     typeof hospital.user === "object"
-      ? (hospital.user as any)?._id || ""
-      : hospital.user || "",
+      ? (hospital.user as any)?._id || "__none__"
+      : hospital.user || "__none__",
   );
 
   const {
@@ -190,8 +190,8 @@ export function EditHospitalModal({
     if (open) {
       const userIdVal =
         typeof hospital.user === "object"
-          ? (hospital.user as any)?._id || ""
-          : hospital.user || "";
+          ? (hospital.user as any)?._id || "__none__"
+          : hospital.user || "__none__";
       reset({
         idn:
           typeof hospital.idn === "object"
@@ -222,7 +222,7 @@ export function EditHospitalModal({
         updateHospital({
           id: hospital._id,
           ...data,
-          user: selectedUser || undefined,
+          user: selectedUser === "__none__" ? null : selectedUser || undefined,
         }),
       ).unwrap();
       toast.success("Hospital updated successfully");
@@ -257,6 +257,7 @@ export function EditHospitalModal({
                   <SelectValue placeholder="Select Sales Rep" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
                   {users.map((user) => (
                     <SelectItem key={user._id} value={user._id}>
                       {user.name}
@@ -513,7 +514,7 @@ export function EditHospitalModal({
                 type="number"
                 placeholder="Enter number"
                 className="text-xs h-9 mt-1.5 bg-muted"
-                {...register("ICUBeds", { valueAsNumber: true })}
+                {...register("ICUBeds", { setValueAs: (v) => (v === "" ? 0 : Number(v)) })}
               />
               {errors.ICUBeds && (
                 <p className="text-xs text-destructive mt-1">
@@ -527,7 +528,7 @@ export function EditHospitalModal({
                 type="number"
                 placeholder="Enter number"
                 className="text-xs h-9 mt-1.5 bg-muted"
-                {...register("totalBeds", { valueAsNumber: true })}
+                {...register("totalBeds", { setValueAs: (v) => (v === "" ? undefined : Number(v)) })}
               />
               {errors.totalBeds && (
                 <p className="text-xs text-destructive mt-1">
