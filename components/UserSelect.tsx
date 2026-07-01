@@ -68,8 +68,10 @@ export function UserSelect({
   const selectedName =
     selectedVal === "all"
       ? "All Sales Reps"
-      : users.find((u) => u._id === selectedVal)?.name ||
-        (currentUser?._id === selectedVal ? currentUser?.name : placeholder);
+      : selectedVal === ""
+        ? placeholder
+        : users.find((u) => u._id === selectedVal)?.name ||
+          (currentUser?._id === selectedVal ? currentUser?.name : placeholder);
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -102,6 +104,25 @@ export function UserSelect({
               No sales rep found.
             </CommandEmpty>
             <CommandGroup>
+              {!showAll && (
+                <CommandItem
+                  value="none"
+                  onSelect={() => {
+                    onValueChange?.("");
+                    if (value === undefined) setSelectedVal("");
+                    setOpen(false);
+                  }}
+                  className="text-xs"
+                >
+                  None
+                  <Check
+                    className={cn(
+                      "ml-auto h-4 w-4",
+                      selectedVal === "" ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                </CommandItem>
+              )}
               {showAll && (
                 <CommandItem
                   value="all"
