@@ -78,16 +78,6 @@ export function LogCallModal({
   );
 
   const { products } = useAppSelector((state) => state.product);
-  const { selectedHospital } = useAppSelector((state) => state.hospital);
-
-  const hospitalProducts = selectedHospital?.deals?.flatMap((deal) => 
-    deal.products.map((p) => p.product)
-  ).filter((prod): prod is { _id: string; name: string } => !!prod && typeof prod === "object" && !!prod._id) || [];
-
-  const uniqueHospitalProducts = Array.from(
-    new Map(hospitalProducts.map((p) => [p._id, p])).values()
-  );
-
   const {
     register,
     handleSubmit,
@@ -228,7 +218,7 @@ export function LogCallModal({
                     <SelectValue placeholder="Select Product Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {uniqueHospitalProducts.map((prod) => (
+                    {products.map((prod) => (
                       <SelectItem key={prod._id} value={prod._id}>
                         {prod.name}
                       </SelectItem>
@@ -242,11 +232,7 @@ export function LogCallModal({
                 {errors.product.message}
               </p>
             )}
-            {uniqueHospitalProducts.length === 0 && (
-              <p className="text-[11px] text-amber-600 dark:text-amber-500 font-semibold mt-1.5 leading-tight">
-                ⚠️ This hospital has no deals created yet. Please create a deal (expected ARR) for this hospital first.
-              </p>
-            )}
+
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
