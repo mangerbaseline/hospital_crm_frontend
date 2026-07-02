@@ -94,8 +94,8 @@ export function EditExpectedARRModal({
           isNew: false,
           isRemoved: false,
           isDirty: false,
-          leadSource: deal.leadSource || "",
-          leadSourceDetails: deal.leadSourceDetails || "",
+          leadSource: (p as any).leadSource || "",
+          leadSourceDetails: (p as any).leadSourceDetails || "",
         })),
       );
       setItems(allProducts);
@@ -147,16 +147,6 @@ export function EditExpectedARRModal({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const invalidItem = items.find(
-        (item) => !item.isRemoved && item.productId && !item.leadSource
-      );
-      if (invalidItem) {
-        const prodName = invalidItem.productName || "Selected product";
-        toast.error(`Lead Source is required for ${prodName}`);
-        setIsSaving(false);
-        return;
-      }
-
       const promises: Promise<any>[] = [];
 
       const removedItems = items.filter(

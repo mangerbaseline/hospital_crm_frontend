@@ -157,8 +157,6 @@ export interface Hospital {
   documents?: string[];
   deals?: {
     _id: string;
-    leadSource?: string;
-    leadSourceDetails?: string;
     products: {
       product: { _id: string; name: string } | any;
       dealAmount: number;
@@ -166,6 +164,8 @@ export interface Hospital {
       expectedCloseDate: string;
       _id: string;
       dealDate?: string;
+      leadSource?: string;
+      leadSourceDetails?: string;
     }[];
   }[];
   createdAt?: string;
