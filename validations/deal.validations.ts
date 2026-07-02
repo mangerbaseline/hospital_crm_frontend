@@ -7,6 +7,8 @@ export const dealProductSchema = z.object({
   dealAmount: z.number().min(0, "Amount must be 0 or more").optional(),
   stage: z.enum(DealProductStage),
   expectedCloseDate: z.union([z.date(), z.string()]).optional(),
+  leadSource: z.string().optional(),
+  leadSourceDetails: z.string().optional(),
 });
 
 export const dealSchema = z.object({
@@ -19,8 +21,6 @@ export const dealSchema = z.object({
     .min(1, "At least one product must be selected"),
   notes: z.string().optional(),
   userId: z.string().optional(),
-  leadSource: z.string().optional(),
-  leadSourceDetails: z.string().optional(),
 });
 
 export type DealFormValues = z.infer<typeof dealSchema>;

@@ -167,6 +167,45 @@ export function ProductFields({ index }: ProductFieldsProps) {
           )}
         />
       </div>
+
+      <div>
+        <Label className="text-[11px] font-semibold">Lead Source</Label>
+        <Controller
+          control={control}
+          name={`products.${index}.leadSource`}
+          render={({ field }) => (
+            <Select onValueChange={field.onChange} value={field.value || ""}>
+              <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted border-border">
+                <SelectValue placeholder="Select Lead Source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Trade Show">Trade Show</SelectItem>
+                <SelectItem value="Cold Call">Cold Call</SelectItem>
+                <SelectItem value="Referral">Referral</SelectItem>
+                <SelectItem value="Website">Website</SelectItem>
+                <SelectItem value="Outreach/Marketing">Outreach/Marketing</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </div>
+
+      <Controller
+        control={control}
+        name={`products.${index}.leadSourceDetails`}
+        render={({ field }) => (
+          <div>
+            <Label className="text-[11px] font-semibold">Lead Source Details</Label>
+            <Input
+              placeholder="Enter lead source details..."
+              className="mt-1.5 text-xs h-9 bg-muted border-border"
+              value={field.value || ""}
+              onChange={field.onChange}
+            />
+          </div>
+        )}
+      />
     </div>
   );
 }
