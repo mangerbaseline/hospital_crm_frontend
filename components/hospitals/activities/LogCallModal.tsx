@@ -37,15 +37,15 @@ import {
   updateActivity,
   fetchAllActivities,
 } from "@/store/features/activity/activitySlice";
-import { fetchProducts } from "@/store/features/product/productSlice";
 import { ActivityType } from "@/store/types";
 import { toast } from "sonner";
+import { MultiProductSelect } from "@/components/products/MultiProductSelect";
 
 const logCallSchema = z.object({
   Date: z.date(),
   contact: z.string().optional(),
   notes: z.string().min(1, "Call notes cannot be empty"),
-  product: z.string().min(1, "Product category is required"),
+  products: z.array(z.string()).min(1, "At least one product category is required"),
 });
 
 type LogCallFormValues = z.infer<typeof logCallSchema>;
@@ -60,7 +60,7 @@ interface LogCallModalProps {
     Date: string;
     contact?: string;
     notes: string;
-    product?: string;
+    products?: string[];
   };
 }
 
@@ -77,7 +77,6 @@ export function LogCallModal({
     (state) => state.activity,
   );
 
-  const { products } = useAppSelector((state) => state.product);
   const {
     register,
     handleSubmit,
@@ -90,7 +89,7 @@ export function LogCallModal({
       Date: new Date(),
       contact: "",
       notes: "",
-      product: "",
+      products: [],
     },
   });
 
@@ -98,15 +97,14 @@ export function LogCallModal({
 
   useEffect(() => {
     if (isOpen) {
-      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
       reset({
         Date: initialData?.Date ? new Date(initialData.Date) : new Date(),
         contact: initialData?.contact || "",
         notes: initialData?.notes || "",
-        product: initialData?.product || "",
+        products: initialData?.products || [],
       });
     }
-  }, [isOpen, initialData, reset, products.length, dispatch]);
+  }, [isOpen, initialData, reset]);
 
   const onSubmit = async (data: LogCallFormValues) => {
     try {
@@ -120,7 +118,7 @@ export function LogCallModal({
               contact: data.contact || "",
               notes: data.notes,
               hospital: hospitalId,
-              product: data.product,
+              products: data.products,
             },
           }),
         ).unwrap();
@@ -134,7 +132,7 @@ export function LogCallModal({
               contact: data.contact || "",
               notes: data.notes,
               hospital: hospitalId,
-              product: data.product,
+              products: data.products,
             },
           }),
         ).unwrap();
@@ -205,34 +203,23 @@ export function LogCallModal({
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <Label className="text-sm font-bold">Product Category</Label>
+            <Label className="text-sm font-bold">Product Categories</Label>
             <Controller
               control={control}
-              name="product"
+              name="products"
               render={({ field }) => (
-                <Select
+                <MultiProductSelect
                   value={field.value}
                   onValueChange={field.onChange}
-                >
-                  <SelectTrigger className="w-full h-10 bg-muted border-border rounded-xl px-3 text-xs">
-                    <SelectValue placeholder="Select Product Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((prod) => (
-                      <SelectItem key={prod._id} value={prod._id}>
-                        {prod.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Product Categories"
+                />
               )}
             />
-            {errors.product && (
+            {errors.products && (
               <p className="text-xs text-destructive font-medium">
-                {errors.product.message}
+                {errors.products.message}
               </p>
             )}
-
           </div>
 
           <div className="flex flex-col gap-2 mb-4">

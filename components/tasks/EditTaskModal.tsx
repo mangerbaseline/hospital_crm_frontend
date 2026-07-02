@@ -15,7 +15,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { fetchUsers } from "@/store/features/user/userSlice";
-import { fetchProducts } from "@/store/features/product/productSlice";
 import { getSingleHospital } from "@/store/features/hospital/hospitalSlice";
 import { UserRole } from "@/store/types";
 import {
@@ -41,13 +40,14 @@ import { updateTask, fetchTasks } from "@/store/features/task/taskSlice";
 import { Task } from "@/store/types";
 import { toast } from "sonner";
 import { MentionTextarea } from "../hospitals/activities/MentionTextarea";
+import { MultiProductSelect } from "@/components/products/MultiProductSelect";
 
 const editTaskSchema = z.object({
   title: z.string().min(1, "Task title is required"),
   description: z.string().optional(),
   dueDate: z.date({ message: "Due date is required" }),
   reminders: z.array(z.enum(["email", "push"])),
-  product: z.string().min(1, "Product category is required"),
+  products: z.array(z.string()).min(1, "At least one product category is required"),
   user: z.string().min(1, "Primary assignee is required"),
   secondaryAssignees: z.array(z.string()).optional(),
 });
@@ -57,7 +57,7 @@ interface EditTaskFormValues {
   description?: string;
   dueDate: Date;
   reminders: ("email" | "push")[];
-  product: string;
+  products: string[];
   user: string;
   secondaryAssignees?: string[];
 }
@@ -80,7 +80,6 @@ export function EditTaskModal({
 
   const { users } = useAppSelector((state) => state.user);
   const { user: currentUser } = useAppSelector((state) => state.auth);
-  const { products } = useAppSelector((state) => state.product);
   const { selectedHospital } = useAppSelector((state) => state.hospital);
 
   const isSales = currentUser?.role === UserRole.SALES;
@@ -103,7 +102,7 @@ export function EditTaskModal({
       description: "",
       dueDate: new Date(),
       reminders: [],
-      product: "",
+      products: [],
       user: "",
       secondaryAssignees: [],
     },
@@ -111,7 +110,6 @@ export function EditTaskModal({
 
   useEffect(() => {
     if (isOpen) {
-      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
       if (users.length === 0) dispatch(fetchUsers({ limit: 1000 }));
 
       if (task) {
@@ -121,7 +119,7 @@ export function EditTaskModal({
         }
       }
     }
-  }, [isOpen, dispatch, products.length, users.length, task, selectedHospital]);
+  }, [isOpen, dispatch, users.length, task, selectedHospital]);
 
   useEffect(() => {
     if (task) {
@@ -130,7 +128,7 @@ export function EditTaskModal({
         description: task.description || "",
         dueDate: new Date(task.dueDate),
         reminders: task.reminders || [],
-        product: typeof task.product === "object" ? (task.product as any)?._id : task.product || "",
+        products: (task.products || []).map((p: any) => typeof p === "object" ? p._id : p),
         user: typeof task.user === "object" ? (task.user as any)?._id : task.user || "",
         secondaryAssignees: (task.secondaryAssignees || []).map((u: any) => typeof u === "object" ? u._id : u),
       });
@@ -149,7 +147,7 @@ export function EditTaskModal({
             description: data.description || "",
             dueDate: data.dueDate.toISOString(),
             reminders: data.reminders,
-            product: data.product,
+            products: data.products,
             user: data.user,
             secondaryAssignees: data.secondaryAssignees,
           },
@@ -214,34 +212,23 @@ export function EditTaskModal({
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <Label className="text-sm font-bold">Product Category</Label>
+            <Label className="text-sm font-bold">Product Categories</Label>
             <Controller
               control={control}
-              name="product"
+              name="products"
               render={({ field }) => (
-                <Select
+                <MultiProductSelect
                   value={field.value}
                   onValueChange={field.onChange}
-                >
-                  <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
-                    <SelectValue placeholder="Select Product Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((prod) => (
-                      <SelectItem key={prod._id} value={prod._id}>
-                        {prod.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Product Categories"
+                />
               )}
             />
-            {errors.product && (
+            {errors.products && (
               <p className="text-xs text-destructive font-medium">
-                {errors.product.message}
+                {errors.products.message}
               </p>
             )}
-
           </div>
 
           <div className="flex flex-col gap-2 mb-4">

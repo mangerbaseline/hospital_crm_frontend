@@ -23,19 +23,12 @@ import {
 } from "@/store/features/activity/activitySlice";
 import { ActivityType } from "@/store/types";
 import { toast } from "sonner";
-import { fetchProducts } from "@/store/features/product/productSlice";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { MultiProductSelect } from "@/components/products/MultiProductSelect";
 import { Loader2 } from "lucide-react";
 
 const noteSchema = z.object({
   notes: z.string().min(1, "Note cannot be empty"),
-  product: z.string().min(1, "Product category is required"),
+  products: z.array(z.string()).min(1, "At least one product category is required"),
 });
 
 type NoteFormValues = z.infer<typeof noteSchema>;
@@ -46,7 +39,7 @@ interface AddNoteModalProps {
   hospitalId: string;
   noteId?: string;
   initialNotes?: string;
-  initialProduct?: string;
+  initialProducts?: string[];
 }
 
 export function AddNoteModal({
@@ -55,13 +48,12 @@ export function AddNoteModal({
   hospitalId,
   noteId,
   initialNotes,
-  initialProduct,
+  initialProducts,
 }: AddNoteModalProps) {
   const dispatch = useAppDispatch();
   const { isCreateActivityLoading, isUpdateActivityLoading } = useAppSelector(
     (state) => state.activity,
   );
-  const { products } = useAppSelector((state) => state.product);
   const {
     handleSubmit,
     control,
@@ -71,7 +63,7 @@ export function AddNoteModal({
     resolver: zodResolver(noteSchema),
     defaultValues: {
       notes: "",
-      product: "",
+      products: [],
     },
   });
 
@@ -79,13 +71,12 @@ export function AddNoteModal({
 
   useEffect(() => {
     if (isOpen) {
-      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
       reset({
         notes: initialNotes || "",
-        product: initialProduct || "",
+        products: initialProducts || [],
       });
     }
-  }, [isOpen, initialNotes, initialProduct, reset, products.length, dispatch]);
+  }, [isOpen, initialNotes, initialProducts, reset]);
 
   const onSubmit = async (data: NoteFormValues) => {
     try {
@@ -97,7 +88,7 @@ export function AddNoteModal({
             data: {
               notes: data.notes,
               hospital: hospitalId,
-              product: data.product,
+              products: data.products,
             },
           }),
         ).unwrap();
@@ -161,34 +152,23 @@ export function AddNoteModal({
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <Label className="text-sm font-bold">Product Category</Label>
+            <Label className="text-sm font-bold">Product Categories</Label>
             <Controller
               control={control}
-              name="product"
+              name="products"
               render={({ field }) => (
-                <Select
+                <MultiProductSelect
                   value={field.value}
                   onValueChange={field.onChange}
-                >
-                  <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
-                    <SelectValue placeholder="Select Product Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((prod) => (
-                      <SelectItem key={prod._id} value={prod._id}>
-                        {prod.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Product Categories"
+                />
               )}
             />
-            {errors.product && (
+            {errors.products && (
               <p className="text-xs text-destructive font-medium">
-                {errors.product.message}
+                {errors.products.message}
               </p>
             )}
-
           </div>
 
           <DialogFooter className="p-2">

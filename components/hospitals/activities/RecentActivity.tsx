@@ -88,11 +88,11 @@ export function RecentActivity({
             key={activity._id}
             className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4"
             style={{
-              borderLeftColor: activity.product?.name?.toLowerCase().includes("elevate")
+              borderLeftColor: activity.products?.[0]?.name?.toLowerCase().includes("elevate")
                 ? "#f59e0b"
-                : activity.product?.name?.toLowerCase().includes("heelpod") || activity.product?.name?.toLowerCase().includes("hellpod")
+                : activity.products?.[0]?.name?.toLowerCase().includes("heelpod") || activity.products?.[0]?.name?.toLowerCase().includes("hellpod")
                 ? "#f43f5e"
-                : activity.product?.name?.toLowerCase().includes("mac")
+                : activity.products?.[0]?.name?.toLowerCase().includes("mac")
                 ? "#2563eb"
                 : "transparent"
             }}
@@ -110,15 +110,19 @@ export function RecentActivity({
                   {activity.notes}
                 </p>
                 
-                {activity.product && (
-                  <Badge variant="outline" className={cn(
-                    "w-fit text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border mt-2",
-                    activity.product.name.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
-                    (activity.product.name.toLowerCase().includes("heelpod") || activity.product.name.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
-                    activity.product.name.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
-                  )}>
-                    {activity.product.name}
-                  </Badge>
+                {activity.products && activity.products.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {activity.products.map((p: any, idx: number) => (
+                      <Badge key={idx} variant="outline" className={cn(
+                        "w-fit text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
+                        p.name?.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                        (p.name?.toLowerCase().includes("heelpod") || p.name?.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+                        p.name?.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
+                      )}>
+                        {p.name}
+                      </Badge>
+                    ))}
+                  </div>
                 )}
 
                 <p className="text-[11px] font-semibold text-muted-foreground mt-2 flex items-center gap-1">
@@ -164,11 +168,11 @@ export function RecentActivity({
             key={activity._id}
             className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4"
             style={{
-              borderLeftColor: activity.product?.name?.toLowerCase().includes("elevate")
+              borderLeftColor: activity.products?.[0]?.name?.toLowerCase().includes("elevate")
                 ? "#f59e0b"
-                : activity.product?.name?.toLowerCase().includes("heelpod") || activity.product?.name?.toLowerCase().includes("hellpod")
+                : activity.products?.[0]?.name?.toLowerCase().includes("heelpod") || activity.products?.[0]?.name?.toLowerCase().includes("hellpod")
                 ? "#f43f5e"
-                : activity.product?.name?.toLowerCase().includes("mac")
+                : activity.products?.[0]?.name?.toLowerCase().includes("mac")
                 ? "#2563eb"
                 : "transparent"
             }}
@@ -203,15 +207,19 @@ export function RecentActivity({
                   </div>
                 )}
 
-                {activity.product && (
-                  <Badge variant="outline" className={cn(
-                    "w-fit text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border mt-2",
-                    activity.product.name.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
-                    (activity.product.name.toLowerCase().includes("heelpod") || activity.product.name.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
-                    activity.product.name.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
-                  )}>
-                    {activity.product.name}
-                  </Badge>
+                {activity.products && activity.products.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {activity.products.map((p: any, idx: number) => (
+                      <Badge key={idx} variant="outline" className={cn(
+                        "w-fit text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
+                        p.name?.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                        (p.name?.toLowerCase().includes("heelpod") || p.name?.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+                        p.name?.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
+                      )}>
+                        {p.name}
+                      </Badge>
+                    ))}
+                  </div>
                 )}
 
                 <p className="text-[11px] font-semibold text-muted-foreground mt-2 flex items-center gap-1">
@@ -257,11 +265,11 @@ export function RecentActivity({
             key={activity._id}
             className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4"
             style={{
-              borderLeftColor: activity.product?.name?.toLowerCase().includes("elevate")
+              borderLeftColor: activity.products?.[0]?.name?.toLowerCase().includes("elevate")
                 ? "#f59e0b"
-                : activity.product?.name?.toLowerCase().includes("heelpod") || activity.product?.name?.toLowerCase().includes("hellpod")
+                : activity.products?.[0]?.name?.toLowerCase().includes("heelpod") || activity.products?.[0]?.name?.toLowerCase().includes("hellpod")
                 ? "#f43f5e"
-                : activity.product?.name?.toLowerCase().includes("mac")
+                : activity.products?.[0]?.name?.toLowerCase().includes("mac")
                 ? "#2563eb"
                 : "transparent"
             }}
@@ -292,15 +300,19 @@ export function RecentActivity({
                       </Badge>
                     </div>
                   )}
-                  {activity.product && (
-                    <Badge variant="outline" className={cn(
-                      "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
-                      activity.product.name.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
-                      (activity.product.name.toLowerCase().includes("heelpod") || activity.product.name.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
-                      activity.product.name.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
-                    )}>
-                      {activity.product.name}
-                    </Badge>
+                  {activity.products && activity.products.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {activity.products.map((p: any, idx: number) => (
+                        <Badge key={idx} variant="outline" className={cn(
+                          "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border",
+                          p.name?.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                          (p.name?.toLowerCase().includes("heelpod") || p.name?.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+                          p.name?.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
+                        )}>
+                          {p.name}
+                        </Badge>
+                      ))}
+                    </div>
                   )}
                 </div>
 
@@ -429,7 +441,7 @@ export function RecentActivity({
         hospitalId={hospitalId}
         noteId={editingActivity?.activityType === ActivityType.NOTE ? editingActivity._id : undefined}
         initialNotes={editingActivity?.activityType === ActivityType.NOTE ? editingActivity.notes : undefined}
-        initialProduct={editingActivity?.activityType === ActivityType.NOTE ? (typeof editingActivity.product === "object" ? (editingActivity.product as any)?._id : editingActivity.product) : undefined}
+        initialProducts={editingActivity?.activityType === ActivityType.NOTE ? (editingActivity.products || []).map((p: any) => typeof p === "object" ? p._id : p) : undefined}
       />
       <LogCallModal
         isOpen={isCallModalOpen}
@@ -446,7 +458,7 @@ export function RecentActivity({
               Date: editingActivity.Date,
               contact: typeof editingActivity.contact === "object" ? (editingActivity.contact as any)?._id : editingActivity.contact,
               notes: editingActivity.notes,
-              product: typeof editingActivity.product === "object" ? (editingActivity.product as any)?._id : editingActivity.product,
+              products: (editingActivity.products || []).map((p: any) => typeof p === "object" ? p._id : p),
             }
             : undefined
         }
@@ -467,7 +479,7 @@ export function RecentActivity({
               description: editingActivity.description,
               dueDate: editingActivity.dueDate,
               reminders: editingActivity.reminders || [],
-              product: typeof editingActivity.product === "object" ? (editingActivity.product as any)?._id : editingActivity.product,
+              products: (editingActivity.products || []).map((p: any) => typeof p === "object" ? p._id : p),
               user: typeof editingActivity.user === "object" ? (editingActivity.user as any)?._id : editingActivity.user,
               secondaryAssignees: (editingActivity.secondaryAssignees || []).map((u: any) => typeof u === "object" ? u._id : u),
             }

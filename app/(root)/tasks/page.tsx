@@ -273,11 +273,11 @@ export default function TasksPage() {
                         key={task._id}
                         className="hover:bg-muted/10 transition-colors border-l-4"
                         style={{
-                          borderLeftColor: task.product?.name?.toLowerCase().includes("elevate")
+                          borderLeftColor: task.products?.[0]?.name?.toLowerCase().includes("elevate")
                             ? "#f59e0b"
-                            : task.product?.name?.toLowerCase().includes("heelpod") || task.product?.name?.toLowerCase().includes("hellpod")
+                            : task.products?.[0]?.name?.toLowerCase().includes("heelpod") || task.products?.[0]?.name?.toLowerCase().includes("hellpod")
                               ? "#f43f5e"
-                              : task.product?.name?.toLowerCase().includes("mac")
+                              : task.products?.[0]?.name?.toLowerCase().includes("mac")
                                 ? "#2563eb"
                                 : "transparent"
                         }}
@@ -313,19 +313,23 @@ export default function TasksPage() {
                           )}
                         </td>
                         <td className="py-4 px-6">
-                          {task.product ? (
-                            <span className={cn(
-                              "inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border",
-                              task.product.name.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
-                              (task.product.name.toLowerCase().includes("heelpod") || task.product.name.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
-                              task.product.name.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50",
-                              !task.product.name.toLowerCase().includes("elevate") &&
-                              !task.product.name.toLowerCase().includes("heelpod") &&
-                              !task.product.name.toLowerCase().includes("hellpod") &&
-                              !task.product.name.toLowerCase().includes("mac") && "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/50"
-                            )}>
-                              {task.product.name}
-                            </span>
+                          {task.products && task.products.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {task.products.map((p: any, idx: number) => (
+                                <span key={idx} className={cn(
+                                  "inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border",
+                                  p.name?.toLowerCase().includes("elevate") && "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+                                  (p.name?.toLowerCase().includes("heelpod") || p.name?.toLowerCase().includes("hellpod")) && "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+                                  p.name?.toLowerCase().includes("mac") && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50",
+                                  !p.name?.toLowerCase().includes("elevate") &&
+                                  !p.name?.toLowerCase().includes("heelpod") &&
+                                  !p.name?.toLowerCase().includes("hellpod") &&
+                                  !p.name?.toLowerCase().includes("mac") && "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/50"
+                                )}>
+                                  {p.name}
+                                </span>
+                              ))}
+                            </div>
                           ) : (
                             <span className="text-xs text-muted-foreground">-</span>
                           )}

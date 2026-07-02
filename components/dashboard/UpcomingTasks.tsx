@@ -43,7 +43,7 @@ export function UpcomingTasks() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 flex-1 min-h-0 w-full overflow-hidden flex flex-col">
-        <ScrollArea className="flex-1 w-full max-w-full">
+        <ScrollArea className="h-full w-full max-w-full">
           <div className="flex flex-col px-1 sm:px-4 pb-6">
             {isFetchingDashboardTasks ? (
               Array.from({ length: 3 }).map((_, idx) => (

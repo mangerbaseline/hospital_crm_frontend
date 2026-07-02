@@ -716,13 +716,13 @@ export interface CallLogData {
   contact?: string;
   notes: string;
   hospital: string;
-  product?: string;
+  products?: string[];
 }
 
 export interface NoteData {
   notes: string;
   hospital: string;
-  product?: string;
+  products?: string[];
 }
 
 export interface TaskData {
@@ -731,7 +731,7 @@ export interface TaskData {
   dueDate: string | Date;
   hospital: string;
   reminders: ("email" | "push")[];
-  product?: string;
+  products?: string[];
   user?: string;
   secondaryAssignees?: string[];
 }
@@ -764,7 +764,7 @@ export interface TaskActivity {
   dueDate: string;
   hospital: ActivityHospital;
   user: any;
-  product?: any;
+  products?: any[];
   secondaryAssignees?: any[];
   reminders: ("email" | "push")[];
   createdAt: string;
@@ -779,7 +779,7 @@ export interface CallLogActivity {
   notes: string;
   hospital: ActivityHospital;
   user: any;
-  product?: any;
+  products?: any[];
   createdAt: string;
   updatedAt: string;
 }
@@ -790,7 +790,7 @@ export interface NoteActivity {
   notes: string;
   hospital: ActivityHospital;
   user: any;
-  product?: any;
+  products?: any[];
   createdAt: string;
   updatedAt: string;
 }
@@ -1105,7 +1105,7 @@ export interface Task {
     hospitalName: string;
   };
   user: any;
-  product?: any;
+  products?: any[];
   secondaryAssignees?: any[];
   reminders: ("email" | "push")[];
   createdAt: string;
@@ -1143,7 +1143,7 @@ export interface CreateTaskPayload {
   dueDate: string;
   hospital: string;
   reminders: ("email" | "push")[];
-  product?: string;
+  products?: string[];
   user?: string;
   secondaryAssignees?: string[];
 }
@@ -1155,7 +1155,7 @@ export interface UpdateTaskPayload {
   dueDate?: string;
   hospital?: string;
   reminders?: ("email" | "push")[];
-  product?: string;
+  products?: string[];
   user?: string;
   secondaryAssignees?: string[];
 }

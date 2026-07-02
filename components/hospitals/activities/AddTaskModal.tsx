@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import { CalendarIcon, Loader2, Mail, Bell, ChevronsUpDown } from "lucide-react";
 import { useEffect } from "react";
 import { fetchUsers } from "@/store/features/user/userSlice";
-import { fetchProducts } from "@/store/features/product/productSlice";
 import { UserRole } from "@/store/types";
 import {
   Select,
@@ -44,13 +43,14 @@ import {
 } from "@/store/features/activity/activitySlice";
 import { ActivityType } from "@/store/types";
 import { toast } from "sonner";
+import { MultiProductSelect } from "@/components/products/MultiProductSelect";
 
 const taskSchema = z.object({
   title: z.string().min(1, "Task title is required"),
   description: z.string().optional(),
   dueDate: z.date().optional(),
   reminders: z.array(z.enum(["email", "push"])),
-  product: z.string().min(1, "Product category is required"),
+  products: z.array(z.string()).min(1, "At least one product category is required"),
   user: z.string().min(1, "Primary assignee is required"),
   secondaryAssignees: z.array(z.string()).optional(),
 });
@@ -60,7 +60,7 @@ interface TaskFormValues {
   description?: string;
   dueDate?: Date;
   reminders: ("email" | "push")[];
-  product: string;
+  products: string[];
   user: string;
   secondaryAssignees?: string[];
 }
@@ -76,7 +76,7 @@ interface AddTaskModalProps {
     description?: string;
     dueDate?: string;
     reminders: ("email" | "push")[];
-    product?: string;
+    products?: string[];
     user?: string;
     secondaryAssignees?: string[];
   };
@@ -97,7 +97,6 @@ export function AddTaskModal({
 
   const { users } = useAppSelector((state) => state.user);
   const { user: currentUser } = useAppSelector((state) => state.auth);
-  const { products } = useAppSelector((state) => state.product);
   const {
     register,
     handleSubmit,
@@ -112,7 +111,7 @@ export function AddTaskModal({
       title: "",
       description: "",
       reminders: [],
-      product: "",
+      products: [],
       user: currentUser?._id || "",
       secondaryAssignees: [],
     },
@@ -123,7 +122,6 @@ export function AddTaskModal({
 
   useEffect(() => {
     if (isOpen) {
-      if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
       if (users.length === 0) dispatch(fetchUsers({ limit: 1000 }));
 
       reset({
@@ -131,12 +129,12 @@ export function AddTaskModal({
         description: initialData?.description || "",
         dueDate: initialData?.dueDate ? new Date(initialData.dueDate) : undefined,
         reminders: initialData?.reminders || [],
-        product: initialData?.product || "",
+        products: initialData?.products || [],
         user: initialData?.user || currentUser?._id || "",
         secondaryAssignees: initialData?.secondaryAssignees || [],
       });
     }
-  }, [isOpen, initialData, reset, products.length, users.length, dispatch, currentUser]);
+  }, [isOpen, initialData, reset, users.length, dispatch, currentUser]);
 
   const onSubmit = async (data: TaskFormValues) => {
     try {
@@ -153,7 +151,7 @@ export function AddTaskModal({
                 : new Date().toISOString(),
               hospital: hospitalId,
               reminders: data.reminders,
-              product: data.product,
+              products: data.products,
               user: data.user,
               secondaryAssignees: data.secondaryAssignees,
             },
@@ -172,7 +170,7 @@ export function AddTaskModal({
                 : new Date().toISOString(),
               hospital: hospitalId,
               reminders: data.reminders,
-              product: data.product,
+              products: data.products,
               user: data.user,
               secondaryAssignees: data.secondaryAssignees,
             },
@@ -241,34 +239,23 @@ export function AddTaskModal({
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <Label className="text-sm font-bold">Product Category</Label>
+            <Label className="text-sm font-bold">Product Categories</Label>
             <Controller
               control={control}
-              name="product"
+              name="products"
               render={({ field }) => (
-                <Select
+                <MultiProductSelect
                   value={field.value}
                   onValueChange={field.onChange}
-                >
-                  <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
-                    <SelectValue placeholder="Select Product Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((prod) => (
-                      <SelectItem key={prod._id} value={prod._id}>
-                        {prod.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Select Product Categories"
+                />
               )}
             />
-            {errors.product && (
+            {errors.products && (
               <p className="text-xs text-destructive font-medium">
-                {errors.product.message}
+                {errors.products.message}
               </p>
             )}
-
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
