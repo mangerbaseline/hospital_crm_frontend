@@ -27,8 +27,9 @@ import {
   Handshake,
   Briefcase,
   ClipboardList,
+  KeyRound,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
@@ -36,6 +37,7 @@ import { logoutUser } from "@/store/features/auth/authSlice";
 import { fetchHospitalProductCount } from "@/store/features/deal/dealSlice";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 
 const data = {
   navMain: [
@@ -124,6 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { setOpenMobile } = useSidebar();
 
   const { quickStats } = useAppSelector((state) => state.deal);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -318,6 +321,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
           </div>
         </div>
+
+        <button
+          onClick={() => setChangePasswordOpen(true)}
+          className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
+        >
+          <KeyRound className="h-3.5 w-3.5" />
+          Change Password
+        </button>
+
+        <ChangePasswordModal
+          open={changePasswordOpen}
+          onOpenChange={setChangePasswordOpen}
+        />
 
         <SidebarMenu className="px-0">
           <SidebarMenuItem>

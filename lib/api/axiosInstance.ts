@@ -29,10 +29,13 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-        if (!window.location.pathname.startsWith("/auth/")) {
-          window.location.href = "/auth/sign-in";
+      const url = error.config?.url || "";
+      if (!url.includes("/api/auth/change-password")) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          if (!window.location.pathname.startsWith("/auth/")) {
+            window.location.href = "/auth/sign-in";
+          }
         }
       }
     }

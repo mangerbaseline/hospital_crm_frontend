@@ -7,6 +7,7 @@ import {
   ApiResponse,
   AuthResponseData,
 } from "@/store/types";
+import type { ChangePasswordFormValues } from "@/validations/auth.validations";
 
 const initialState: AuthState = {
   user: null,
@@ -62,6 +63,26 @@ export const logoutUser = createAsyncThunk(
         localStorage.removeItem("token");
       }
       return rejectWithValue(error.response?.data?.message || "Logout failed");
+    }
+  },
+);
+
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async (
+    data: ChangePasswordFormValues,
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await axiosInstance.post(
+        "/api/auth/change-password",
+        data,
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to change password",
+      );
     }
   },
 );
