@@ -139,12 +139,8 @@ export function EditDealModal({
       await dispatch(
         updateDealProduct({
           dealId: deal.dealId,
-          product:
-            selectedProductId !== deal.product?._id
-              ? selectedProductId
-              : undefined,
+          product: deal.product?._id,
           dealAmount,
-
           beds: beds === "" ? undefined : Number(beds),
           stage: stage as string,
           expectedCloseDate: expectedCloseDate
