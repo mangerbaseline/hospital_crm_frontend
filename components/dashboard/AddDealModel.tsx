@@ -11,7 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import AddDealForm from "../AddDealForm";
 
-export function AddDealModal({ children }: { children: React.ReactNode }) {
+export function AddDealModal({
+  children,
+  onSuccess,
+}: {
+  children: React.ReactNode;
+  onSuccess?: () => void;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -26,7 +32,7 @@ export function AddDealModal({ children }: { children: React.ReactNode }) {
           </DialogDescription>
         </DialogHeader>
 
-        <AddDealForm onSuccess={() => setOpen(false)} />
+        <AddDealForm onSuccess={() => { setOpen(false); onSuccess?.(); }} />
       </DialogContent>
     </Dialog>
   );

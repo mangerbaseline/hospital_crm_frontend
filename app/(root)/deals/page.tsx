@@ -194,7 +194,7 @@ export default function DealsPage() {
             onValueChange={setSelectedProductIds}
             className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
           />
-          <AddDealModal>
+          <AddDealModal onSuccess={refetchDeals}>
             <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-3 p-3 md:p-4 text-sm cursor-pointer">
               <Building2 className="h-2 w-2 md:h-4 md:w-4" />{" "}
               <span className="md:block hidden">Add Deal</span>
@@ -219,7 +219,7 @@ export default function DealsPage() {
           onValueChange={setSelectedProductIds}
           className="w-full bg-muted border-border shadow-sm cursor-pointer"
         />
-        <AddDealModal>
+        <AddDealModal onSuccess={refetchDeals}>
           <Button className="bg-blue-600 hover:bg-blue-700 text-white flex gap-3 p-3 md:p-4 text-sm cursor-pointer">
             <Building2 className="h-2 w-2 md:h-4 md:w-4" />{" "}
             <span>Add Deal</span>
