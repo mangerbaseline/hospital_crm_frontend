@@ -92,6 +92,7 @@ export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   totalIDNs?: number;
   totalDeals?: number;
   totalTasks?: number;
+  upcomingCount?: number;
   totalPages: number;
   pagination?: {
     total: number;
@@ -1131,6 +1132,7 @@ export interface TaskState {
   limit: number;
   totalTasks: number;
   totalPages: number;
+  upcomingCount: number;
 }
 
 export interface FetchTasksParams {
@@ -1140,6 +1142,7 @@ export interface FetchTasksParams {
   userId?: string;
   hospitalId?: string;
   productId?: string;
+  dueOnly?: boolean;
 }
 
 export interface CreateTaskPayload {

@@ -24,6 +24,7 @@ const initialState: TaskState = {
   limit: 10,
   totalTasks: 0,
   totalPages: 1,
+  upcomingCount: 0,
 };
 
 export const fetchTasks = createAsyncThunk(
@@ -36,11 +37,13 @@ export const fetchTasks = createAsyncThunk(
       const userId = params?.userId || "";
       const hospitalId = params?.hospitalId || "";
       const productId = params?.productId || "";
+      const dueOnly = params?.dueOnly || false;
 
       let url = `/api/task/all-tasks?page=${page}&limit=${limit}&search=${search}`;
       if (userId) url += `&userId=${userId}`;
       if (hospitalId) url += `&hospitalId=${hospitalId}`;
       if (productId) url += `&productId=${productId}`;
+      if (dueOnly) url += `&dueOnly=true`;
 
       const response = await axiosInstance.get<PaginatedApiResponse<Task[]>>(url);
       return response.data;
@@ -152,6 +155,7 @@ const taskSlice = createSlice({
           state.limit = action.payload.limit;
           state.totalTasks = action.payload.totalTasks || 0;
           state.totalPages = action.payload.totalPages;
+          state.upcomingCount = action.payload.upcomingCount || 0;
         },
       )
       .addCase(fetchTasks.rejected, (state, action) => {

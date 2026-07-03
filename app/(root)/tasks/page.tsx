@@ -31,6 +31,7 @@ import {
   ClipboardList,
   AlertCircle,
   SlidersHorizontal,
+  Filter,
 } from "lucide-react";
 import { format, isPast, isToday } from "date-fns";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -47,7 +48,7 @@ import { ProductSelect } from "@/components/products/ProductSelect";
 export default function TasksPage() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { tasks, isFetchingTasks, totalPages, totalTasks } =
+  const { tasks, isFetchingTasks, totalPages, totalTasks, upcomingCount } =
     useAppSelector((state) => state.task);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,6 +67,7 @@ export default function TasksPage() {
 
   const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
   const [selectedProductFilter, setSelectedProductFilter] = useState<string>("all");
+  const [showDueOnly, setShowDueOnly] = useState(false);
 
   useEffect(() => {
     if (users.length === 0) dispatch(fetchUsers({ limit: 1000 }));
@@ -74,7 +76,7 @@ export default function TasksPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedUserFilter, selectedProductFilter]);
+  }, [searchQuery, selectedUserFilter, selectedProductFilter, showDueOnly]);
 
   const loadTasks = () => {
     dispatch(
@@ -84,6 +86,7 @@ export default function TasksPage() {
         search: searchQuery,
         userId: selectedUserFilter === "all" ? (isAdminOrExecutive ? undefined : user?._id) : selectedUserFilter,
         productId: selectedProductFilter === "all" ? undefined : selectedProductFilter,
+        dueOnly: showDueOnly || undefined,
       }),
     );
   };
@@ -92,7 +95,7 @@ export default function TasksPage() {
     if (user) {
       loadTasks();
     }
-  }, [dispatch, searchQuery, currentPage, pageSize, user, selectedUserFilter, selectedProductFilter]);
+  }, [dispatch, searchQuery, currentPage, pageSize, user, selectedUserFilter, selectedProductFilter, showDueOnly]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -184,33 +187,21 @@ export default function TasksPage() {
       </div>
 
       {tasks && tasks.length > 0 && (
-        (() => {
-          const upcomingCount = tasks.filter((t) => {
-            const due = new Date(t.dueDate);
-            const now = new Date();
-            const diffTime = due.getTime() - now.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            return diffDays >= 0 && diffDays <= 7;
-          }).length;
-
-          if (upcomingCount === 0) return null;
-
-          return (
-            <div className="mx-2 md:mx-0 mt-6 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
-              <div className="bg-amber-500 text-white p-1.5 rounded-lg">
-                <AlertCircle className="h-4 w-4" />
-              </div>
-              <div className="flex-1">
-                <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
-                  7-Day Calendar Alert
-                </h4>
-                <p className="text-xs text-amber-700 dark:text-amber-500/90 mt-1 font-medium">
-                  You have <span className="font-extrabold text-amber-900 dark:text-amber-300">{upcomingCount}</span> task{upcomingCount > 1 ? "s" : ""} scheduled to be completed in the next 7 days.
-                </p>
-              </div>
-            </div>
-          );
-        })()
+        <div className="mx-2 md:mx-0 mt-6 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+          <div className="bg-amber-500 text-white p-1.5 rounded-lg">
+            <AlertCircle className="h-4 w-4" />
+          </div>
+          <div className="flex-1">
+            <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
+              7-Day Calendar Alert
+            </h4>
+            <p className="text-xs text-amber-700 dark:text-amber-500/90 mt-1 font-medium">
+              {upcomingCount > 0
+                ? <>You have <span className="font-extrabold text-amber-900 dark:text-amber-300">{upcomingCount}</span> task{upcomingCount > 1 ? "s" : ""} scheduled to be completed in the next 7 days.</>
+                : "No tasks scheduled in the next 7 days."}
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Search Bar & Filters */}
@@ -231,7 +222,21 @@ export default function TasksPage() {
         </InputGroup>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex w-full md:w-auto items-center gap-2 text-sm font-medium text-muted-foreground border px-3 py-2 rounded-lg shadow-sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDueOnly(!showDueOnly)}
+            className={cn(
+              "gap-2 text-xs font-bold h-11 px-3 rounded-lg transition-all",
+              showDueOnly
+                ? "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50"
+                : "text-muted-foreground border-border"
+            )}
+          >
+            <Filter className="h-3.5 w-3.5" />
+            {showDueOnly ? "Due Tasks" : "All Tasks"}
+          </Button>
+          <div className="flex w-full h-11 md:w-auto items-center gap-2 text-sm font-medium text-muted-foreground border px-3 py-2 rounded-lg shadow-sm">
             <SlidersHorizontal className="h-4 w-4" />
             <span>Rows:</span>
             <Select value={String(pageSize)} onValueChange={handleLimitChange}>
