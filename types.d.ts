@@ -82,6 +82,7 @@ export interface Contact {
       }
     | string;
   isPrimary?: boolean;
+  product?: { _id: string; name: string }[];
 }
 
 export interface ContactCardProps {

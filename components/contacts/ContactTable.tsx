@@ -168,9 +168,20 @@ export function ContactTable({
                           <Users className="h-4 w-4 text-black/85" />
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm font-bold text-foreground">
-                        {fullName}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-foreground">
+                          {fullName}
+                        </span>
+                        {contact.product && contact.product.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {contact.product.map((prod) => (
+                              <span key={prod._id} className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0 rounded-full text-[9px] font-bold leading-normal">
+                                {prod.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
 

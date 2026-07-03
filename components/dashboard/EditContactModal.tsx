@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { MultiProductSelect } from "@/components/products/MultiProductSelect";
 import {
   updateContact,
   resetContactStatus,
@@ -41,6 +42,7 @@ export function EditContactModal({
   const { isCreateContactLoading } = useAppSelector((state) => state.contact);
 
   const [open, setOpen] = useState(false);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
   const {
     register,
@@ -73,14 +75,23 @@ export function EditContactModal({
       setValue("secondaryPhoneNumber", contact.secondaryPhoneNumber || "");
       setValue("email", contact.email || "");
       setValue("isPrimary", !!contact.isPrimary);
+      const existingProducts = contact.product
+        ? (Array.isArray(contact.product) ? contact.product : [contact.product]).map((p: any) => typeof p === "object" ? p._id : p)
+        : [];
+      setSelectedProductIds(existingProducts);
     } else if (!open) {
       reset();
+      setSelectedProductIds([]);
     }
   }, [open, contact, reset, setValue]);
 
   const onSubmit = async (data: UpdateContactValues) => {
+    const payload = {
+      ...data,
+      product: selectedProductIds.length > 0 ? selectedProductIds : undefined,
+    };
     const resultAction = await dispatch(
-      updateContact({ id: contact._id, payload: data as any }),
+      updateContact({ id: contact._id, payload }),
     );
 
     if (updateContact.fulfilled.match(resultAction)) {
@@ -194,6 +205,17 @@ export function EditContactModal({
                 {errors.secondaryPhoneNumber.message}
               </p>
             )}
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold">Product (optional)</Label>
+            <div className="mt-1.5">
+              <MultiProductSelect
+                value={selectedProductIds}
+                onValueChange={setSelectedProductIds}
+                placeholder="Select product (optional)"
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-2 mt-1">

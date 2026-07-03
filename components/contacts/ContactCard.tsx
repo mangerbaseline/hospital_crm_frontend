@@ -106,6 +106,15 @@ export function ContactCard({
               <p className="text-sm text-muted-foreground font-medium truncate">
                 {contact.designation}
               </p>
+              {contact.product && contact.product.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {contact.product.map((prod) => (
+                    <Badge key={prod._id} className="bg-emerald-50 text-emerald-700 border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-none">
+                      {prod.name}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           {contact.isPrimary && (
