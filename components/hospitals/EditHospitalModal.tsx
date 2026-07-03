@@ -66,7 +66,7 @@ export function EditHospitalModal({
   const { gpos } = useAppSelector((state) => state.gpo);
   const { users } = useAppSelector((state) => state.user);
   const { user } = useAppSelector((state) => state.auth);
-  const isSales = user?.role === UserRole.SALES;
+  const isRestrictedRole = user?.role === UserRole.SALES || user?.role === UserRole.CLINICAL_SPECIALIST;
 
   const { isUpdateHospitalLoading } = useAppSelector((state) => state.hospital);
 
@@ -249,7 +249,7 @@ export function EditHospitalModal({
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 mt-2"
         >
-          {!isSales && (
+          {!isRestrictedRole && (
             <div>
               <Label className="text-xs font-semibold">Sales Rep</Label>
               <Select value={selectedUser} onValueChange={setSelectedUser}>
@@ -281,7 +281,7 @@ export function EditHospitalModal({
                       variant="outline"
                       role="combobox"
                       aria-expanded={idnOpen}
-                      disabled={isSales}
+                      disabled={isRestrictedRole}
                       className="w-full justify-between mt-1.5 text-xs h-9 bg-white font-medium border-border shadow-none hover:bg-muted cursor-pointer"
                     >
                       <span className="truncate text-left flex-1 min-w-0">
@@ -362,7 +362,7 @@ export function EditHospitalModal({
                 <Input
                   placeholder="Enter hospital name"
                   className="text-xs h-9 mt-1.5 bg-white"
-                  disabled={isSales}
+                  disabled={isRestrictedRole}
                   {...register("hospitalName")}
                 />
                 {errors.hospitalName && (
@@ -380,7 +380,7 @@ export function EditHospitalModal({
               <Input
                 placeholder="Enter address"
                 className="text-xs h-9 mt-1.5 bg-white"
-                disabled={isSales}
+                disabled={isRestrictedRole}
                 {...register("address")}
               />
               {errors.address && (
@@ -397,7 +397,7 @@ export function EditHospitalModal({
               <Input
                 placeholder="Enter city"
                 className="text-xs h-9 mt-1.5 bg-muted"
-                disabled={isSales}
+                disabled={isRestrictedRole}
                 {...register("city")}
               />
               {errors.city && (
@@ -411,7 +411,7 @@ export function EditHospitalModal({
               <Input
                 placeholder="Enter state"
                 className="text-xs h-9 mt-1.5 bg-muted"
-                disabled={isSales}
+                disabled={isRestrictedRole}
                 {...register("state")}
               />
               {errors.state && (
@@ -425,7 +425,7 @@ export function EditHospitalModal({
               <Input
                 placeholder="Enter zip code"
                 className="text-xs h-9 mt-1.5 bg-muted"
-                disabled={isSales}
+                disabled={isRestrictedRole}
                 {...register("zip")}
               />
               {errors.zip && (
@@ -446,7 +446,7 @@ export function EditHospitalModal({
                     variant="outline"
                     role="combobox"
                     aria-expanded={gpoOpen}
-                    disabled={isSales}
+                    disabled={isRestrictedRole}
                     className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted"
                   >
                     {gpoValue

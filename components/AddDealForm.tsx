@@ -83,7 +83,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
   const { isCreateDealLoading } = useAppSelector((state) => state.deal);
 
   const isAdmin = currentUser?.role === UserRole.ADMIN;
-  const isSales = currentUser?.role === UserRole.SALES;
+  const isRestrictedRole = currentUser?.role === UserRole.SALES || currentUser?.role === UserRole.CLINICAL_SPECIALIST;
 
   const [idnOpen, setIdnOpen] = useState(false);
   const [idnSearch, setIdnSearch] = useState("");

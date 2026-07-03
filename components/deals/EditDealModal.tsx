@@ -65,7 +65,6 @@ export function EditDealModal({
   const { user: currentUser } = useAppSelector((state) => state.auth);
 
   const isAdmin = currentUser?.role === UserRole.ADMIN;
-  const isSales = currentUser?.role === UserRole.SALES;
 
   const [userOpen, setUserOpen] = useState(false);
   const [gpoOpen, setGpoOpen] = useState(false);

@@ -117,7 +117,7 @@ export function AddTaskModal({
     },
   });
 
-  const isSales = currentUser?.role === UserRole.SALES;
+  const isRestrictedRole = currentUser?.role === UserRole.SALES || currentUser?.role === UserRole.CLINICAL_SPECIALIST;
   const isEditing = !!taskId;
 
   useEffect(() => {
@@ -267,7 +267,7 @@ export function AddTaskModal({
                 <Select
                   value={field.value}
                   onValueChange={field.onChange}
-                  disabled={isSales}
+                  disabled={isRestrictedRole}
                 >
                   <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
                     <SelectValue placeholder="Select Primary Assignee" />

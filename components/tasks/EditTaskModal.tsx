@@ -82,10 +82,10 @@ export function EditTaskModal({
   const { user: currentUser } = useAppSelector((state) => state.auth);
   const { selectedHospital } = useAppSelector((state) => state.hospital);
 
-  const isSales = currentUser?.role === UserRole.SALES;
+  const isRestrictedRole = currentUser?.role === UserRole.SALES || currentUser?.role === UserRole.CLINICAL_SPECIALIST;
   const taskCreatorId = typeof task?.user === "object" ? (task.user as any)?._id : task?.user;
   const isCreator = taskCreatorId === currentUser?._id;
-  const disableSecondaryAssignees = isSales && !isCreator;
+  const disableSecondaryAssignees = isRestrictedRole && !isCreator;
 
   const {
     register,
@@ -240,7 +240,7 @@ export function EditTaskModal({
                 <Select
                   value={field.value}
                   onValueChange={field.onChange}
-                  disabled={isSales}
+                  disabled={isRestrictedRole}
                 >
                   <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
                     <SelectValue placeholder="Select Primary Assignee" />
