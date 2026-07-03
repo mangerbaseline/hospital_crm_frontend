@@ -429,13 +429,14 @@ export function EditExpectedARRModal({
                 <Select
                   value={item.leadSource || ""}
                   onValueChange={(val) =>
-                    handleFieldChange(item._id, "leadSource", val)
+                    handleFieldChange(item._id, "leadSource", val === "none" ? "" : val)
                   }
                 >
                   <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                     <SelectValue placeholder="Select Lead Source" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Trade Show">Trade Show</SelectItem>
                     <SelectItem value="Cold Call">Cold Call</SelectItem>
                     <SelectItem value="Referral">Referral</SelectItem>

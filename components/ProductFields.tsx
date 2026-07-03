@@ -174,11 +174,12 @@ export function ProductFields({ index }: ProductFieldsProps) {
           control={control}
           name={`products.${index}.leadSource`}
           render={({ field }) => (
-            <Select onValueChange={field.onChange} value={field.value || ""}>
+            <Select onValueChange={(val) => field.onChange(val === "none" ? "" : val)} value={field.value || ""}>
               <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted border-border">
                 <SelectValue placeholder="Select Lead Source" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 <SelectItem value="Trade Show">Trade Show</SelectItem>
                 <SelectItem value="Cold Call">Cold Call</SelectItem>
                 <SelectItem value="Referral">Referral</SelectItem>

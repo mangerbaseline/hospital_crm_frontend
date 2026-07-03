@@ -398,12 +398,13 @@ export function EditDealModal({
             <Label className="text-xs font-semibold">Lead Source</Label>
             <Select
               value={leadSource}
-              onValueChange={(val) => setLeadSource(val)}
+              onValueChange={(val) => setLeadSource(val === "none" ? "" : val)}
             >
               <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                 <SelectValue placeholder="Select Lead Source" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 <SelectItem value="Trade Show">Trade Show</SelectItem>
                 <SelectItem value="Cold Call">Cold Call</SelectItem>
                 <SelectItem value="Referral">Referral</SelectItem>
