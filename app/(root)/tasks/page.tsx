@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { fetchTasks, deleteTask } from "@/store/features/task/taskSlice";
+import { fetchTasks, deleteTask, toggleTaskStatus } from "@/store/features/task/taskSlice";
 import { DashboardHeader } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import {
@@ -120,6 +120,15 @@ export default function TasksPage() {
   const handleEditClick = (task: Task) => {
     setEditingTask(task);
     setIsEditModalOpen(true);
+  };
+
+  const handleToggleStatus = async (id: string) => {
+    try {
+      await dispatch(toggleTaskStatus(id)).unwrap();
+      loadTasks();
+    } catch (error: any) {
+      toast.error(error || "Failed to toggle task status");
+    }
   };
 
   const getDueDateStyle = (dueDateStr: string) => {
@@ -256,6 +265,7 @@ export default function TasksPage() {
               <table className="w-full border-collapse text-left text-sm text-foreground">
                 <thead className="bg-muted/40 border-b border-border text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   <tr>
+                    <th scope="col" className="py-4 px-6 w-16">Status</th>
                     <th scope="col" className="py-4 px-6">Task</th>
                     <th scope="col" className="py-4 px-6">Hospital</th>
                     <th scope="col" className="py-4 px-6">Product</th>
@@ -271,29 +281,54 @@ export default function TasksPage() {
                     return (
                       <tr
                         key={task._id}
-                        className="hover:bg-muted/10 transition-colors border-l-4"
+                        className={cn(
+                          "hover:bg-muted/10 transition-colors border-l-4",
+                          task.completed && "bg-green-50/40 dark:bg-green-950/10"
+                        )}
                         style={{
-                          borderLeftColor: task.products?.[0]?.name?.toLowerCase().includes("elevate")
-                            ? "#f59e0b"
-                            : task.products?.[0]?.name?.toLowerCase().includes("heelpod") || task.products?.[0]?.name?.toLowerCase().includes("hellpod")
-                              ? "#f43f5e"
-                              : task.products?.[0]?.name?.toLowerCase().includes("mac")
-                                ? "#2563eb"
-                                : "transparent"
+                          borderLeftColor: task.completed
+                            ? "#22c55e"
+                            : task.products?.[0]?.name?.toLowerCase().includes("elevate")
+                              ? "#f59e0b"
+                              : task.products?.[0]?.name?.toLowerCase().includes("heelpod") || task.products?.[0]?.name?.toLowerCase().includes("hellpod")
+                                ? "#f43f5e"
+                                : task.products?.[0]?.name?.toLowerCase().includes("mac")
+                                  ? "#2563eb"
+                                  : "transparent"
                         }}
                       >
+                        <td className="py-4 px-6 w-16">
+                          <button
+                            onClick={() => handleToggleStatus(task._id)}
+                            className={cn(
+                              "flex items-center justify-center h-6 w-6 rounded-full border-2 transition-all cursor-pointer",
+                              task.completed
+                                ? "bg-green-500 border-green-500 text-white"
+                                : "border-muted-foreground/40 hover:border-green-400 bg-transparent"
+                            )}
+                            title={task.completed ? "Mark as incomplete" : "Mark as complete"}
+                          >
+                            {task.completed && (
+                              <CheckCircle className="h-4 w-4" />
+                            )}
+                          </button>
+                        </td>
                         <td className="py-4 px-6 min-w-[200px]">
                           <div className="flex flex-col">
                             <span
                               className={cn(
                                 "text-sm font-bold text-foreground leading-snug",
-                                isOverdue && "text-rose-600 dark:text-rose-400"
+                                isOverdue && !task.completed && "text-rose-600 dark:text-rose-400",
+                                task.completed && "line-through text-muted-foreground"
                               )}
                             >
                               {task.title}
                             </span>
                             {task.description && (
-                              <span className="text-xs text-muted-foreground mt-0.5 line-clamp-1 font-normal">
+                              <span className={cn(
+                                "text-xs text-muted-foreground mt-0.5 line-clamp-1 font-normal",
+                                task.completed && "line-through"
+                              )}>
                                 {task.description}
                               </span>
                             )}

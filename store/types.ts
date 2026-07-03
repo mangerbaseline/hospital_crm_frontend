@@ -734,6 +734,7 @@ export interface TaskData {
   products?: string[];
   user?: string;
   secondaryAssignees?: string[];
+  completed?: boolean;
 }
 
 export interface CreateActivityPayload {
@@ -767,6 +768,7 @@ export interface TaskActivity {
   products?: any[];
   secondaryAssignees?: any[];
   reminders: ("email" | "push")[];
+  completed: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -938,6 +940,7 @@ export interface DashboardTask {
   };
   user: string;
   reminders: ("email" | "push")[];
+  completed: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -959,6 +962,7 @@ export interface DashboardActivityItem {
   title?: string;
   description?: string;
   dueDate?: string;
+  completed?: boolean;
   contact?: {
     _id: string;
     firstName: string;
@@ -1108,6 +1112,7 @@ export interface Task {
   products?: any[];
   secondaryAssignees?: any[];
   reminders: ("email" | "push")[];
+  completed: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -1146,6 +1151,7 @@ export interface CreateTaskPayload {
   products?: string[];
   user?: string;
   secondaryAssignees?: string[];
+  completed?: boolean;
 }
 
 export interface UpdateTaskPayload {
@@ -1158,4 +1164,5 @@ export interface UpdateTaskPayload {
   products?: string[];
   user?: string;
   secondaryAssignees?: string[];
+  completed?: boolean;
 }

@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Clock } from "lucide-react";
+import { Clock, CheckCircle2 } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/lib/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import { fetchDashboardTasks } from "@/store/features/dashboard/dashboardSlice";
 
 export function UpcomingTasks() {
@@ -17,6 +19,7 @@ export function UpcomingTasks() {
     dashboardTasksTotalPages,
   } = useAppSelector((state) => state.dashboard);
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
   useEffect(() => {
     dispatch(fetchDashboardTasks({ page: 1, limit: 5 }));
@@ -66,25 +69,46 @@ export function UpcomingTasks() {
                 return (
                   <div
                     key={task._id}
-                    className="mb-3 last:mb-0 border border-border/60 hover:border-border rounded-xl p-3 sm:p-4 shadow-sm transition-all bg-muted"
+                    onClick={() => {
+                      const hospitalId = typeof task.hospital === "object" ? task.hospital?._id : task.hospital;
+                      if (hospitalId) router.push(`/hospitals/${hospitalId}`);
+                    }}
+                    className={cn(
+                      "mb-3 last:mb-0 border border-border/60 hover:border-border rounded-xl p-3 sm:p-4 shadow-sm transition-all cursor-pointer",
+                      task.completed ? "bg-green-50/60 dark:bg-green-950/20" : "bg-muted"
+                    )}
                   >
                     <div className="flex justify-between items-start gap-2">
-                      <h4 className="text-[13px] sm:text-sm font-bold truncate leading-tight text-foreground flex-1">
-                        {task.title}
-                      </h4>
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {task.completed && (
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+                        )}
+                        <h4 className={cn(
+                          "text-[13px] sm:text-sm font-bold truncate leading-tight",
+                          task.completed ? "line-through text-muted-foreground" : "text-foreground"
+                        )}>
+                          {task.title}
+                        </h4>
+                      </div>
                       <span className="text-[10px] sm:text-[11px] font-semibold text-blue-600 whitespace-nowrap bg-blue-100 border border-blue-200 px-2 py-0.5 rounded-full shrink-0 tracking-wide">
                         {format(new Date(task.dueDate), "MMM d")}
                       </span>
                     </div>
 
                     {hospitalName && (
-                      <p className="text-[11px] sm:text-xs text-muted-foreground font-medium mt-1 truncate">
+                      <p className={cn(
+                        "text-[11px] sm:text-xs font-medium mt-1 truncate",
+                        task.completed ? "text-muted-foreground/60 line-through" : "text-muted-foreground"
+                      )}>
                         {hospitalName}
                       </p>
                     )}
 
                     {task.description && (
-                      <p className="text-[11px] sm:text-xs text-muted-foreground/80 font-medium mt-1 line-clamp-2 leading-relaxed">
+                      <p className={cn(
+                        "text-[11px] sm:text-xs font-medium mt-1 line-clamp-2 leading-relaxed",
+                        task.completed ? "text-muted-foreground/50 line-through" : "text-muted-foreground/80"
+                      )}>
                         {task.description}
                       </p>
                     )}

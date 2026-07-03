@@ -17,8 +17,9 @@ import {
   deleteActivity,
 } from "@/store/features/activity/activitySlice";
 import { ActivityType, ActivityItem } from "@/store/types";
+import { toggleTaskStatus } from "@/store/features/task/taskSlice";
 import { format } from "date-fns";
-import { X, Phone, MessageSquare, ClipboardList, Edit } from "lucide-react";
+import { X, Phone, MessageSquare, ClipboardList, Edit, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AddNoteModal } from "./AddNoteModal";
@@ -95,6 +96,22 @@ export function AllActivitiesModal({
       );
     } catch (error: any) {
       toast.error(error || "Failed to delete activity");
+    }
+  };
+
+  const handleToggleTaskStatus = async (taskId: string) => {
+    try {
+      await dispatch(toggleTaskStatus(taskId)).unwrap();
+      dispatch(
+        fetchAllActivities({
+          hospitalId,
+          page,
+          limit,
+          showAll: true,
+        }),
+      );
+    } catch (error: any) {
+      toast.error(error || "Failed to toggle task status");
     }
   };
 
@@ -267,25 +284,53 @@ export function AllActivitiesModal({
         return (
           <div
             key={activity._id}
-            className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4"
+            className={cn(
+              "group relative flex flex-col gap-2 p-4 border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4",
+              activity.completed && "bg-green-50/40 dark:bg-green-950/10"
+            )}
             style={{
-              borderLeftColor: activity.products?.[0]?.name?.toLowerCase().includes("elevate")
-                ? "#f59e0b"
-                : activity.products?.[0]?.name?.toLowerCase().includes("heelpod") || activity.products?.[0]?.name?.toLowerCase().includes("hellpod")
-                  ? "#f43f5e"
-                  : activity.products?.[0]?.name?.toLowerCase().includes("mac")
-                    ? "#2563eb"
-                    : "transparent"
+              borderLeftColor: activity.completed
+                ? "#22c55e"
+                : activity.products?.[0]?.name?.toLowerCase().includes("elevate")
+                  ? "#f59e0b"
+                  : activity.products?.[0]?.name?.toLowerCase().includes("heelpod") || activity.products?.[0]?.name?.toLowerCase().includes("hellpod")
+                    ? "#f43f5e"
+                    : activity.products?.[0]?.name?.toLowerCase().includes("mac")
+                      ? "#2563eb"
+                      : "transparent"
             }}
           >
             <div className="flex items-start gap-3">
-              <ClipboardList className="h-5 w-5 text-indigo-600" />
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  onClick={() => handleToggleTaskStatus(activity._id)}
+                  className={cn(
+                    "flex items-center justify-center h-6 w-6 rounded-full border-2 transition-all cursor-pointer shrink-0",
+                    activity.completed
+                      ? "bg-green-500 border-green-500 text-white"
+                      : "border-muted-foreground/40 hover:border-green-400 bg-transparent"
+                  )}
+                  title={activity.completed ? "Mark as incomplete" : "Mark as complete"}
+                >
+                  {activity.completed ? (
+                    <CheckCircle className="h-4 w-4" />
+                  ) : (
+                    <ClipboardList className="h-3.5 w-3.5 text-muted-foreground/40" />
+                  )}
+                </button>
+              </div>
               <div className="flex flex-col flex-1 min-w-0">
-                <h4 className="text-sm font-bold text-foreground leading-tight">
+                <h4 className={cn(
+                  "text-sm font-bold leading-tight",
+                  activity.completed ? "line-through text-muted-foreground" : "text-foreground"
+                )}>
                   {activity.title}
                 </h4>
                 {activity.description && (
-                  <p className="text-sm text-muted-foreground mt-1 font-medium wrap-break-word leading-tight">
+                  <p className={cn(
+                    "text-sm mt-1 font-medium wrap-break-word leading-tight",
+                    activity.completed ? "line-through text-muted-foreground/60" : "text-muted-foreground"
+                  )}>
                     {activity.description}
                   </p>
                 )}
@@ -323,7 +368,7 @@ export function AllActivitiesModal({
                 {/* Primary and Secondary Assignees */}
                 <div className="text-[10px] font-semibold text-muted-foreground mt-2 flex flex-wrap items-center gap-2">
                   <span>Assigned to:</span>
-                  <span className="text-foreground font-bold">
+                  <span className={cn("font-bold", activity.completed ? "text-muted-foreground/60" : "text-foreground")}>
                     {activity.user?.name || (typeof activity.user === "object" ? (activity.user as any).name : "User")}
                   </span>
                   {activity.secondaryAssignees && activity.secondaryAssignees.length > 0 && (

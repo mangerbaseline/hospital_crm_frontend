@@ -89,6 +89,22 @@ export const updateTask = createAsyncThunk(
   },
 );
 
+export const toggleTaskStatus = createAsyncThunk(
+  "task/toggleTaskStatus",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch<ApiResponse<Task>>(
+        `/api/task/${id}/status`,
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to toggle task status",
+      );
+    }
+  },
+);
+
 export const deleteTask = createAsyncThunk(
   "task/deleteTask",
   async (id: string, { rejectWithValue }) => {
@@ -185,6 +201,21 @@ const taskSlice = createSlice({
       .addCase(deleteTask.rejected, (state, action) => {
         state.isDeleteTaskLoading = false;
         state.deleteTaskError = action.payload as string;
+      })
+      // toggleTaskStatus
+      .addCase(toggleTaskStatus.pending, (state) => {
+        state.isUpdateTaskLoading = true;
+      })
+      .addCase(toggleTaskStatus.fulfilled, (state, action: PayloadAction<Task>) => {
+        state.isUpdateTaskLoading = false;
+        const index = state.tasks.findIndex((t) => t._id === action.payload._id);
+        if (index !== -1) {
+          state.tasks[index] = action.payload;
+        }
+      })
+      .addCase(toggleTaskStatus.rejected, (state, action) => {
+        state.isUpdateTaskLoading = false;
+        state.updateTaskError = action.payload as string;
       });
   },
 });
