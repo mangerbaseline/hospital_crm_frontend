@@ -135,7 +135,8 @@ export interface Hospital {
   hospitalName: string;
   beds: string;
   address: string;
-  user: string;
+  primaryRep: { _id: string; name: string } | string;
+  secondaryRep?: { _id: string; name: string } | string;
   city: string;
   state: string;
   zip: string;
@@ -143,10 +144,8 @@ export interface Hospital {
   competitiveProduct?: string;
   teamHospital?: boolean;
   magnetHospital?: boolean;
-  bedsWithMac?: number;
   ICUBeds?: number;
   totalBeds?: number;
-  products?: string[];
   notes?: string;
   contacts: {
     _id: string;
@@ -159,6 +158,7 @@ export interface Hospital {
   documents?: string[];
   deals?: {
     _id: string;
+    user?: { _id: string; name: string } | string;
     products: {
       product: { _id: string; name: string } | any;
       dealAmount: number;
@@ -168,6 +168,7 @@ export interface Hospital {
       dealDate?: string;
       leadSource?: string;
       leadSourceDetails?: string;
+      userName?: string;
     }[];
   }[];
   createdAt?: string;
@@ -223,17 +224,15 @@ export interface CreateHospitalPayload {
   state?: string;
   zip?: string;
   gpo?: string;
-  userId?: string;
-  // competitiveProduct: string;
+  primaryRep?: string | null;
+  secondaryRep?: string | null;
   teamHospital?: boolean | null;
   magnetHospital?: boolean | null;
-  // bedsWithMac: number;
   ICUBeds: number;
 }
 
 export interface UpdateHospitalPayload extends Partial<CreateHospitalPayload> {
   id: string;
-  user?: string | null;
 }
 
 export interface ContactState {

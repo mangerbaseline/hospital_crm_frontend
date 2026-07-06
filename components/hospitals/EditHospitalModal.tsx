@@ -79,10 +79,15 @@ export function EditHospitalModal({
   const isLoadingIdnRef = useRef(false);
 
   const IDN_PAGE_LIMIT = 20;
-  const [selectedUser, setSelectedUser] = useState<string>(
-    typeof hospital.user === "object"
-      ? (hospital.user as any)?._id || "__none__"
-      : hospital.user || "__none__",
+  const [selectedPrimaryRep, setSelectedPrimaryRep] = useState<string>(
+    typeof hospital.primaryRep === "object"
+      ? (hospital.primaryRep as any)?._id || "__none__"
+      : hospital.primaryRep || "__none__",
+  );
+  const [selectedSecondaryRep, setSelectedSecondaryRep] = useState<string>(
+    typeof hospital.secondaryRep === "object"
+      ? (hospital.secondaryRep as any)?._id || "__none__"
+      : hospital.secondaryRep || "__none__",
   );
 
   const {
@@ -109,10 +114,14 @@ export function EditHospitalModal({
         typeof hospital.gpo === "object"
           ? (hospital.gpo as any)?._id || ""
           : hospital.gpo || "",
-      userId:
-        typeof hospital.user === "object"
-          ? (hospital.user as any)?._id || ""
-          : hospital.user || "",
+      primaryRep:
+        typeof hospital.primaryRep === "object"
+          ? (hospital.primaryRep as any)?._id || ""
+          : hospital.primaryRep || "",
+      secondaryRep:
+        typeof hospital.secondaryRep === "object"
+          ? (hospital.secondaryRep as any)?._id || ""
+          : hospital.secondaryRep || "",
       teamHospital: hospital.teamHospital ?? null as any,
       magnetHospital: hospital.magnetHospital ?? null as any,
       ICUBeds: hospital.ICUBeds ?? 0,
@@ -188,10 +197,14 @@ export function EditHospitalModal({
 
   useEffect(() => {
     if (open) {
-      const userIdVal =
-        typeof hospital.user === "object"
-          ? (hospital.user as any)?._id || "__none__"
-          : hospital.user || "__none__";
+      const primaryRepVal =
+        typeof hospital.primaryRep === "object"
+          ? (hospital.primaryRep as any)?._id || "__none__"
+          : hospital.primaryRep || "__none__";
+      const secondaryRepVal =
+        typeof hospital.secondaryRep === "object"
+          ? (hospital.secondaryRep as any)?._id || "__none__"
+          : hospital.secondaryRep || "__none__";
       reset({
         idn:
           typeof hospital.idn === "object"
@@ -206,13 +219,15 @@ export function EditHospitalModal({
           typeof hospital.gpo === "object"
             ? (hospital.gpo as any)?._id || ""
             : hospital.gpo || "",
-        userId: userIdVal,
+        primaryRep: primaryRepVal,
+        secondaryRep: secondaryRepVal,
         teamHospital: hospital.teamHospital ?? null as any,
         magnetHospital: hospital.magnetHospital ?? null as any,
         ICUBeds: hospital.ICUBeds ?? 0,
         totalBeds: hospital.totalBeds ?? 0,
       });
-      setSelectedUser(userIdVal);
+      setSelectedPrimaryRep(primaryRepVal);
+      setSelectedSecondaryRep(secondaryRepVal);
     }
   }, [open, hospital, reset]);
 
@@ -222,7 +237,8 @@ export function EditHospitalModal({
         updateHospital({
           id: hospital._id,
           ...data,
-          user: selectedUser === "__none__" ? null : selectedUser || undefined,
+          primaryRep: selectedPrimaryRep === "__none__" ? null : selectedPrimaryRep || undefined,
+          secondaryRep: selectedSecondaryRep === "__none__" ? null : selectedSecondaryRep || undefined,
         }),
       ).unwrap();
       toast.success("Hospital updated successfully");
@@ -249,12 +265,16 @@ export function EditHospitalModal({
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 mt-2"
         >
-          {!isRestrictedRole && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label className="text-xs font-semibold">Sales Rep</Label>
-              <Select value={selectedUser} onValueChange={setSelectedUser}>
+              <Label className="text-xs font-semibold">Primary Rep</Label>
+              <Select
+                value={selectedPrimaryRep}
+                onValueChange={setSelectedPrimaryRep}
+                disabled={isRestrictedRole}
+              >
                 <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
-                  <SelectValue placeholder="Select Sales Rep" />
+                  <SelectValue placeholder="Select Primary Rep" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">None</SelectItem>
@@ -266,7 +286,27 @@ export function EditHospitalModal({
                 </SelectContent>
               </Select>
             </div>
-          )}
+            <div>
+              <Label className="text-xs font-semibold">Secondary Rep</Label>
+              <Select
+                value={selectedSecondaryRep}
+                onValueChange={setSelectedSecondaryRep}
+                disabled={isRestrictedRole}
+              >
+                <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
+                  <SelectValue placeholder="Select Secondary Rep" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user._id} value={user._id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4 flex flex-col gap-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

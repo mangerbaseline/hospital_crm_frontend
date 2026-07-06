@@ -73,7 +73,8 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
       state: "",
       zip: "",
       gpo: "",
-      userId: "",
+      primaryRep: "",
+      secondaryRep: "",
       teamHospital: null as any,
       magnetHospital: null as any,
       ICUBeds: 0,
@@ -82,7 +83,6 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
 
   const idnValue = watch("idn");
   const gpoValue = watch("gpo");
-  const userIdValue = watch("userId");
 
   useEffect(() => {
     dispatch(fetchIDNs({ limit: 1000 }));
@@ -104,30 +104,61 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
     <div className="rounded-xl border border-border bg-background p-5 flex flex-col gap-4">
       <DialogTitle asChild>
         <CardHeader className="w-full bg-muted rounded-xl p-4 border border-border mt-2">
-          <CardTitle className="text-sm mb-1.5">Sales Rep</CardTitle>
-          {isAdmin ? (
-            <Controller
-              control={control}
-              name="userId"
-              render={({ field }) => (
-                <UserSelect
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  showAll={false}
-                  className="w-full bg-background border-border shadow-none cursor-pointer h-9 text-xs"
+          <CardTitle className="text-sm mb-3">Sales Reps</CardTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-semibold mb-1.5 block">Primary Rep</Label>
+              {isAdmin ? (
+                <Controller
+                  control={control}
+                  name="primaryRep"
+                  render={({ field }) => (
+                    <UserSelect
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      showAll={false}
+                      className="w-full bg-background border-border shadow-none cursor-pointer h-9 text-xs"
+                    />
+                  )}
                 />
+              ) : (
+                <CardDescription className="text-lg text-primary font-semibold">
+                  {currentUser?.name}
+                </CardDescription>
               )}
-            />
-          ) : (
-            <CardDescription className="text-lg text-primary font-semibold">
-              {currentUser?.name}
-            </CardDescription>
-          )}
-          {errors.userId && (
-            <p className="text-xs text-destructive mt-1">
-              {errors.userId.message}
-            </p>
-          )}
+              {errors.primaryRep && (
+                <p className="text-xs text-destructive mt-1">
+                  {errors.primaryRep.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label className="text-xs font-semibold mb-1.5 block">Secondary Rep</Label>
+              {isAdmin ? (
+                <Controller
+                  control={control}
+                  name="secondaryRep"
+                  render={({ field }) => (
+                    <UserSelect
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      showAll={false}
+                      className="w-full bg-background border-border shadow-none cursor-pointer h-9 text-xs"
+                    />
+                  )}
+                />
+              ) : (
+                <CardDescription className="text-lg text-primary font-semibold">
+                  {" "}
+                </CardDescription>
+              )}
+              {errors.secondaryRep && (
+                <p className="text-xs text-destructive mt-1">
+                  {errors.secondaryRep.message}
+                </p>
+              )}
+            </div>
+          </div>
         </CardHeader>
       </DialogTitle>
 

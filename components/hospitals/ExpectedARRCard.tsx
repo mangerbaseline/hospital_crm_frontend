@@ -146,6 +146,16 @@ export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
                     </span>
                   </div>
                 )}
+                {(p as any).userName && (
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      Created By
+                    </span>
+                    <span className={`text-sm font-bold ${themeStyle.label}`}>
+                      {(p as any).userName}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           );

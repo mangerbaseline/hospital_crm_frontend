@@ -132,6 +132,43 @@ function HospitalDetails() {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+              <div className="flex items-start gap-4 border border-border rounded-xl p-5">
+                <div className="bg-muted p-2.5 rounded-lg border border-border shrink-0 mt-0.5">
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider mb-1">
+                    Primary Rep
+                  </p>
+                  <p className="text-sm font-semibold text-slate-700">
+                    {selectedHospital.primaryRep
+                      ? typeof selectedHospital.primaryRep === "object"
+                        ? (selectedHospital.primaryRep as any).name
+                        : selectedHospital.primaryRep
+                      : "N/A"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 border border-border rounded-xl p-5">
+                <div className="bg-muted p-2.5 rounded-lg border border-border shrink-0 mt-0.5">
+                  <Building2 className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider mb-1">
+                    Secondary Rep
+                  </p>
+                  <p className="text-sm font-semibold text-slate-700">
+                    {selectedHospital.secondaryRep
+                      ? typeof selectedHospital.secondaryRep === "object"
+                        ? (selectedHospital.secondaryRep as any).name
+                        : selectedHospital.secondaryRep
+                      : "N/A"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-muted border border-border rounded-xl p-4">
                 <div className="bg-white p-2.5 rounded-lg border border-border shrink-0">

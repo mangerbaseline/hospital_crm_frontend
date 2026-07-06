@@ -98,6 +98,9 @@ export function PipelineCard({ deal, index }: KanbanCardProps) {
           <span className="truncate">
             GPO: {deal.hospital?.gpo?.name || "N/A"}
           </span>
+          <span className="truncate">
+            Creator: {deal.user?.name || "N/A"}
+          </span>
         </div>
 
         <div className="flex items-center justify-between text-xs pt-3 border-t border-border">
