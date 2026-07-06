@@ -77,7 +77,6 @@ export function AddContactModal({
     resolver: zodResolver(createContactSchema),
     defaultValues: {
       firstName: "",
-      lastName: "",
       designation: "",
       hospital: "",
       phoneNumber: "",

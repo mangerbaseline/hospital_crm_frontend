@@ -92,7 +92,7 @@ export function HospitalContacts({
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center gap-2">
                         <h4 className="text-sm font-bold text-foreground truncate">
-                          {contact.firstName} {contact.lastName}
+                          {contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName}
                         </h4>
                         {contact.isPrimary && (
                           <Badge className="bg-blue-50 text-blue-600 border-blue-100 px-2 py-0 h-4.5 rounded-full text-[10px] font-bold shadow-none shrink-0">

@@ -238,7 +238,7 @@ export function LogCallModal({
                   <SelectContent>
                     {contacts.map((contact) => (
                       <SelectItem key={contact._id} value={contact._id}>
-                        {contact.firstName} {contact.lastName}
+                        {contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName}
                       </SelectItem>
                     ))}
                   </SelectContent>

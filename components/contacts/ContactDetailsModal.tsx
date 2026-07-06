@@ -45,7 +45,7 @@ export function ContactDetailsModal({
 }: ContactDetailsModalProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const fullName = contact ? `${contact.firstName} ${contact.lastName}` : "";
+  const fullName = contact ? (contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName) : "";
 
   const handleHospitalNavigate = (hospitalId: string) => {
     onClose();
@@ -91,7 +91,7 @@ export function ContactDetailsModal({
 
     if (!contact) return null;
 
-    const fullName = `${contact.firstName} ${contact.lastName}`;
+    const fullName = contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName;
     const hospital =
       typeof contact.hospital === "object" ? contact.hospital : null;
     const hospitalName = hospital?.hospitalName || "Unknown Hospital";

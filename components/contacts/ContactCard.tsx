@@ -25,7 +25,7 @@ export function ContactCard({
   onViewClick,
 }: ContactCardProps) {
   const dispatch = useAppDispatch();
-  const fullName = `${contact.firstName} ${contact.lastName}`;
+  const fullName = contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName;
 
   const hospital =
     typeof contact.hospital === "object" ? contact.hospital : null;

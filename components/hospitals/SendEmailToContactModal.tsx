@@ -125,7 +125,7 @@ export function SendEmailToContactModal({
         <DialogHeader>
           <DialogTitle className="text-base font-bold flex items-center gap-2">
             <Mail className="h-4 w-4" />
-            Email {contact.firstName} {contact.lastName}
+            Email {contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName}
           </DialogTitle>
           <DialogDescription>
             Send an email to {contact.email}

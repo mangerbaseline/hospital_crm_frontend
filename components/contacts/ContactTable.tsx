@@ -63,8 +63,8 @@ export function ContactTable({
     let bVal = "";
 
     if (sortBy === "name") {
-      aVal = `${a.firstName} ${a.lastName}`.toLowerCase();
-      bVal = `${b.firstName} ${b.lastName}`.toLowerCase();
+      aVal = `${a.firstName} ${a.lastName || ""}`.toLowerCase();
+      bVal = `${b.firstName} ${b.lastName || ""}`.toLowerCase();
     } else if (sortBy === "designation") {
       aVal = (a.designation || "").toLowerCase();
       bVal = (b.designation || "").toLowerCase();
@@ -151,7 +151,7 @@ export function ContactTable({
           </thead>
           <tbody className="divide-y divide-border font-medium text-xs">
             {sortedContacts.map((contact) => {
-              const fullName = `${contact.firstName} ${contact.lastName}`;
+              const fullName = contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName;
               const hospital = typeof contact.hospital === "object" ? contact.hospital : null;
               const hospitalName = hospital?.hospitalName || "Unknown Hospital";
 
