@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   Select,
   SelectContent,
@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { UserSelect } from "./UserSelect";
-import { fetchIDNs } from "@/store/features/idn/idnSlice";
+import { fetchIDNs, resetIDNsForSelection } from "@/store/features/idn/idnSlice";
 import { fetchGPOs } from "@/store/features/gpo/gpoSlice";
 import { createHospital } from "@/store/features/hospital/hospitalSlice";
 import { toast } from "sonner";
@@ -46,7 +46,7 @@ interface AddHospitalFormProps {
 function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
   const dispatch = useAppDispatch();
   const { user: currentUser } = useAppSelector((state) => state.auth);
-  const { idns } = useAppSelector((state) => state.idn);
+  const { idns, isFetchingIDNs, hasMoreSelection, selectionPage } = useAppSelector((state) => state.idn);
   const { gpos } = useAppSelector((state) => state.gpo);
   const { isCreateHospitalLoading } = useAppSelector((state) => state.hospital);
 
@@ -54,6 +54,11 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
 
   const [idnOpen, setIdnOpen] = useState(false);
   const [gpoOpen, setGpoOpen] = useState(false);
+  const [idnSearch, setIdnSearch] = useState("");
+  const idnListRef = useRef<HTMLDivElement>(null);
+  const isLoadingIdnRef = useRef(false);
+  const idnSearchTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const IDN_PAGE_LIMIT = 20;
 
   const {
     register,
@@ -85,9 +90,59 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
   const gpoValue = watch("gpo");
 
   useEffect(() => {
-    dispatch(fetchIDNs({ limit: 1000 }));
     dispatch(fetchGPOs({ limit: 1000 }));
   }, [dispatch]);
+
+  useEffect(() => {
+    if (idnOpen) {
+      isLoadingIdnRef.current = true;
+      dispatch(resetIDNsForSelection());
+      dispatch(
+        fetchIDNs({ page: 1, limit: IDN_PAGE_LIMIT, search: idnSearch }),
+      );
+    }
+  }, [idnOpen, idnSearch, dispatch]);
+
+  useEffect(() => {
+    if (!isFetchingIDNs) {
+      isLoadingIdnRef.current = false;
+    }
+  }, [isFetchingIDNs]);
+
+  useEffect(() => {
+    if (!idnOpen) {
+      setIdnSearch("");
+    }
+  }, [idnOpen]);
+
+  const handleIdnSearchChange = useCallback((value: string) => {
+    if (idnSearchTimerRef.current) {
+      clearTimeout(idnSearchTimerRef.current);
+    }
+    idnSearchTimerRef.current = setTimeout(() => {
+      setIdnSearch(value);
+    }, 300);
+  }, []);
+
+  const handleIdnScroll = useCallback(() => {
+    const el = idnListRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    if (
+      scrollHeight - scrollTop - clientHeight < 30 &&
+      hasMoreSelection &&
+      !isLoadingIdnRef.current
+    ) {
+      isLoadingIdnRef.current = true;
+      dispatch(
+        fetchIDNs({
+          page: selectionPage + 1,
+          limit: IDN_PAGE_LIMIT,
+          search: idnSearch,
+        }),
+      );
+    }
+  }, [hasMoreSelection, selectionPage, idnSearch, dispatch]);
 
   const onSubmit = async (data: HospitalFormValues) => {
     try {
@@ -187,14 +242,18 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
                 className="w-(--radix-popover-trigger-width) p-0 z-100"
                 align="start"
               >
-                <Command onWheel={(e) => e.stopPropagation()}>
+                <Command
+                  onWheel={(e) => e.stopPropagation()}
+                  shouldFilter={false}
+                >
                   <CommandInput
                     placeholder="Search IDN..."
                     className="h-9 text-xs"
+                    onValueChange={handleIdnSearchChange}
                   />
-                  <CommandList>
+                  <CommandList ref={idnListRef} onScroll={handleIdnScroll}>
                     <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                      No IDN found.
+                      {isFetchingIDNs ? "Loading..." : "No IDN found."}
                     </CommandEmpty>
                     <CommandGroup>
                       {idns.map((idn) => (
@@ -222,6 +281,11 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
                           />
                         </CommandItem>
                       ))}
+                      {isFetchingIDNs && (
+                        <div className="flex justify-center py-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        </div>
+                      )}
                     </CommandGroup>
                   </CommandList>
                 </Command>
