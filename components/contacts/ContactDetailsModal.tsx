@@ -6,7 +6,6 @@ import {
   Phone,
   CheckCircle2,
   ShieldCheck,
-  Loader2,
 } from "lucide-react";
 import {
   Dialog,
@@ -24,11 +23,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAppDispatch } from "@/lib/hooks";
 import {
   deleteContact,
-  getSingleContact,
 } from "@/store/features/contact/contactSlice";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { EditContactModal } from "./EditContactModal";
 
 interface ContactDetailsModalProps {
   contact: Contact | null;
@@ -60,12 +57,6 @@ export function ContactDetailsModal({
       onClose();
     } catch (error: any) {
       toast.error(error || "Failed to delete contact");
-    }
-  };
-
-  const handleEditSuccess = () => {
-    if (contact) {
-      dispatch(getSingleContact(contact._id));
     }
   };
 
@@ -261,15 +252,6 @@ export function ContactDetailsModal({
                   Delete
                 </Button>
               </ConfirmDialog>
-
-              <EditContactModal contact={contact} onSuccess={handleEditSuccess}>
-                <Button
-                  variant="outline"
-                  className="border-border hover:bg-slate-50 text-slate-700 h-9 text-xs px-4 rounded-lg shadow-sm font-semibold cursor-pointer transition-all"
-                >
-                  Edit
-                </Button>
-              </EditContactModal>
             </div>
           ) : (
             <div />
