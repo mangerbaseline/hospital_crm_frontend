@@ -14,7 +14,10 @@ interface ExpectedARRCardProps {
 export function ExpectedARRCard({ hospital }: ExpectedARRCardProps) {
   const deals = hospital.deals || [];
   const allProducts = deals.flatMap((deal) =>
-    (deal.products || []).map((p) => ({ ...p }))
+    (deal.products || []).map((p) => ({
+      ...p,
+      userName: (p as any).userName || (typeof deal.user === "object" ? (deal.user as any)?.name : "") || "",
+    }))
   );
 
   const totalArr = allProducts.reduce((acc, p) => acc + (p.dealAmount || 0), 0);
