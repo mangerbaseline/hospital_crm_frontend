@@ -95,7 +95,9 @@ export function EditExpectedARRModal({
     if (open) {
       if (products.length === 0) dispatch(fetchProducts({ limit: 1000 }));
 
-      const deals = hospital.deals || [];
+      const deals = (hospital.deals || []).filter(
+        (d) => d._id && deletableDealIds.has(d._id)
+      );
       const allProducts = deals.flatMap((deal) =>
         (deal.products || []).map((p) => ({
           _id: p._id,
@@ -191,7 +193,7 @@ export function EditExpectedARRModal({
         (item) => item.isDirty && !item.isNew && !item.isRemoved,
       );
       for (const item of updatedItems) {
-        if (item.dealId) {
+        if (item.dealId && deletableDealIds.has(item.dealId)) {
           promises.push(
             dispatch(
               updateDealProduct({
@@ -266,6 +268,8 @@ export function EditExpectedARRModal({
 
   const visibleItems = items.filter((item) => !item.isRemoved);
 
+  const isItemEditable = (item: ProductItem) => !item.dealId || deletableDealIds.has(item.dealId);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -336,6 +340,7 @@ export function EditExpectedARRModal({
                         prod?.name || "",
                       );
                     }}
+                    disabled={!isItemEditable(item)}
                   >
                     <SelectTrigger className="w-full text-sm h-9 bg-muted font-semibold">
                       <SelectValue placeholder="Select Product" />
@@ -378,6 +383,7 @@ export function EditExpectedARRModal({
                         Number(e.target.value),
                       )
                     }
+                    disabled={!isItemEditable(item)}
                     className="text-xs h-9 bg-muted pl-7"
                   />
                 </div>
@@ -405,6 +411,7 @@ export function EditExpectedARRModal({
                   onChange={(e) =>
                     handleFieldChange(item._id, "beds", e.target.value)
                   }
+                  disabled={!isItemEditable(item)}
                   placeholder="No. of beds"
                   className="text-xs h-9 bg-muted mt-1.5"
                 />
@@ -417,6 +424,7 @@ export function EditExpectedARRModal({
                   onValueChange={(val) =>
                     handleFieldChange(item._id, "stage", val)
                   }
+                  disabled={!isItemEditable(item)}
                 >
                   <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                     <SelectValue placeholder="Select stage" />
@@ -445,6 +453,7 @@ export function EditExpectedARRModal({
                       e.target.value,
                     )
                   }
+                  disabled={!isItemEditable(item)}
                   className="text-xs h-9 mt-1.5 bg-muted"
                 />
               </div>
@@ -456,6 +465,7 @@ export function EditExpectedARRModal({
                   onValueChange={(val) =>
                     handleFieldChange(item._id, "leadSource", val === "none" ? "" : val)
                   }
+                  disabled={!isItemEditable(item)}
                 >
                   <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                     <SelectValue placeholder="Select Lead Source" />
@@ -482,6 +492,7 @@ export function EditExpectedARRModal({
                     onChange={(e) =>
                       handleFieldChange(item._id, "leadSourceDetails", e.target.value)
                     }
+                    disabled={!isItemEditable(item)}
                   />
                 </div>
               )}
