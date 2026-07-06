@@ -30,7 +30,7 @@ import {
 } from "@/store/features/deal/dealSlice";
 import { getSingleHospital, updateHospital } from "@/store/features/hospital/hospitalSlice";
 import { toast } from "sonner";
-import { Hospital, DealProductStage } from "@/store/types";
+import { Hospital, DealProductStage, UserRole } from "@/store/types";
 
 interface ProductItem {
   _id: string;
@@ -67,6 +67,29 @@ export function EditExpectedARRModal({
   const [items, setItems] = useState<ProductItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [totalBeds, setTotalBeds] = useState<number | string>(hospital.totalBeds ?? "");
+  const currentUser = useAppSelector((state) => state.auth.user);
+
+  const canEditAll = (() => {
+    if (!currentUser) return false;
+    const role = currentUser.role;
+    if (role === UserRole.ADMIN || role === UserRole.EXECUTIVE || role === UserRole.CUSTOMER_SUCCESS) return true;
+    const repId = typeof currentUser === "object" ? currentUser._id : currentUser;
+    const primaryId = typeof hospital.primaryRep === "object" ? hospital.primaryRep._id : hospital.primaryRep;
+    const secondaryId = typeof hospital.secondaryRep === "object" ? hospital.secondaryRep._id : hospital.secondaryRep;
+    if (repId === primaryId || repId === secondaryId) return true;
+    return false;
+  })();
+
+  const deletableDealIds = new Set<string>();
+  if (canEditAll) {
+    (hospital.deals || []).forEach((d) => { if (d._id) deletableDealIds.add(d._id); });
+  } else if (currentUser) {
+    const userId = typeof currentUser === "object" ? currentUser._id : currentUser;
+    (hospital.deals || []).forEach((d) => {
+      const dealUserId = typeof d.user === "object" ? d.user._id : d.user;
+      if (d._id && dealUserId === userId) deletableDealIds.add(d._id);
+    });
+  }
 
   useEffect(() => {
     if (open) {
@@ -153,7 +176,7 @@ export function EditExpectedARRModal({
         (item) => item.isRemoved && !item.isNew,
       );
       for (const item of removedItems) {
-        if (item.dealId) {
+        if (item.dealId && deletableDealIds.has(item.dealId)) {
           promises.push(
             dispatch(
               removeDealProduct({
@@ -326,15 +349,17 @@ export function EditExpectedARRModal({
                     </SelectContent>
                   </Select>
                 )}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleRemoveProduct(item._id)}
-                  className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive cursor-pointer"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                {deletableDealIds.has(item.dealId) && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveProduct(item._id)}
+                    className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
 
               <div>
