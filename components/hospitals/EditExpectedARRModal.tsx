@@ -74,8 +74,8 @@ export function EditExpectedARRModal({
     const role = currentUser.role;
     if (role === UserRole.ADMIN || role === UserRole.EXECUTIVE || role === UserRole.CUSTOMER_SUCCESS) return true;
     const repId = typeof currentUser === "object" ? currentUser._id : currentUser;
-    const primaryId = typeof hospital.primaryRep === "object" ? hospital.primaryRep._id : hospital.primaryRep;
-    const secondaryId = typeof hospital.secondaryRep === "object" ? hospital.secondaryRep._id : hospital.secondaryRep;
+    const primaryId = hospital.primaryRep && typeof hospital.primaryRep === "object" ? hospital.primaryRep._id : hospital.primaryRep;
+    const secondaryId = hospital.secondaryRep && typeof hospital.secondaryRep === "object" ? hospital.secondaryRep._id : hospital.secondaryRep;
     if (repId === primaryId || repId === secondaryId) return true;
     return false;
   })();

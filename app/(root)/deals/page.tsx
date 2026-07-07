@@ -304,7 +304,7 @@ export default function DealsPage() {
             ))
           ) : deals.length > 0 ? (
             deals.map((deal) => (
-              <DealCard key={deal._id} deal={deal} onDealUpdated={refetchDeals} />
+              <DealCard key={`${deal.dealId}-${deal.product?._id}`} deal={deal} onDealUpdated={refetchDeals} />
             ))
           ) : (
             <div className="col-span-full py-20 text-center bg-muted/30 rounded-3xl border border-dashed border-border">
