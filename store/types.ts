@@ -628,8 +628,11 @@ export interface ProductRevenue {
 export interface FetchAllDealsResponse {
   success: boolean;
   totalDeals: number;
+  activeDeals: number;
   totalHospitals: number;
   closedBusiness: number;
+  implementedDeals: number;
+  implementedARR: number;
   productRevenue: ProductRevenue[];
   data: PipelineDeal[];
   page?: number;
@@ -658,6 +661,9 @@ export interface DealState {
     totalHospitals: number;
     closedBusiness: number;
     totalDeals: number;
+    activeDeals: number;
+    implementedDeals: number;
+    implementedARR: number;
     productRevenue: ProductRevenue[];
   } | null;
   page: number;
@@ -670,6 +676,7 @@ export interface DealState {
     hospitalCount: number;
     dealsCount: number;
     productCount: number;
+    activeDealsCount: number;
   } | null;
   isFetchingQuickStats: boolean;
   quickStatsError: string | null;

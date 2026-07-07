@@ -82,10 +82,10 @@ function Home() {
         ) : (
           <>
             <StatsCard
-              title="All Deals"
+              title="Active Deals"
               icon={Building2}
               iconClassName="text-muted-foreground"
-              value={dashboardStats?.totalDeals || 0}
+              value={dashboardStats?.activeDeals || 0}
               // subtitle={}
               buttonText="View All"
               href="/deals"

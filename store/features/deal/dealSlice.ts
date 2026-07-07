@@ -151,6 +151,7 @@ export const fetchHospitalProductCount = createAsyncThunk(
         hospitalCount: number;
         productCount: number;
         dealsCount: number;
+        activeDealsCount: number;
       }>("/api/deal/stats/hospital-product-count");
       return response.data;
     } catch (error: any) {
@@ -208,6 +209,9 @@ const dealSlice = createSlice({
           closedBusiness: action.payload.closedBusiness,
           productRevenue: action.payload.productRevenue,
           totalDeals: action.payload.totalDeals,
+          activeDeals: action.payload.activeDeals,
+          implementedDeals: action.payload.implementedDeals,
+          implementedARR: action.payload.implementedARR,
         };
         state.page = action.payload.page || 1;
         state.limit = action.payload.limit || 10;
@@ -276,6 +280,7 @@ const dealSlice = createSlice({
           hospitalCount: action.payload.hospitalCount,
           dealsCount: action.payload.dealsCount,
           productCount: action.payload.productCount,
+          activeDealsCount: action.payload.activeDealsCount,
         };
       })
       .addCase(fetchHospitalProductCount.rejected, (state, action) => {

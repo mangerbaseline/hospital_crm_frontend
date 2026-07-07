@@ -91,10 +91,11 @@ function Pipeline() {
         </div>
 
         {/* stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5 w-full">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 md:gap-5 w-full">
+
           <PipelineStatsCard
-            value={stats ? Number(stats.totalDeals) : "-"}
-            label="Total Deals"
+            value={stats ? Number(stats.activeDeals ?? "-") : "-"}
+            label="Active Deals"
           />
           {stats?.productRevenue ? (
             stats.productRevenue.map((prod) => (
@@ -119,6 +120,15 @@ function Pipeline() {
             />
           ) : (
             <PipelineStatsCard value="-" label="Loading Closed Business..." />
+          )}
+
+          {stats ? (
+            <PipelineStatsCard
+              value={formatCurrency(Number(stats.implementedARR || 0))}
+              label="Implemented"
+            />
+          ) : (
+            <PipelineStatsCard value="-" label="Implemented" />
           )}
         </div>
       </section>
