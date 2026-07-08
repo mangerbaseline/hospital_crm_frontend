@@ -375,6 +375,7 @@ export function EditExpectedARRModal({
                   </span>
                   <Input
                     type="number"
+                    min={0}
                     value={item.dealAmount}
                     onChange={(e) =>
                       handleFieldChange(

@@ -45,9 +45,7 @@ function Hospitals() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
 
-  const [selectedUser, setSelectedUser] = useState<string>(
-    isAdminOrExecutive ? "all" : currentUser?._id || "all",
-  );
+  const [selectedUser, setSelectedUser] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
 
@@ -90,13 +88,11 @@ function Hospitals() {
         title="All Hospitals"
         subTitle="Hospitals organized by expected close date"
       >
-        {isAdminOrExecutive && (
-          <UserSelect
-            value={selectedUser}
-            onValueChange={setSelectedUser}
-            className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
-          />
-        )}
+        <UserSelect
+          value={selectedUser}
+          onValueChange={setSelectedUser}
+          className="w-full sm:w-45 bg-muted border-border shadow-sm cursor-pointer"
+        />
       </DashboardHeader>
 
       <div className="flex flex-col md:flex-row md:gap-4 items-start md:items-center justify-between mt-6">
