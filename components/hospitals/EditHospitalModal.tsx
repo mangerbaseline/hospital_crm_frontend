@@ -68,6 +68,14 @@ export function EditHospitalModal({
   const { user } = useAppSelector((state) => state.auth);
   const isRestrictedRole = user?.role === UserRole.SALES || user?.role === UserRole.CLINICAL_SPECIALIST;
 
+  // Check if reps are already declared on this hospital
+  const hasPrimaryRep = !!(typeof hospital.primaryRep === "object"
+    ? (hospital.primaryRep as any)?._id
+    : hospital.primaryRep);
+  const hasSecondaryRep = !!(typeof hospital.secondaryRep === "object"
+    ? (hospital.secondaryRep as any)?._id
+    : hospital.secondaryRep);
+
   const { isUpdateHospitalLoading } = useAppSelector((state) => state.hospital);
 
   const [open, setOpen] = useState(false);
@@ -270,17 +278,23 @@ export function EditHospitalModal({
               <Label className="text-xs font-semibold">Primary Rep</Label>
               <Select
                 value={selectedPrimaryRep}
-                onValueChange={setSelectedPrimaryRep}
-                disabled={isRestrictedRole}
+                onValueChange={(val) => {
+                  setSelectedPrimaryRep(val);
+                  setValue("primaryRep", val === "__none__" ? "" : val, { shouldValidate: true });
+                }}
+                disabled={isRestrictedRole && hasPrimaryRep}
               >
                 <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                   <SelectValue placeholder="Select Primary Rep" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">None</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user._id} value={user._id}>
-                      {user.name}
+                  {(isRestrictedRole && !hasPrimaryRep
+                    ? users.filter((u) => u._id === user?._id)
+                    : users
+                  ).map((u) => (
+                    <SelectItem key={u._id} value={u._id}>
+                      {u.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -290,23 +304,34 @@ export function EditHospitalModal({
               <Label className="text-xs font-semibold">Secondary Rep</Label>
               <Select
                 value={selectedSecondaryRep}
-                onValueChange={setSelectedSecondaryRep}
-                disabled={isRestrictedRole}
+                onValueChange={(val) => {
+                  setSelectedSecondaryRep(val);
+                  setValue("secondaryRep", val === "__none__" ? "" : val, { shouldValidate: true });
+                }}
+                disabled={isRestrictedRole && hasSecondaryRep}
               >
                 <SelectTrigger className="w-full mt-1.5 text-xs h-9 bg-muted">
                   <SelectValue placeholder="Select Secondary Rep" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">None</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user._id} value={user._id}>
-                      {user.name}
+                  {(isRestrictedRole && !hasSecondaryRep
+                    ? users.filter((u) => u._id === user?._id)
+                    : users
+                  ).map((u) => (
+                    <SelectItem key={u._id} value={u._id}>
+                      {u.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
+          {(errors.primaryRep || errors.secondaryRep) && (
+            <p className="text-xs text-destructive -mt-2">
+              {errors.secondaryRep?.message || errors.primaryRep?.message}
+            </p>
+          )}
 
           <div className="rounded-xl border border-blue-200 bg-blue-50/40 p-4 flex flex-col gap-3">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -486,7 +511,6 @@ export function EditHospitalModal({
                     variant="outline"
                     role="combobox"
                     aria-expanded={gpoOpen}
-                    disabled={isRestrictedRole}
                     className="w-full justify-between mt-1.5 text-xs h-9 bg-muted/70 font-normal border-border shadow-none hover:bg-muted"
                   >
                     {gpoValue
