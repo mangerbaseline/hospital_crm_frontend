@@ -218,7 +218,7 @@ const idnSlice = createSlice({
         fetchIDNs.fulfilled,
         (state, action: PayloadAction<PaginatedApiResponse<IDN[]>>) => {
           state.isFetchingIDNs = false;
-          const { data, page, totalPages } = action.payload;
+          const { data, page, limit, totalIDNs, totalPages } = action.payload;
 
           if (page === 1) {
             state.idns = data;
@@ -231,6 +231,8 @@ const idnSlice = createSlice({
           state.hasMoreSelection = page < totalPages;
 
           state.page = page;
+          state.limit = limit || state.limit;
+          state.totalIDNs = totalIDNs || 0;
           state.totalPages = totalPages;
         },
       )
