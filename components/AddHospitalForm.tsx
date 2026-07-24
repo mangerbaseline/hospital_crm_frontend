@@ -139,6 +139,7 @@ function AddHospitalForm({ onSuccess, onCancel }: AddHospitalFormProps) {
           page: selectionPage + 1,
           limit: IDN_PAGE_LIMIT,
           search: idnSearch,
+          append: true,
         }),
       );
     }

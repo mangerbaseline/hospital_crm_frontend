@@ -511,6 +511,7 @@ export interface FetchIDNsParams {
   page?: number;
   limit?: number;
   search?: string;
+  append?: boolean;
 }
 
 export interface FetchIDNsDealsParams {

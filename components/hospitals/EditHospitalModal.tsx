@@ -198,6 +198,7 @@ export function EditHospitalModal({
           page: selectionPage + 1,
           limit: IDN_PAGE_LIMIT,
           search: idnSearch,
+          append: true,
         }),
       );
     }

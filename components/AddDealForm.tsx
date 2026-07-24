@@ -163,6 +163,7 @@ function AddDealForm({ onSuccess }: AddDealFormProps = {}) {
           page: idnSelectionPage + 1,
           limit: 10,
           search: idnSearch,
+          append: true,
         }),
       );
     }

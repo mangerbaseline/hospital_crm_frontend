@@ -216,14 +216,15 @@ const idnSlice = createSlice({
       })
       .addCase(
         fetchIDNs.fulfilled,
-        (state, action: PayloadAction<PaginatedApiResponse<IDN[]>>) => {
+        (state, action) => {
           state.isFetchingIDNs = false;
           const { data, page, limit, totalIDNs, totalPages } = action.payload;
 
-          if (page === 1) {
-            state.idns = data;
-          } else {
+          const isAppend = action.meta.arg.append;
+          if (isAppend && page > 1) {
             state.idns = [...state.idns, ...data];
+          } else {
+            state.idns = data;
           }
 
           state.selectionPage = page;
