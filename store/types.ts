@@ -606,6 +606,8 @@ export interface PipelineDeal {
   beds?: number;
   leadSource?: string;
   leadSourceDetails?: string;
+  lastActivityDate?: string;
+  nextActivityDate?: string;
 }
 
 export interface FetchAllDealsParams {

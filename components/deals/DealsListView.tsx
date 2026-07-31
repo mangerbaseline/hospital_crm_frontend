@@ -46,15 +46,14 @@ const columns: ColumnDef[] = [
   { key: "expectedCloseDate", label: "Expected Close", sortable: true },
   { key: "dealAmount", label: "Deal Amount", sortable: true },
   {
-    key: "updatedAt",
+    key: "lastActivityDate",
     label: "Days Since Last Activity",
     sortable: true,
   },
   {
-    key: "daysUntilNext",
+    key: "nextActivityDate",
     label: "Days Until Next Activity",
     sortable: true,
-    sortKey: "expectedCloseDate",
   },
   { key: "user.name", label: "Deal Owner", sortable: true },
 ];
@@ -166,16 +165,16 @@ export function DealsListView({
               </tr>
             </thead>
             <tbody className="divide-y divide-border font-medium">
-              {deals.map((deal) => {
-                const daysSince = getDaysSince(deal.updatedAt);
-                const daysUntil = getDaysUntil(deal.expectedCloseDate);
+              {deals.map((deal, index) => {
+                const daysSince = getDaysSince(deal.lastActivityDate);
+                const daysUntil = getDaysUntil(deal.nextActivityDate);
                 const stageColor =
                   stageColorMap[deal.stage as string] ||
                   "bg-muted text-muted-foreground border-border";
 
                 return (
                   <tr
-                    key={deal._id}
+                    key={`${deal.dealId}-${deal.product?._id || index}`}
                     className="hover:bg-muted/30 transition-colors group"
                   >
                     {/* Deal Name (Hospital) */}
@@ -185,7 +184,7 @@ export function DealsListView({
                         className="inline-flex items-center gap-1.5 text-sm font-bold text-foreground hover:text-primary transition-colors"
                       >
                         <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        <span className="truncate max-w-[200px]">
+                        <span>
                           {deal.hospital?.hospitalName || "—"}
                         </span>
                       </Link>
