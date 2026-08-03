@@ -71,7 +71,7 @@ export const fetchHospitalsWithDeals = createAsyncThunk(
         search = "",
         userId = "",
       } = params;
-      let url = `/api/hospital/all-hospitals-deals?page=${page}&limit=${limit}&search=${search}`;
+      let url = `/api/hospital/all-hospitals-deals?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
       if (userId) url += `&userId=${userId}`;
       const response =
         await axiosInstance.get<PaginatedApiResponse<HospitalWithDeals[]>>(url);

@@ -52,7 +52,7 @@ export const fetchIDNs = createAsyncThunk(
     try {
       const { page = 1, limit = 10, search = "" } = params;
       const response = await axiosInstance.get<PaginatedApiResponse<IDN[]>>(
-        `/api/idn/all-idns?page=${page}&limit=${limit}&search=${search}`,
+        `/api/idn/all-idns?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
       );
       return response.data;
     } catch (error: any) {
@@ -68,7 +68,7 @@ export const fetchIDNsWithDeals = createAsyncThunk(
   async (params: FetchIDNsDealsParams, { rejectWithValue }) => {
     try {
       const { page = 1, limit = 10, search = "", userId = "" } = params;
-      let url = `/api/idn/all-idns-deals?page=${page}&limit=${limit}&search=${search}`;
+      let url = `/api/idn/all-idns-deals?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
       if (userId) url += `&userId=${userId}`;
       const response =
         await axiosInstance.get<PaginatedApiResponse<IDNWithDeals[]>>(url);

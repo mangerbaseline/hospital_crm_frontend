@@ -40,7 +40,7 @@ export const fetchContacts = createAsyncThunk(
         hospitalId = "",
       } = params;
       const response = await axiosInstance.get<PaginatedApiResponse<Contact[]>>(
-        `/api/contact/all-contacts?page=${page}&limit=${limit}&search=${search}${userId ? `&userId=${userId}` : ""}${productId ? `&productId=${productId}` : ""}${hospitalId ? `&hospitalId=${hospitalId}` : ""}`,
+        `/api/contact/all-contacts?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}${userId ? `&userId=${userId}` : ""}${productId ? `&productId=${productId}` : ""}${hospitalId ? `&hospitalId=${hospitalId}` : ""}`,
       );
       return response.data;
     } catch (error: any) {

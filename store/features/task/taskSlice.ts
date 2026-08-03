@@ -39,7 +39,7 @@ export const fetchTasks = createAsyncThunk(
       const productId = params?.productId || "";
       const dueOnly = params?.dueOnly || false;
 
-      let url = `/api/task/all-tasks?page=${page}&limit=${limit}&search=${search}`;
+      let url = `/api/task/all-tasks?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
       if (userId) url += `&userId=${userId}`;
       if (hospitalId) url += `&hospitalId=${hospitalId}`;
       if (productId) url += `&productId=${productId}`;

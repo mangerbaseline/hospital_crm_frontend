@@ -49,7 +49,7 @@ export const fetchGPOs = createAsyncThunk(
     try {
       const { page = 1, limit = 10, search = "" } = params;
       const response = await axiosInstance.get<PaginatedApiResponse<GPO[]>>(
-        `/api/gpo/all-gpos?page=${page}&limit=${limit}&search=${search}`,
+        `/api/gpo/all-gpos?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
       );
       return response.data;
     } catch (error: any) {
@@ -65,7 +65,7 @@ export const fetchGPOsWithDeals = createAsyncThunk(
   async (params: FetchGPOsDealsParams, { rejectWithValue }) => {
     try {
       const { page = 1, limit = 10, search = "", userId = "" } = params;
-      let url = `/api/gpo/all-gpo-deals?page=${page}&limit=${limit}&search=${search}`;
+      let url = `/api/gpo/all-gpo-deals?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`;
       if (userId) url += `&userId=${userId}`;
       const response =
         await axiosInstance.get<PaginatedApiResponse<GPOWithDeals[]>>(url);

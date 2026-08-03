@@ -35,7 +35,7 @@ export const fetchProducts = createAsyncThunk(
     try {
       const { page = 1, limit = 10, search = "" } = params;
       const response = await axiosInstance.get<PaginatedApiResponse<Product[]>>(
-        `/api/product/all-products?page=${page}&limit=${limit}&search=${search}`,
+        `/api/product/all-products?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
       );
       return response.data;
     } catch (error: any) {
@@ -52,7 +52,7 @@ export const fetchAdminProducts = createAsyncThunk(
     try {
       const { page = 1, limit = 10, search = "" } = params;
       const response = await axiosInstance.get<PaginatedApiResponse<Product[]>>(
-        `/api/product/all-products-admin?page=${page}&limit=${limit}&search=${search}`,
+        `/api/product/all-products-admin?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`,
       );
       return response.data;
     } catch (error: any) {

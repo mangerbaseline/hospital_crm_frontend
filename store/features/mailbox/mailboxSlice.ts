@@ -42,7 +42,7 @@ export const fetchReceivedEmails = createAsyncThunk(
       const response = await axiosInstance.get<
         PaginatedApiResponse<EmailMessage[]>
       >(
-        `/api/graph-app/received-emails?page=${page}&limit=${limit}&search=${search}&hospitalId=${hospitalId}`,
+        `/api/graph-app/received-emails?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&hospitalId=${hospitalId}`,
       );
       return response.data;
     } catch (error: any) {
@@ -68,7 +68,7 @@ export const fetchSentEmails = createAsyncThunk(
       const response = await axiosInstance.get<
         PaginatedApiResponse<EmailMessage[]>
       >(
-        `/api/graph-app/sent-emails?page=${page}&limit=${limit}&search=${search}&hospitalId=${hospitalId}`,
+        `/api/graph-app/sent-emails?page=${page}&limit=${limit}&search=${encodeURIComponent(search)}&hospitalId=${hospitalId}`,
       );
       return response.data;
     } catch (error: any) {
