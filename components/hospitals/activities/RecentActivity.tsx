@@ -36,11 +36,13 @@ import { cn } from "@/lib/utils";
 interface RecentActivityProps {
   hospitalId: string;
   hospitalName: string;
+  idnNotes?: any[];
 }
 
 export function RecentActivity({
   hospitalId,
   hospitalName,
+  idnNotes = [],
 }: RecentActivityProps) {
   const dispatch = useAppDispatch();
   const { activities, isFetchingActivities } = useAppSelector(
@@ -48,6 +50,24 @@ export function RecentActivity({
   );
   const { selectedHospital } = useAppSelector((state) => state.hospital);
   const { user: currentUser } = useAppSelector((state) => state.auth);
+
+  const mappedIdnNotes = (idnNotes || []).map((note: any) => ({
+    _id: note._id,
+    activityType: "IDN_NOTE" as any,
+    content: note.content,
+    user: note.user,
+    createdAt: note.createdAt,
+    updatedAt: note.updatedAt,
+  }));
+
+  const combinedActivities = [
+    ...activities,
+    ...mappedIdnNotes,
+  ].sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return dateB - dateA;
+  });
 
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isCallModalOpen, setIsCallModalOpen] = useState(false);
@@ -91,7 +111,7 @@ export function RecentActivity({
     }
   };
 
-  const renderActivityItem = (activity: ActivityItem) => {
+  const renderActivityItem = (activity: any) => {
     switch (activity.activityType) {
       case ActivityType.CALL_LOG:
         return (
@@ -399,6 +419,38 @@ export function RecentActivity({
           </div>
         );
 
+      case "IDN_NOTE" as any:
+        return (
+          <div
+            key={activity._id}
+            className="group relative flex flex-col gap-2 p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border-l-4 border-l-primary"
+          >
+            <div className="flex items-start gap-3">
+              <div className="bg-primary/10 p-2 rounded-full border border-border mt-0.5 shrink-0">
+                <MessageSquare className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex flex-col flex-1 min-w-0">
+                <h4 className="text-sm font-bold text-foreground">IDN Note</h4>
+                <p className="text-[10px] font-medium text-muted-foreground">
+                  {activity.createdAt && format(new Date(activity.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                </p>
+                <p className="text-sm text-foreground mt-2 font-medium wrap-break-word leading-relaxed">
+                  {(activity as any).content}
+                </p>
+
+                <p className="text-[11px] font-semibold text-muted-foreground mt-2 flex items-center gap-1">
+                  <span>by</span>
+                  <span className="text-muted-foreground font-bold">
+                    {typeof activity.user === "object" && activity.user !== null
+                      ? (activity.user as any).name
+                      : "User"}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -459,14 +511,14 @@ export function RecentActivity({
                 Loading activities...
               </p>
             </div>
-          ) : activities.length === 0 ? (
+          ) : combinedActivities.length === 0 ? (
             <div className="flex items-center justify-center py-20">
               <p className="text-sm text-muted-foreground font-medium tracking-tight">
                 No activity or tasks in the last 30 days
               </p>
             </div>
           ) : (
-            [...activities].reverse().map(renderActivityItem)
+            combinedActivities.map(renderActivityItem)
           )}
         </div>
       </div>

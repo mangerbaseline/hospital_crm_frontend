@@ -209,6 +209,7 @@ function HospitalDetails() {
           <RecentActivity
             hospitalId={selectedHospital._id}
             hospitalName={selectedHospital.hospitalName}
+            idnNotes={selectedHospital.idn?.notes || []}
           />
           <HospitalContacts
             contacts={selectedHospital.contacts || []}

@@ -1,6 +1,4 @@
-"use client";
-
-import { Building2, Eye } from "lucide-react";
+import { Building2, Eye, Plus, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,9 +11,16 @@ import { IDNWithDeals } from "@/store/types";
 interface IDNCardProps {
   idn: IDNWithDeals;
   onViewClick: (idn: IDNWithDeals) => void;
+  onAddNoteClick: (idn: IDNWithDeals) => void;
+  onViewNotesClick: (idn: IDNWithDeals) => void;
 }
 
-export function IDNCard({ idn, onViewClick }: IDNCardProps) {
+export function IDNCard({
+  idn,
+  onViewClick,
+  onAddNoteClick,
+  onViewNotesClick,
+}: IDNCardProps) {
   return (
     <Card className="overflow-hidden border-border shadow-sm hover:drop-shadow-lg transition-shadow p-0 rounded-xl hover:bg-muted/30">
       <CardHeader className="p-4 pb-2">
@@ -48,7 +53,7 @@ export function IDNCard({ idn, onViewClick }: IDNCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="mt-auto">
+      <CardFooter className="mt-auto flex flex-col gap-2 p-4 pt-0">
         <Button
           variant="secondary"
           onClick={() => onViewClick(idn)}
@@ -57,6 +62,24 @@ export function IDNCard({ idn, onViewClick }: IDNCardProps) {
           <Eye className="h-3.5 w-3.5" />
           View Hospitals
         </Button>
+        <div className="flex gap-2 w-full">
+          <Button
+            variant="outline"
+            onClick={() => onViewNotesClick(idn)}
+            className="flex-1 border-border hover:bg-muted text-foreground h-9 text-xs font-semibold rounded-lg flex gap-1.5 items-center justify-center cursor-pointer shadow-sm"
+          >
+            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+            Notes
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => onAddNoteClick(idn)}
+            className="flex-1 border-border hover:bg-muted text-foreground h-9 text-xs font-semibold rounded-lg flex gap-1.5 items-center justify-center cursor-pointer shadow-sm"
+          >
+            <Plus className="h-3.5 w-3.5 text-muted-foreground" />
+            Add Note
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

@@ -131,7 +131,7 @@ export interface HospitalWithDeals {
 
 export interface Hospital {
   _id: string;
-  idn: { _id: string; name: string };
+  idn: { _id: string; name: string; notes?: IDNNote[] };
   hospitalName: string;
   beds: string;
   address: string;
@@ -430,9 +430,22 @@ export interface FetchGPOsDealsParams {
   userId?: string;
 }
 
+export interface IDNNote {
+  _id: string;
+  content: string;
+  user: { _id: string; name: string } | string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface IDN {
   _id: string;
   name: string;
+  hospitals?: string[];
+  user?: string;
+  notes?: IDNNote[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface IDNHospitalWithARR {

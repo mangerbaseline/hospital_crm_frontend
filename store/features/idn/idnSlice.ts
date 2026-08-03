@@ -169,6 +169,65 @@ export const deleteIDN = createAsyncThunk(
   },
 );
 
+export const createIDNNote = createAsyncThunk(
+  "idn/createIDNNote",
+  async (
+    { idnId, content }: { idnId: string; content: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await axiosInstance.post<ApiResponse<any>>(
+        `/api/idn/${idnId}/notes`,
+        { content },
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create IDN note",
+      );
+    }
+  },
+);
+
+export const deleteIDNNote = createAsyncThunk(
+  "idn/deleteIDNNote",
+  async (
+    { idnId, noteId }: { idnId: string; noteId: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await axiosInstance.delete<ApiResponse<any>>(
+        `/api/idn/${idnId}/notes/${noteId}`,
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete IDN note",
+      );
+    }
+  },
+);
+
+export const updateIDNNote = createAsyncThunk(
+  "idn/updateIDNNote",
+  async (
+    { idnId, noteId, content }: { idnId: string; noteId: string; content: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await axiosInstance.put<ApiResponse<any>>(
+        `/api/idn/${idnId}/notes/${noteId}`,
+        { content },
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update IDN note",
+      );
+    }
+  },
+);
+
 const idnSlice = createSlice({
   name: "idn",
   initialState,

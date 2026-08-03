@@ -17,6 +17,8 @@ import {
 import { IDNCard } from "@/components/idn/IDNCard";
 import { IDNCardSkeleton } from "@/components/idn/IDNCardSkeleton";
 import { IDNDetailsModal } from "@/components/idn/IDNDetailsModal";
+import { AddIDNNoteModal } from "@/components/idn/AddIDNNoteModal";
+import { ViewIDNNotesModal } from "@/components/idn/ViewIDNNotesModal";
 import { SearchBar } from "@/components/SearchBar";
 import { IDNWithDeals, UserRole } from "@/store/types";
 
@@ -45,6 +47,10 @@ function IDNs() {
 
   const [selectedIDN, setSelectedIDN] = useState<IDNWithDeals | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [noteIdn, setNoteIdn] = useState<{ id: string; name: string } | null>(null);
+  const [isViewNotesOpen, setIsViewNotesOpen] = useState(false);
+  const [viewNotesIdn, setViewNotesIdn] = useState<{ id: string; name: string } | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -87,6 +93,16 @@ function IDNs() {
     setIsModalOpen(true);
   };
 
+  const handleAddNoteClick = (idn: IDNWithDeals) => {
+    setNoteIdn({ id: idn._id, name: idn.name });
+    setIsNoteModalOpen(true);
+  };
+
+  const handleViewNotesClick = (idn: IDNWithDeals) => {
+    setViewNotesIdn({ id: idn._id, name: idn.name });
+    setIsViewNotesOpen(true);
+  };
+
   return (
     <section className="w-full max-w-7xl mx-auto">
       <DashboardHeader
@@ -120,6 +136,8 @@ function IDNs() {
               key={idn._id}
               idn={idn}
               onViewClick={handleViewHospitals}
+              onAddNoteClick={handleAddNoteClick}
+              onViewNotesClick={handleViewNotesClick}
             />
           ))
         ) : (
@@ -241,6 +259,40 @@ function IDNs() {
         idn={selectedIDN}
         selectedUser={selectedUser}
       />
+
+      {noteIdn && (
+        <AddIDNNoteModal
+          isOpen={isNoteModalOpen}
+          onClose={() => {
+            setIsNoteModalOpen(false);
+            setNoteIdn(null);
+          }}
+          idnId={noteIdn.id}
+          idnName={noteIdn.name}
+          onSuccess={() => {
+            dispatch(
+              fetchIDNsWithDeals({
+                page: currentPage,
+                limit: pageSize,
+                search: debouncedSearchQuery,
+                userId: selectedUser === "all" ? "" : selectedUser,
+              }),
+            );
+          }}
+        />
+      )}
+
+      {viewNotesIdn && (
+        <ViewIDNNotesModal
+          isOpen={isViewNotesOpen}
+          onClose={() => {
+            setIsViewNotesOpen(false);
+            setViewNotesIdn(null);
+          }}
+          idnId={viewNotesIdn.id}
+          idnName={viewNotesIdn.name}
+        />
+      )}
     </section>
   );
 }
