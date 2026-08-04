@@ -27,11 +27,15 @@ export function ContactCard({
   const dispatch = useAppDispatch();
   const fullName = contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName;
 
-  const hospital =
-    typeof contact.hospital === "object" ? contact.hospital : null;
-  const hospitalName = hospital?.hospitalName || "Unknown Hospital";
-  const hospitalId = hospital?._id || "#";
-  const hospitalIdn = hospital?.idn?.name?.trim() || "No IDN";
+  const contactHospitals = Array.isArray(contact.hospitals) ? contact.hospitals : [];
+  const primaryHospital =
+    contactHospitals[0] && typeof contactHospitals[0] === "object"
+      ? (contactHospitals[0] as any)
+      : null;
+  const hospitalName = primaryHospital?.hospitalName || "Unknown Hospital";
+  const hospitalId = primaryHospital?._id || "#";
+  const hospitalIdn = primaryHospital?.idn?.name?.trim() || "No IDN";
+  const remainingCount = contactHospitals.length - 1;
 
   const handleDeleteConfirm = async () => {
     try {
@@ -108,8 +112,8 @@ export function ContactCard({
               </p>
               {contact.product && contact.product.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {contact.product.map((prod) => (
-                    <Badge key={prod._id} className="bg-emerald-50 text-emerald-700 border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-none">
+                  {contact.product.map((prod, idx) => (
+                    <Badge key={prod._id || idx} className="bg-emerald-50 text-emerald-700 border-emerald-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-none">
                       {prod.name}
                     </Badge>
                   ))}
@@ -149,7 +153,7 @@ export function ContactCard({
           </div>
           <div className="flex flex-col min-w-0 flex-1">
             <h4 className="text-sm font-bold text-foreground leading-tight truncate group-hover/hosp:text-primary transition-all">
-              {hospitalName}
+              {hospitalName} {remainingCount > 0 ? `+${remainingCount} more` : ""}
             </h4>
             <p className="text-xs text-muted-foreground font-medium mt-0.5 truncate">
               {hospitalIdn}

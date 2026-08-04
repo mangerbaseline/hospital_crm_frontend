@@ -90,12 +90,14 @@ export const updateContact = createAsyncThunk(
 
 export const deleteContact = createAsyncThunk(
   "contact/deleteContact",
-  async (id: string, { rejectWithValue }) => {
+  async (arg: string | { id: string; hospitalId?: string }, { rejectWithValue }) => {
     try {
+      const id = typeof arg === "string" ? arg : arg.id;
+      const hospitalId = typeof arg === "string" ? undefined : arg.hospitalId;
       const response = await axiosInstance.delete<ApiResponse<null>>(
-        `/api/contact/${id}`,
+        `/api/contact/${id}${hospitalId ? `?hospitalId=${hospitalId}` : ""}`,
       );
-      return { id, message: response.data.message };
+      return { id, message: response.data.message, hospitalId };
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to delete contact",
@@ -204,10 +206,27 @@ const contactSlice = createSlice({
       })
       .addCase(deleteContact.fulfilled, (state, action) => {
         state.isDeleteContactLoading = false;
-        state.contacts = state.contacts.filter(
-          (contact) => contact._id !== action.payload.id,
-        );
-        state.totalContacts -= 1;
+        if (action.payload.hospitalId) {
+          state.contacts = state.contacts
+            .map((c) => {
+              if (c._id === action.payload.id) {
+                return {
+                  ...c,
+                  hospitals: c.hospitals.filter((h: any) => {
+                    const hId = typeof h === "object" ? h._id : h;
+                    return hId !== action.payload.hospitalId;
+                  }),
+                };
+              }
+              return c;
+            })
+            .filter((c) => c.hospitals.length > 0);
+        } else {
+          state.contacts = state.contacts.filter(
+            (contact) => contact._id !== action.payload.id,
+          );
+          state.totalContacts -= 1;
+        }
       })
       .addCase(deleteContact.rejected, (state, action) => {
         state.isDeleteContactLoading = false;

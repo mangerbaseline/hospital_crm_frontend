@@ -69,8 +69,10 @@ export function ContactTable({
       aVal = (a.designation || "").toLowerCase();
       bVal = (b.designation || "").toLowerCase();
     } else if (sortBy === "hospital") {
-      aVal = (typeof a.hospital === "object" ? a.hospital?.hospitalName : "").toLowerCase();
-      bVal = (typeof b.hospital === "object" ? b.hospital?.hospitalName : "").toLowerCase();
+      const aHosp = Array.isArray(a.hospitals) && a.hospitals[0] && typeof a.hospitals[0] === "object" ? (a.hospitals[0] as any) : null;
+      const bHosp = Array.isArray(b.hospitals) && b.hospitals[0] && typeof b.hospitals[0] === "object" ? (b.hospitals[0] as any) : null;
+      aVal = (aHosp?.hospitalName || "").toLowerCase();
+      bVal = (bHosp?.hospitalName || "").toLowerCase();
     } else if (sortBy === "email") {
       aVal = (a.email || "").toLowerCase();
       bVal = (b.email || "").toLowerCase();
@@ -152,8 +154,13 @@ export function ContactTable({
           <tbody className="divide-y divide-border font-medium text-xs">
             {sortedContacts.map((contact) => {
               const fullName = contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName;
-              const hospital = typeof contact.hospital === "object" ? contact.hospital : null;
-              const hospitalName = hospital?.hospitalName || "Unknown Hospital";
+              const contactHospitals = Array.isArray(contact.hospitals) ? contact.hospitals : [];
+              const primaryHospital =
+                contactHospitals[0] && typeof contactHospitals[0] === "object"
+                  ? (contactHospitals[0] as any)
+                  : null;
+              const hospitalName = primaryHospital?.hospitalName || "Unknown Hospital";
+              const remainingCount = contactHospitals.length - 1;
 
               return (
                 <tr
@@ -192,14 +199,14 @@ export function ContactTable({
 
                   {/* Hospital */}
                   <td className="py-3 px-5 min-w-[160px]">
-                    {hospital ? (
+                    {primaryHospital ? (
                       <Link
-                        href={`/hospitals/${hospital._id}`}
+                        href={`/hospitals/${primaryHospital._id}`}
                         className="inline-flex items-center gap-1.5 font-bold text-foreground hover:text-primary transition-colors"
                       >
                         <Building2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                         <span className="truncate max-w-[180px]">
-                          {hospitalName}
+                          {hospitalName} {remainingCount > 0 ? `+${remainingCount} more` : ""}
                         </span>
                       </Link>
                     ) : (

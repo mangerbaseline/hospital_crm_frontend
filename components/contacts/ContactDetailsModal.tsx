@@ -83,13 +83,7 @@ export function ContactDetailsModal({
     if (!contact) return null;
 
     const fullName = contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName;
-    const hospital =
-      typeof contact.hospital === "object" ? contact.hospital : null;
-    const hospitalName = hospital?.hospitalName || "Unknown Hospital";
-    const hospitalId = hospital?._id;
-    const hospitalIdn = hospital?.idn?.name?.trim() || "No IDN";
-    const hospitalGpo =
-      typeof hospital?.gpo === "object" ? hospital?.gpo?.name : "No GPO";
+    const contactHospitals = Array.isArray(contact.hospitals) ? contact.hospitals : [];
 
     return (
       <ScrollArea className="flex-1 overflow-y-auto px-6 py-5">
@@ -130,40 +124,54 @@ export function ContactDetailsModal({
           </div>
         </div>
 
-        {hospitalId && (
+        {contactHospitals.length > 0 && (
           <div className="py-5 border-b border-border/60 space-y-4">
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-              Associated Hospital
+              Associated Hospitals ({contactHospitals.length})
             </h4>
-            <div
-              onClick={() => handleHospitalNavigate(hospitalId)}
-              className="flex items-start gap-4 p-4.5 rounded-xl bg-white border border-border/85 hover:border-emerald-200 hover:shadow-md cursor-pointer transition-all group"
-            >
-              <div className="p-2.5 rounded-lg bg-slate-50 text-slate-500 group-hover:bg-emerald-50 group-hover:text-emerald-600 shrink-0 transition-colors mt-0.5">
-                <Building2 className="h-5 w-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h5 className="text-md font-bold text-foreground truncate group-hover:text-emerald-700 transition-colors leading-tight">
-                  {hospitalName}
-                </h5>
-                <p className="text-xs text-muted-foreground mt-1">
-                  IDN:{" "}
-                  <span className="font-semibold text-slate-700">
-                    {hospitalIdn}
-                  </span>
-                </p>
-                {hospitalGpo && hospitalGpo !== "No GPO" && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    GPO:{" "}
-                    <span className="font-semibold text-slate-700">
-                      {hospitalGpo}
-                    </span>
-                  </p>
-                )}
-                <span className="text-[10px] text-emerald-600 font-bold block mt-3 group-hover:underline">
-                  Visit Hospital Dashboard →
-                </span>
-              </div>
+            <div className="flex flex-col gap-3">
+              {contactHospitals.map((hosp: any, idx) => {
+                const hospObj = typeof hosp === "object" ? hosp : null;
+                if (!hospObj) return null;
+                const hName = hospObj.hospitalName || "Unknown Hospital";
+                const hId = hospObj._id;
+                const hIdn = hospObj.idn?.name?.trim() || "No IDN";
+                const hGpo = typeof hospObj.gpo === "object" ? hospObj.gpo?.name : "No GPO";
+
+                return (
+                  <div
+                    key={hId || idx}
+                    onClick={() => handleHospitalNavigate(hId)}
+                    className="flex items-start gap-4 p-4.5 rounded-xl bg-white border border-border/85 hover:border-emerald-200 hover:shadow-md cursor-pointer transition-all group"
+                  >
+                    <div className="p-2.5 rounded-lg bg-slate-50 text-slate-500 group-hover:bg-emerald-50 group-hover:text-emerald-600 shrink-0 transition-colors mt-0.5">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h5 className="text-md font-bold text-foreground truncate group-hover:text-emerald-700 transition-colors leading-tight">
+                        {hName}
+                      </h5>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        IDN:{" "}
+                        <span className="font-semibold text-slate-700">
+                          {hIdn}
+                        </span>
+                      </p>
+                      {hGpo && hGpo !== "No GPO" && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          GPO:{" "}
+                          <span className="font-semibold text-slate-700">
+                            {hGpo}
+                          </span>
+                        </p>
+                      )}
+                      <span className="text-[10px] text-emerald-600 font-bold block mt-3 group-hover:underline">
+                        Visit Hospital Dashboard →
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

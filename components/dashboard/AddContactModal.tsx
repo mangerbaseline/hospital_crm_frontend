@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -15,26 +15,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import {
-  fetchHospitalsForSelection,
-  getSingleHospital,
-} from "@/store/features/hospital/hospitalSlice";
+import { getSingleHospital } from "@/store/features/hospital/hospitalSlice";
 import {
   createContact,
   resetContactStatus,
@@ -45,6 +28,7 @@ import {
 } from "@/validations/contact.validations";
 import { toast } from "sonner";
 import { MultiProductSelect } from "@/components/products/MultiProductSelect";
+import { MultiHospitalSelect } from "@/components/hospitals/MultiHospitalSelect";
 import { Hospital } from "@/store/types";
 
 export function AddContactModal({
@@ -57,13 +41,9 @@ export function AddContactModal({
   onSuccess?: () => void;
 }) {
   const dispatch = useAppDispatch();
-  const { hospitals, isFetchingHospitals, selectionPage, hasMoreSelection } =
-    useAppSelector((state) => state.hospital);
   const { isCreateContactLoading } = useAppSelector((state) => state.contact);
 
   const [open, setOpen] = useState(false);
-  const [hospitalOpen, setHospitalOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
   const {
@@ -77,8 +57,9 @@ export function AddContactModal({
     resolver: zodResolver(createContactSchema),
     defaultValues: {
       firstName: "",
+      lastName: "",
       designation: "",
-      hospital: "",
+      hospitals: [],
       phoneNumber: "",
       secondaryPhoneNumber: "",
       email: "",
@@ -89,67 +70,13 @@ export function AddContactModal({
   useEffect(() => {
     if (open) {
       if (defaultHospital) {
-        setValue("hospital", defaultHospital._id, { shouldValidate: true });
-      } else {
-        dispatch(
-          fetchHospitalsForSelection({ page: 1, limit: 10, search: "" }),
-        );
+        setValue("hospitals", [defaultHospital._id], { shouldValidate: true });
       }
     } else {
-      setSearch("");
+      reset();
+      setSelectedProductIds([]);
     }
-    setSelectedProductIds([]);
-  }, [open, dispatch, defaultHospital, setValue]);
-
-  useEffect(() => {
-    if (!open || defaultHospital) return;
-
-    const timer = setTimeout(() => {
-      dispatch(fetchHospitalsForSelection({ page: 1, limit: 10, search }));
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [search, dispatch, open, defaultHospital]);
-
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-
-  const loadMore = () => {
-    if (hasMoreSelection && !isFetchingHospitals) {
-      dispatch(
-        fetchHospitalsForSelection({
-          page: selectionPage + 1,
-          limit: 10,
-          search,
-        }),
-      );
-    }
-  };
-
-  useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasMoreSelection &&
-          !isFetchingHospitals
-        ) {
-          loadMore();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    if (sentinelRef.current) {
-      observerRef.current.observe(sentinelRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect();
-    };
-  }, [hospitals, isFetchingHospitals, hasMoreSelection]);
+  }, [open, defaultHospital, setValue, reset]);
 
   const onSubmit = async (data: CreateContactValues) => {
     const payload = {
@@ -184,9 +111,9 @@ export function AddContactModal({
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-106.25 max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-5">
+      <DialogContent className="sm:max-w-106.25 max-h-[85vh] overflow-y-auto p-6 flex flex-col gap-5 bg-card">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-lg font-bold">Add Contact</DialogTitle>
+          <DialogTitle className="text-lg font-bold text-foreground">Add Contact</DialogTitle>
           <DialogDescription className="text-sm mt-1 text-muted-foreground">
             {defaultHospital
               ? `Add a new contact for ${defaultHospital.hospitalName}.`
@@ -196,12 +123,12 @@ export function AddContactModal({
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
           {defaultHospital ? (
-            <div className="rounded-xl border border-border bg-slate-50/50 p-4 flex flex-col gap-3">
+            <div className="rounded-xl border border-border bg-muted p-4 flex flex-col gap-3">
               <div>
                 <Label className="text-[11px] font-semibold text-muted-foreground">
                   IDN Name
                 </Label>
-                <h4 className="text-sm font-bold -mt-0.5">
+                <h4 className="text-sm font-bold -mt-0.5 text-foreground">
                   {defaultHospital.idn &&
                   typeof defaultHospital.idn === "object"
                     ? defaultHospital.idn?.name
@@ -212,109 +139,36 @@ export function AddContactModal({
                 <Label className="text-[11px] font-semibold text-muted-foreground">
                   Hospital Name
                 </Label>
-                <h4 className="text-sm font-bold -mt-0.5">
+                <h4 className="text-sm font-bold -mt-0.5 text-foreground">
                   {defaultHospital.hospitalName}
                 </h4>
               </div>
             </div>
           ) : (
             <div>
-              <Label className="text-xs font-semibold">Select Hospital</Label>
+              <Label className="text-xs font-semibold text-foreground">Select Hospitals</Label>
               <Controller
-                name="hospital"
+                name="hospitals"
                 control={control}
                 render={({ field }) => (
-                  <Popover open={hospitalOpen} onOpenChange={setHospitalOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={hospitalOpen}
-                        className={cn(
-                          "w-full justify-between mt-1.5 text-xs h-9 bg-muted font-normal border-border",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value
-                          ? hospitals.find((h) => h._id === field.value)
-                              ?.hospitalName
-                          : "Select a hospital..."}
-                        <ChevronsUpDown className="opacity-50 h-4 w-4 shrink-0" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-(--radix-popover-trigger-width) p-0 z-100"
-                      align="start"
-                    >
-                      <Command
-                        shouldFilter={false}
-                        onWheel={(e) => e.stopPropagation()}
-                      >
-                        <CommandInput
-                          placeholder="Search hospital..."
-                          className="h-9 text-xs w-full"
-                          value={search}
-                          onValueChange={setSearch}
-                        />
-                        <CommandList>
-                          {hospitals.length === 0 && !isFetchingHospitals ? (
-                            <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
-                              No hospital found.
-                            </CommandEmpty>
-                          ) : null}
-                          <CommandGroup>
-                            {hospitals.map((hospital) => (
-                              <CommandItem
-                                key={hospital._id}
-                                value={hospital._id}
-                                onSelect={() => {
-                                  setValue("hospital", hospital._id, {
-                                    shouldValidate: true,
-                                  });
-                                  setHospitalOpen(false);
-                                }}
-                                className="text-xs"
-                              >
-                                {hospital.hospitalName}
-                                <Check
-                                  className={cn(
-                                    "ml-auto h-4 w-4",
-                                    field.value === hospital._id
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                          {hasMoreSelection && (
-                            <div
-                              ref={sentinelRef}
-                              className="h-4 flex items-center justify-center py-2"
-                            >
-                              {isFetchingHospitals && (
-                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                              )}
-                            </div>
-                          )}
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                  <MultiHospitalSelect
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  />
                 )}
               />
-              {errors.hospital && (
+              {errors.hospitals && (
                 <p className="text-[10px] text-destructive mt-1 font-medium">
-                  {errors.hospital.message}
+                  {errors.hospitals.message}
                 </p>
               )}
             </div>
           )}
 
           <div>
-            <Label className="text-xs font-semibold">First Name</Label>
+            <Label className="text-xs font-semibold text-foreground">First Name</Label>
             <Input
-              className="text-xs h-9 mt-1.5 bg-muted"
+              className="text-xs h-9 mt-1.5 bg-muted border-border"
               {...register("firstName")}
             />
             {errors.firstName && (
@@ -325,9 +179,9 @@ export function AddContactModal({
           </div>
 
           <div>
-            <Label className="text-xs font-semibold">Last Name</Label>
+            <Label className="text-xs font-semibold text-foreground">Last Name</Label>
             <Input
-              className="text-xs h-9 mt-1.5 bg-muted"
+              className="text-xs h-9 mt-1.5 bg-muted border-border"
               {...register("lastName")}
             />
             {errors.lastName && (
@@ -338,9 +192,9 @@ export function AddContactModal({
           </div>
 
           <div>
-            <Label className="text-xs font-semibold">Title</Label>
+            <Label className="text-xs font-semibold text-foreground">Title</Label>
             <Input
-              className="text-xs h-9 mt-1.5 bg-muted"
+              className="text-xs h-9 mt-1.5 bg-muted border-border"
               {...register("designation")}
             />
             {errors.designation && (
@@ -351,10 +205,10 @@ export function AddContactModal({
           </div>
 
           <div>
-            <Label className="text-xs font-semibold">Email</Label>
+            <Label className="text-xs font-semibold text-foreground">Email</Label>
             <Input
               type="email"
-              className="text-xs h-9 mt-1.5 bg-muted"
+              className="text-xs h-9 mt-1.5 bg-muted border-border"
               {...register("email")}
             />
             {errors.email && (
@@ -365,10 +219,10 @@ export function AddContactModal({
           </div>
 
           <div>
-            <Label className="text-xs font-semibold">Phone</Label>
+            <Label className="text-xs font-semibold text-foreground">Phone</Label>
             <Input
               type="tel"
-              className="text-xs h-9 mt-1.5 bg-muted"
+              className="text-xs h-9 mt-1.5 bg-muted border-border"
               {...register("phoneNumber")}
             />
             {errors.phoneNumber && (
@@ -379,10 +233,10 @@ export function AddContactModal({
           </div>
 
           <div>
-            <Label className="text-xs font-semibold">Secondary Phone</Label>
+            <Label className="text-xs font-semibold text-foreground">Secondary Phone</Label>
             <Input
               type="tel"
-              className="text-xs h-9 mt-1.5 bg-muted"
+              className="text-xs h-9 mt-1.5 bg-muted border-border"
               {...register("secondaryPhoneNumber")}
             />
             {errors.secondaryPhoneNumber && (
@@ -393,7 +247,7 @@ export function AddContactModal({
           </div>
 
           <div>
-            <Label className="text-xs font-semibold">Product (optional)</Label>
+            <Label className="text-xs font-semibold text-foreground">Product (optional)</Label>
             <div className="mt-1.5">
               <MultiProductSelect
                 value={selectedProductIds}
@@ -418,7 +272,7 @@ export function AddContactModal({
             />
             <Label
               htmlFor="primary_contact"
-              className="text-xs ml-1 font-medium leading-none cursor-pointer"
+              className="text-xs ml-1 font-medium leading-none cursor-pointer text-foreground"
             >
               Primary Contact
             </Label>
@@ -427,7 +281,7 @@ export function AddContactModal({
           <div className="flex justify-end mt-2">
             <Button
               type="submit"
-              className="bg-[#09090b] text-white hover:bg-[#27272a] h-10 px-8 rounded-md font-semibold text-sm cursor-pointer disabled:opacity-70"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-8 rounded-md font-semibold text-sm cursor-pointer disabled:opacity-70"
               disabled={isCreateContactLoading}
             >
               {isCreateContactLoading ? (

@@ -43,7 +43,7 @@ import {
 } from "@/store/features/idn/idnSlice";
 import { fetchGPOs } from "@/store/features/gpo/gpoSlice";
 import { fetchUsers } from "@/store/features/user/userSlice";
-import { updateHospital } from "@/store/features/hospital/hospitalSlice";
+import { updateHospital, getSingleHospital } from "@/store/features/hospital/hospitalSlice";
 import { toast } from "sonner";
 import {
   hospitalSchema,
@@ -251,6 +251,7 @@ export function EditHospitalModal({
         }),
       ).unwrap();
       toast.success("Hospital updated successfully");
+      dispatch(getSingleHospital(hospital._id));
       setOpen(false);
     } catch (error: any) {
       toast.error(error || "Failed to update hospital");

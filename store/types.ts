@@ -181,7 +181,7 @@ export interface Contact {
   lastName: string;
   user: string;
   designation: string;
-  hospital: string | Hospital;
+  hospitals: (string | Hospital)[];
   phoneNumber: string;
   secondaryPhoneNumber?: string;
   email: string;

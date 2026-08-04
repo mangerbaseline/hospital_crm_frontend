@@ -74,13 +74,7 @@ export interface Contact {
   designation: string;
   email: string;
   phoneNumber: string;
-  hospital?:
-    | {
-        _id: string;
-        idn?: { name: string };
-        hospitalName: string;
-      }
-    | string;
+  hospitals?: any[];
   isPrimary?: boolean;
   product?: { _id: string; name: string }[];
 }

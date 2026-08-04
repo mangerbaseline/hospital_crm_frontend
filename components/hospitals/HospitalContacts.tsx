@@ -26,6 +26,7 @@ interface HospitalContactsProps {
     email: string;
     isPrimary?: boolean;
     product?: { _id: string; name: string }[];
+    hospitals?: any[];
   }[];
   hospital?: any;
 }
@@ -38,7 +39,9 @@ export function HospitalContacts({
 
   const handleDeleteContact = async (contactId: string) => {
     try {
-      const result = await dispatch(deleteContact(contactId)).unwrap();
+      const result = await dispatch(
+        deleteContact({ id: contactId, hospitalId: hospital?._id })
+      ).unwrap();
       toast.success(result?.message || "Contact deleted successfully");
       if (hospital?._id) {
         dispatch(getSingleHospital(hospital._id));
@@ -125,7 +128,14 @@ export function HospitalContacts({
                         <Send className="h-3.5 w-3.5" />
                       </Button>
                     </SendEmailToContactModal>
-                    <EditContactModal contact={contact} hospital={hospital}>
+                    <EditContactModal
+                      contact={contact as any}
+                      onSuccess={() => {
+                        if (hospital?._id) {
+                          dispatch(getSingleHospital(hospital._id));
+                        }
+                      }}
+                    >
                       <Button
                         variant="outline"
                         size="sm"
