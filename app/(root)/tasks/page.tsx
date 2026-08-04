@@ -67,7 +67,7 @@ export default function TasksPage() {
 
   const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
   const [selectedProductFilter, setSelectedProductFilter] = useState<string>("all");
-  const [showDueOnly, setShowDueOnly] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     if (users.length === 0) dispatch(fetchUsers({ limit: 1000 }));
@@ -76,7 +76,7 @@ export default function TasksPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedUserFilter, selectedProductFilter, showDueOnly]);
+  }, [searchQuery, selectedUserFilter, selectedProductFilter, showAll]);
 
   const loadTasks = () => {
     dispatch(
@@ -86,7 +86,7 @@ export default function TasksPage() {
         search: searchQuery,
         userId: selectedUserFilter === "all" ? (isAdminOrExecutive ? undefined : user?._id) : selectedUserFilter,
         productId: selectedProductFilter === "all" ? undefined : selectedProductFilter,
-        dueOnly: showDueOnly || undefined,
+        showAll: showAll || undefined,
       }),
     );
   };
@@ -95,7 +95,7 @@ export default function TasksPage() {
     if (user) {
       loadTasks();
     }
-  }, [dispatch, searchQuery, currentPage, pageSize, user, selectedUserFilter, selectedProductFilter, showDueOnly]);
+  }, [dispatch, searchQuery, currentPage, pageSize, user, selectedUserFilter, selectedProductFilter, showAll]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -225,16 +225,16 @@ export default function TasksPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowDueOnly(!showDueOnly)}
+            onClick={() => setShowAll(!showAll)}
             className={cn(
               "gap-2 text-xs font-bold h-11 px-3 rounded-lg transition-all",
-              showDueOnly
+              showAll
                 ? "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50"
                 : "text-muted-foreground border-border"
             )}
           >
             <Filter className="h-3.5 w-3.5" />
-            {showDueOnly ? "Due Tasks" : "All Tasks"}
+            {showAll ? "All Tasks" : "Due Tasks"}
           </Button>
           <div className="flex w-full h-11 md:w-auto items-center gap-2 text-sm font-medium text-muted-foreground border px-3 py-2 rounded-lg shadow-sm">
             <SlidersHorizontal className="h-4 w-4" />

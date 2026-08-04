@@ -758,6 +758,7 @@ export interface TaskData {
   products?: string[];
   user?: string;
   secondaryAssignees?: string[];
+  reminderTime?: string | Date;
   completed?: boolean;
 }
 
@@ -792,6 +793,7 @@ export interface TaskActivity {
   products?: any[];
   secondaryAssignees?: any[];
   reminders: ("email" | "push")[];
+  reminderTime?: string;
   completed: boolean;
   createdAt: string;
   updatedAt: string;
@@ -1165,7 +1167,7 @@ export interface FetchTasksParams {
   userId?: string;
   hospitalId?: string;
   productId?: string;
-  dueOnly?: boolean;
+  showAll?: boolean;
 }
 
 export interface CreateTaskPayload {

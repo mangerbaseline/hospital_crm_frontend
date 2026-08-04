@@ -49,7 +49,10 @@ const taskSchema = z.object({
   title: z.string().min(1, "Task title is required"),
   description: z.string().optional(),
   dueDate: z.date().optional(),
+  dueTime: z.string().optional(),
   reminders: z.array(z.enum(["email", "push"])),
+  reminderDate: z.date().optional(),
+  reminderTime: z.string().optional(),
   products: z.array(z.string()).min(1, "At least one product category is required"),
   user: z.string().min(1, "Primary assignee is required"),
   secondaryAssignees: z.array(z.string()).optional(),
@@ -59,7 +62,10 @@ interface TaskFormValues {
   title: string;
   description?: string;
   dueDate?: Date;
+  dueTime?: string;
   reminders: ("email" | "push")[];
+  reminderDate?: Date;
+  reminderTime?: string;
   products: string[];
   user: string;
   secondaryAssignees?: string[];
@@ -75,6 +81,7 @@ interface AddTaskModalProps {
     title: string;
     description?: string;
     dueDate?: string;
+    reminderTime?: string;
     reminders: ("email" | "push")[];
     products?: string[];
     user?: string;
@@ -97,6 +104,7 @@ export function AddTaskModal({
 
   const { users } = useAppSelector((state) => state.user);
   const { user: currentUser } = useAppSelector((state) => state.auth);
+
   const {
     register,
     handleSubmit,
@@ -110,7 +118,9 @@ export function AddTaskModal({
     defaultValues: {
       title: "",
       description: "",
+      dueTime: "",
       reminders: [],
+      reminderTime: "",
       products: [],
       user: currentUser?._id || "",
       secondaryAssignees: [],
@@ -124,11 +134,20 @@ export function AddTaskModal({
     if (isOpen) {
       if (users.length === 0) dispatch(fetchUsers({ limit: 1000 }));
 
+      const initDue = initialData?.dueDate ? new Date(initialData.dueDate) : undefined;
+      const initDueTime = initDue ? format(initDue, "HH:mm") : "";
+
+      const initReminder = initialData?.reminderTime ? new Date(initialData.reminderTime) : undefined;
+      const initReminderTime = initReminder ? format(initReminder, "HH:mm") : "";
+
       reset({
         title: initialData?.title || "",
         description: initialData?.description || "",
-        dueDate: initialData?.dueDate ? new Date(initialData.dueDate) : undefined,
+        dueDate: initDue,
+        dueTime: initDueTime,
         reminders: initialData?.reminders || [],
+        reminderDate: initReminder,
+        reminderTime: initReminderTime,
         products: initialData?.products || [],
         user: initialData?.user || currentUser?._id || "",
         secondaryAssignees: initialData?.secondaryAssignees || [],
@@ -136,25 +155,41 @@ export function AddTaskModal({
     }
   }, [isOpen, initialData, reset, users.length, dispatch, currentUser]);
 
+  const combineDateTime = (date?: Date, time?: string): string | undefined => {
+    if (!date) return undefined;
+    const combined = new Date(date);
+    if (time) {
+      const [hours, minutes] = time.split(":").map(Number);
+      combined.setHours(hours, minutes, 0, 0);
+    } else {
+      combined.setHours(9, 0, 0, 0); // Default to 9:00 AM if no time specified
+    }
+    return combined.toISOString();
+  };
+
   const onSubmit = async (data: TaskFormValues) => {
     try {
+      const dueDateCombined = combineDateTime(data.dueDate, data.dueTime);
+      const reminderTimeCombined = combineDateTime(data.reminderDate, data.reminderTime);
+
+      const requestData = {
+        title: data.title,
+        description: data.description || "",
+        dueDate: dueDateCombined || new Date().toISOString(),
+        reminderTime: reminderTimeCombined,
+        hospital: hospitalId,
+        reminders: data.reminders,
+        products: data.products,
+        user: data.user,
+        secondaryAssignees: data.secondaryAssignees,
+      };
+
       if (isEditing && taskId) {
         await dispatch(
           updateActivity({
             id: taskId,
             type: ActivityType.TASK,
-            data: {
-              title: data.title,
-              description: data.description || "",
-              dueDate: data.dueDate
-                ? data.dueDate.toISOString()
-                : new Date().toISOString(),
-              hospital: hospitalId,
-              reminders: data.reminders,
-              products: data.products,
-              user: data.user,
-              secondaryAssignees: data.secondaryAssignees,
-            },
+            data: requestData,
           }),
         ).unwrap();
         toast.success("Task updated successfully");
@@ -162,18 +197,7 @@ export function AddTaskModal({
         await dispatch(
           createActivity({
             type: ActivityType.TASK,
-            data: {
-              title: data.title,
-              description: data.description || "",
-              dueDate: data.dueDate
-                ? data.dueDate.toISOString()
-                : new Date().toISOString(),
-              hospital: hospitalId,
-              reminders: data.reminders,
-              products: data.products,
-              user: data.user,
-              secondaryAssignees: data.secondaryAssignees,
-            },
+            data: requestData,
           }),
         ).unwrap();
         toast.success("Task added successfully");
@@ -189,9 +213,9 @@ export function AddTaskModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-125 rounded-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-125 rounded-2xl max-h-[85vh] overflow-y-auto bg-card">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
+          <DialogTitle className="text-xl font-bold text-foreground">
             {isEditing ? "Edit Task" : "Add Task"}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -203,13 +227,13 @@ export function AddTaskModal({
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2 mb-4">
-            <Label htmlFor="title" className="text-sm font-bold">
+            <Label htmlFor="title" className="text-sm font-bold text-foreground">
               Task Title
             </Label>
             <Input
               id="title"
               placeholder="e.g. Follow up with procurement"
-              className="h-10 bg-muted border-border rounded-xl px-3"
+              className="h-10 bg-muted border-border rounded-xl px-3 text-foreground"
               {...register("title")}
             />
             {errors.title && (
@@ -220,7 +244,7 @@ export function AddTaskModal({
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <Label htmlFor="description" className="text-sm font-bold">
+            <Label htmlFor="description" className="text-sm font-bold text-foreground">
               Description (Optional)
             </Label>
             <Controller
@@ -230,7 +254,7 @@ export function AddTaskModal({
                 <MentionTextarea
                   id="description"
                   placeholder="Add details about this task... Use @ to mention coworkers."
-                  className="min-h-20 bg-muted border-border rounded-xl resize-none"
+                  className="min-h-20 bg-muted border-border rounded-xl resize-none text-foreground"
                   {...field}
                   value={field.value || ""}
                 />
@@ -239,7 +263,7 @@ export function AddTaskModal({
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <Label className="text-sm font-bold">Product Categories</Label>
+            <Label className="text-sm font-bold text-foreground">Product Categories</Label>
             <Controller
               control={control}
               name="products"
@@ -259,7 +283,7 @@ export function AddTaskModal({
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <Label className="text-sm font-bold">Primary Assignee</Label>
+            <Label className="text-sm font-bold text-foreground">Primary Assignee</Label>
             <Controller
               control={control}
               name="user"
@@ -269,7 +293,7 @@ export function AddTaskModal({
                   onValueChange={field.onChange}
                   disabled={isRestrictedRole}
                 >
-                  <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs">
+                  <SelectTrigger className="h-10 bg-muted border-border rounded-xl px-3 text-xs text-foreground">
                     <SelectValue placeholder="Select Primary Assignee" />
                   </SelectTrigger>
                   <SelectContent>
@@ -290,23 +314,23 @@ export function AddTaskModal({
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <Label className="text-sm font-bold">Secondary Assignees (Optional)</Label>
+            <Label className="text-sm font-bold text-foreground">Secondary Assignees (Optional)</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full justify-between text-xs h-10 font-normal border-border bg-muted/70 rounded-xl px-3"
+                  className="w-full justify-between text-xs h-10 font-normal border-border bg-muted/70 rounded-xl px-3 text-foreground"
                 >
                   <span>
                     {(watch("secondaryAssignees") || []).length > 0
                       ? `${(watch("secondaryAssignees") || []).length} selected`
                       : "Select secondary assignees"}
                   </span>
-                  <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                  <ChevronsUpDown className="h-4 w-4 opacity-50 text-foreground" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-2 z-100" align="start">
+              <PopoverContent className="w-80 p-2 z-100 bg-card" align="start">
                 <div
                   className="flex flex-col gap-2 max-h-60 overflow-y-auto"
                   onWheel={(e) => e.stopPropagation()}
@@ -329,7 +353,7 @@ export function AddTaskModal({
                               }
                             }}
                           />
-                          <Label htmlFor={`sec-${u._id}`} className="text-xs cursor-pointer flex-1">
+                          <Label htmlFor={`sec-${u._id}`} className="text-xs cursor-pointer flex-1 text-foreground">
                             {u.name} ({u.email})
                           </Label>
                         </div>
@@ -340,44 +364,55 @@ export function AddTaskModal({
             </Popover>
           </div>
 
-          <div className="flex flex-col gap-2 mb-4">
-            <Label className="text-sm font-bold">Due Date (Optional)</Label>
-            <Controller
-              control={control}
-              name="dueDate"
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal h-10 bg-muted border-border rounded-xl px-3",
-                        !field.value && "text-muted-foreground",
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? (
-                        format(field.value, "dd-MM-yyyy")
-                      ) : (
-                        <span>dd-MM-yyyy</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-bold text-foreground">Due Date (Optional)</Label>
+              <Controller
+                control={control}
+                name="dueDate"
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-10 bg-muted border-border rounded-xl px-3 text-foreground",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4 text-foreground" />
+                        {field.value ? (
+                          format(field.value, "dd-MM-yyyy")
+                        ) : (
+                          <span>dd-MM-yyyy</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-card" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="dueTime" className="text-sm font-bold text-foreground">Due Time (Optional)</Label>
+              <Input
+                id="dueTime"
+                type="time"
+                className="h-10 bg-muted border-border rounded-xl px-3 text-xs text-foreground"
+                {...register("dueTime")}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-3 mb-4">
-            <Label className="text-sm font-bold">Reminders</Label>
+            <Label className="text-sm font-bold text-foreground">Reminders</Label>
             <div className="flex flex-col gap-3">
               <Controller
                 control={control}
@@ -397,7 +432,7 @@ export function AddTaskModal({
                     />
                     <Label
                       htmlFor="email-reminder"
-                      className="text-sm flex items-center gap-2 font-medium cursor-pointer"
+                      className="text-sm flex items-center gap-2 font-medium cursor-pointer text-foreground"
                     >
                       <Mail className="h-4 w-4 text-muted-foreground" /> Email
                       Reminder
@@ -423,7 +458,7 @@ export function AddTaskModal({
                     />
                     <Label
                       htmlFor="push-notification"
-                      className="text-sm flex items-center gap-2 font-medium cursor-pointer"
+                      className="text-sm flex items-center gap-2 font-medium cursor-pointer text-foreground"
                     >
                       <Bell className="h-4 w-4 text-muted-foreground" /> Push
                       Notification
@@ -432,13 +467,63 @@ export function AddTaskModal({
                 )}
               />
             </div>
+
+            {/* Custom Reminder Time Selector (shown when reminders are enabled) */}
+            {(watch("reminders") || []).length > 0 && (
+              <div className="grid grid-cols-2 gap-4 mt-2 p-3 bg-muted/40 border border-border rounded-2xl">
+                <div className="flex flex-col gap-2">
+                  <Label className="text-xs font-bold text-foreground">Reminder Date</Label>
+                  <Controller
+                    control={control}
+                    name="reminderDate"
+                    render={({ field }) => (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal h-9 bg-muted border-border rounded-xl px-3 text-xs text-foreground",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-3.5 w-3.5 text-foreground" />
+                            {field.value ? (
+                              format(field.value, "dd-MM-yyyy")
+                            ) : (
+                              <span>dd-MM-yyyy</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 bg-card" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="reminderTime" className="text-xs font-bold text-foreground">Reminder Time</Label>
+                  <Input
+                    id="reminderTime"
+                    type="time"
+                    className="h-9 bg-muted border-border rounded-xl px-3 text-xs text-foreground"
+                    {...register("reminderTime")}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="p-2">
             <Button
               type="submit"
               disabled={isCreateActivityLoading || isUpdateActivityLoading}
-              className="bg-black text-white hover:bg-black/90 rounded-lg p-4 cursor-pointer"
+              className="bg-primary text-primary-foreground hover:bg-primary/95 rounded-lg p-4 cursor-pointer"
             >
               {isCreateActivityLoading || isUpdateActivityLoading ? (
                 <>

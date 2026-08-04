@@ -507,6 +507,7 @@ export function AllActivitiesModal({
               title: editingActivity.title,
               description: editingActivity.description,
               dueDate: editingActivity.dueDate,
+              reminderTime: (editingActivity as any).reminderTime,
               reminders: editingActivity.reminders || [],
               products: (editingActivity.products || []).map((p: any) => typeof p === "object" ? p._id : p),
               user: typeof editingActivity.user === "object" ? (editingActivity.user as any)?._id : editingActivity.user,
