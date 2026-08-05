@@ -42,11 +42,11 @@ export function UpcomingTasks() {
       <CardHeader className="flex flex-row items-center gap-2 pb-2 pt-5 px-1 sm:px-6 space-y-0">
         <Clock className="h-5 w-5 shrink-0" />
         <CardTitle className="text-[16px] font-medium tracking-tight truncate">
-          Upcoming Tasks
+          Upcoming & Overdue Tasks
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 flex-1 min-h-0 w-full overflow-hidden flex flex-col">
-        <ScrollArea className="h-full w-full max-w-full">
+        <ScrollArea className="flex-1 min-h-0 w-full max-w-full">
           <div className="flex flex-col px-1 sm:px-4 pb-6">
             {isFetchingDashboardTasks ? (
               Array.from({ length: 3 }).map((_, idx) => (
@@ -118,13 +118,13 @@ export function UpcomingTasks() {
             ) : (
               <div className="flex items-center justify-center min-h-[100px]">
                 <p className="text-xs sm:text-sm text-muted-foreground font-medium text-center">
-                  No upcoming tasks in the next 7 days
+                  No upcoming or overdue tasks
                 </p>
               </div>
             )}
           </div>
         </ScrollArea>
-        {dashboardTasksTotalPages > 0 && dashboardTasks.length > 0 && (
+        {dashboardTasksTotalPages > 1 && dashboardTasks.length > 0 && (
           <div className="flex items-center justify-between mt-auto border-t border-border pt-3 pb-4 px-4 bg-card z-10 shrink-0">
             <Button
               variant="outline"
