@@ -25,6 +25,7 @@ interface MultiHospitalSelectProps {
   onValueChange?: (value: string[]) => void;
   className?: string;
   placeholder?: string;
+  initialHospitals?: { _id: string; hospitalName: string }[];
 }
 
 export function MultiHospitalSelect({
@@ -32,6 +33,7 @@ export function MultiHospitalSelect({
   onValueChange,
   className,
   placeholder = "Select hospitals...",
+  initialHospitals = [],
 }: MultiHospitalSelectProps) {
   const dispatch = useAppDispatch();
   const { hospitals, isFetchingHospitals, selectionPage, hasMoreSelection } =
@@ -103,7 +105,28 @@ export function MultiHospitalSelect({
     onValueChange(newValue);
   };
 
-  const selectedHospitals = hospitals.filter((h) => value.includes(h._id));
+  const hospitalMap = new Map<string, { _id: string; hospitalName: string }>();
+  if (initialHospitals && Array.isArray(initialHospitals)) {
+    initialHospitals.forEach((h) => {
+      if (h && h._id) hospitalMap.set(h._id, h);
+    });
+  }
+  hospitals.forEach((h) => {
+    if (h && h._id) hospitalMap.set(h._id, h);
+  });
+
+  const uniqueHospitals = Array.from(hospitalMap.values());
+
+  // Sort selected/checked hospitals to the top
+  const displayHospitals = [...uniqueHospitals].sort((a, b) => {
+    const aSelected = value.includes(a._id);
+    const bSelected = value.includes(b._id);
+    if (aSelected && !bSelected) return -1;
+    if (!aSelected && bSelected) return 1;
+    return 0;
+  });
+
+  const selectedHospitals = displayHospitals.filter((h) => value.includes(h._id));
   const displayText =
     selectedHospitals.length > 0
       ? selectedHospitals.length === 1
@@ -140,15 +163,15 @@ export function MultiHospitalSelect({
             onValueChange={setSearch}
           />
           <CommandList>
-            {hospitals.length === 0 && !isFetchingHospitals ? (
+            {displayHospitals.length === 0 && !isFetchingHospitals ? (
               <CommandEmpty className="py-4 text-center text-xs text-muted-foreground">
                 No hospital found.
               </CommandEmpty>
             ) : null}
             <CommandGroup>
-              {hospitals.map((hospital) => (
+              {displayHospitals.map((hospital, idx) => (
                 <CommandItem
-                  key={hospital._id}
+                  key={`${hospital._id}-${idx}`}
                   value={hospital._id}
                   onSelect={() => handleSelect(hospital._id)}
                   className="text-xs cursor-pointer"

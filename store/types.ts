@@ -147,6 +147,7 @@ export interface Hospital {
   ICUBeds?: number;
   totalBeds?: number;
   notes?: string;
+  primaryContact?: string | null;
   contacts: {
     _id: string;
     firstName: string;
@@ -154,6 +155,8 @@ export interface Hospital {
     designation: string;
     phoneNumber: string;
     email: string;
+    isPrimary?: boolean;
+    product?: { _id: string; name: string }[];
   }[];
   documents?: string[];
   deals?: {

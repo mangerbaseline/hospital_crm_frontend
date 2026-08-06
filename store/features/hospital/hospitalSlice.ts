@@ -148,6 +148,26 @@ export const deleteHospital = createAsyncThunk(
   },
 );
 
+export const togglePrimaryContact = createAsyncThunk(
+  "hospital/togglePrimaryContact",
+  async (
+    { hospitalId, contactId }: { hospitalId: string; contactId: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/api/hospital/${hospitalId}/toggle-primary-contact`,
+        { contactId },
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to toggle primary contact",
+      );
+    }
+  },
+);
+
 const hospitalSlice = createSlice({
   name: "hospital",
   initialState,
@@ -195,7 +215,11 @@ const hospitalSlice = createSlice({
           if (action.payload.page === 1) {
             state.hospitals = action.payload.data;
           } else {
-            state.hospitals = [...state.hospitals, ...action.payload.data];
+            const existingIds = new Set(state.hospitals.map((h) => h._id));
+            const newItems = action.payload.data.filter(
+              (h) => !existingIds.has(h._id),
+            );
+            state.hospitals = [...state.hospitals, ...newItems];
           }
           state.selectionPage = action.payload.page;
           state.selectionTotalPages = action.payload.totalPages;

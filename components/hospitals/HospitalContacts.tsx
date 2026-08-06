@@ -7,14 +7,15 @@ import { SendEmailToContactModal } from "./SendEmailToContactModal";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { UserPlus, User, Mail, Phone, Edit3, Send, Trash2 } from "lucide-react";
+import { UserPlus, User, Mail, Phone, Edit3, Send, Trash2, Star } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { useAppDispatch } from "@/lib/hooks";
 import { deleteContact } from "@/store/features/contact/contactSlice";
-import { getSingleHospital } from "@/store/features/hospital/hospitalSlice";
+import { getSingleHospital, togglePrimaryContact } from "@/store/features/hospital/hospitalSlice";
+import { cn } from "@/lib/utils";
 
 interface HospitalContactsProps {
   contacts: {
@@ -36,6 +37,19 @@ export function HospitalContacts({
   hospital,
 }: HospitalContactsProps) {
   const dispatch = useAppDispatch();
+
+  const handleTogglePrimary = async (contactId: string) => {
+    if (!hospital?._id) return;
+    try {
+      const result = await dispatch(
+        togglePrimaryContact({ hospitalId: hospital._id, contactId })
+      ).unwrap();
+      toast.success(result?.message || "Updated primary contact");
+      dispatch(getSingleHospital(hospital._id));
+    } catch (error: any) {
+      toast.error(error || "Failed to update primary contact");
+    }
+  };
 
   const handleDeleteContact = async (contactId: string) => {
     try {
@@ -118,6 +132,24 @@ export function HospitalContacts({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleTogglePrimary(contact._id)}
+                      className={cn(
+                        "h-7 px-2 text-xs rounded-md cursor-pointer transition-colors",
+                        contact.isPrimary
+                          ? "text-amber-500 border-amber-300 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100"
+                          : "text-muted-foreground hover:text-amber-500"
+                      )}
+                      title={
+                        contact.isPrimary
+                          ? "Remove primary contact status for this hospital"
+                          : "Set as primary contact for this hospital"
+                      }
+                    >
+                      <Star className={cn("h-3.5 w-3.5", contact.isPrimary && "fill-amber-500")} />
+                    </Button>
                     <SendEmailToContactModal contact={contact}>
                       <Button
                         variant="outline"

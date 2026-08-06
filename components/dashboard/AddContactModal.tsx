@@ -150,12 +150,23 @@ export function AddContactModal({
               <Controller
                 name="hospitals"
                 control={control}
-                render={({ field }) => (
-                  <MultiHospitalSelect
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  />
-                )}
+                render={({ field }) => {
+                  const initialHospitals = defaultHospital
+                    ? [
+                        {
+                          _id: defaultHospital._id,
+                          hospitalName: defaultHospital.hospitalName,
+                        },
+                      ]
+                    : [];
+                  return (
+                    <MultiHospitalSelect
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      initialHospitals={initialHospitals}
+                    />
+                  );
+                }}
               />
               {errors.hospitals && (
                 <p className="text-[10px] text-destructive mt-1 font-medium">
@@ -256,14 +267,13 @@ export function AddContactModal({
               />
             </div>
           </div>
-
           <div className="flex items-center gap-2 mt-1">
             <Controller
               name="isPrimary"
               control={control}
               render={({ field }) => (
                 <Checkbox
-                  id="primary_contact"
+                  id="primary_contact_add"
                   className="h-4 w-4 rounded-lg border-foreground/50"
                   checked={field.value}
                   onCheckedChange={field.onChange}
@@ -271,10 +281,10 @@ export function AddContactModal({
               )}
             />
             <Label
-              htmlFor="primary_contact"
+              htmlFor="primary_contact_add"
               className="text-xs ml-1 font-medium leading-none cursor-pointer text-foreground"
             >
-              Primary Contact
+              Set as Primary Contact for selected hospital(s)
             </Label>
           </div>
 
