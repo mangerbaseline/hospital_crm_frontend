@@ -31,18 +31,27 @@ interface EditContactModalProps {
   contact: Contact;
   children: React.ReactNode;
   onSuccess?: () => void;
+  showHospitalSelect?: boolean;
+  currentHospitalId?: string;
 }
 
 export function EditContactModal({
   contact,
   children,
   onSuccess,
+  showHospitalSelect,
+  currentHospitalId,
 }: EditContactModalProps) {
   const dispatch = useAppDispatch();
   const { isCreateContactLoading } = useAppSelector((state) => state.contact);
 
   const [open, setOpen] = useState(false);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+
+  const shouldShowHospitalSelect =
+    showHospitalSelect !== undefined
+      ? showHospitalSelect
+      : !currentHospitalId;
 
   const {
     register,
@@ -91,7 +100,12 @@ export function EditContactModal({
     const payload = {
       ...data,
       product: selectedProductIds,
+      ...(currentHospitalId ? { currentHospitalId } : {}),
     } as any;
+
+    if (!shouldShowHospitalSelect) {
+      delete payload.hospitals;
+    }
 
     try {
       await dispatch(
@@ -126,34 +140,36 @@ export function EditContactModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          <div>
-            <Label className="text-xs font-semibold text-foreground">Select Hospitals</Label>
-            <Controller
-              name="hospitals"
-              control={control}
-              render={({ field }) => {
-                const initialHospitals = contact?.hospitals
-                  ? contact.hospitals.map((h: any) =>
-                      typeof h === "object"
-                        ? { _id: h._id, hospitalName: h.hospitalName }
-                        : { _id: h, hospitalName: "Hospital" }
-                    )
-                  : [];
-                return (
-                  <MultiHospitalSelect
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    initialHospitals={initialHospitals}
-                  />
-                );
-              }}
-            />
-            {errors.hospitals && (
-              <p className="text-[10px] text-destructive mt-1 font-medium">
-                {errors.hospitals.message}
-              </p>
-            )}
-          </div>
+          {shouldShowHospitalSelect && (
+            <div>
+              <Label className="text-xs font-semibold text-foreground">Select Hospitals</Label>
+              <Controller
+                name="hospitals"
+                control={control}
+                render={({ field }) => {
+                  const initialHospitals = contact?.hospitals
+                    ? contact.hospitals.map((h: any) =>
+                        typeof h === "object"
+                          ? { _id: h._id, hospitalName: h.hospitalName }
+                          : { _id: h, hospitalName: "Hospital" }
+                      )
+                    : [];
+                  return (
+                    <MultiHospitalSelect
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      initialHospitals={initialHospitals}
+                    />
+                  );
+                }}
+              />
+              {errors.hospitals && (
+                <p className="text-[10px] text-destructive mt-1 font-medium">
+                  {errors.hospitals.message}
+                </p>
+              )}
+            </div>
+          )}
 
           <div>
             <Label className="text-xs font-semibold text-foreground">First Name</Label>
@@ -246,6 +262,7 @@ export function EditContactModal({
               />
             </div>
           </div>
+
           <div className="flex items-center gap-2 mt-1">
             <Controller
               name="isPrimary"
@@ -263,9 +280,12 @@ export function EditContactModal({
               htmlFor="primary_contact_edit"
               className="text-xs ml-1 font-medium leading-none cursor-pointer text-foreground"
             >
-              Set as Primary Contact for selected hospital(s)
+              {currentHospitalId
+                ? "Set as Primary Contact for this hospital"
+                : "Set as Primary Contact for selected hospital(s)"}
             </Label>
           </div>
+
 
           <div className="flex justify-end mt-2">
             <Button

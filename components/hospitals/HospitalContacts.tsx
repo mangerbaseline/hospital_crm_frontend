@@ -162,6 +162,7 @@ export function HospitalContacts({
                     </SendEmailToContactModal>
                     <EditContactModal
                       contact={contact as any}
+                      currentHospitalId={hospital?._id}
                       onSuccess={() => {
                         if (hospital?._id) {
                           dispatch(getSingleHospital(hospital._id));
@@ -197,18 +198,22 @@ export function HospitalContacts({
                 </div>
 
                 <div className="flex flex-col gap-1 text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-[12px] font-medium truncate">
-                      {contact.email}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-[12px] font-medium truncate">
-                      {contact.phoneNumber}
-                    </span>
-                  </div>
+                  {contact.email?.trim() && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-[12px] font-medium truncate">
+                        {contact.email}
+                      </span>
+                    </div>
+                  )}
+                  {contact.phoneNumber?.trim() && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-[12px] font-medium truncate">
+                        {contact.phoneNumber}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))

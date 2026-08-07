@@ -129,11 +129,13 @@ export function ContactCard({
         </div>
 
         <div className="flex flex-col gap-3 min-w-0">
-          <div className="flex items-center gap-3 text-foreground font-normal group/item hover:text-primary transition-colors min-w-0">
-            <Mail className="h-4 w-4 text-muted-foreground group-hover/item:text-primary transition-colors shrink-0" />
-            <span className="text-sm truncate">{contact.email}</span>
-          </div>
-          {contact.phoneNumber && (
+          {contact.email?.trim() && (
+            <div className="flex items-center gap-3 text-foreground font-normal group/item hover:text-primary transition-colors min-w-0">
+              <Mail className="h-4 w-4 text-muted-foreground group-hover/item:text-primary transition-colors shrink-0" />
+              <span className="text-sm truncate">{contact.email}</span>
+            </div>
+          )}
+          {contact.phoneNumber?.trim() && (
             <div className="flex items-center gap-3 text-foreground font-normal group/item hover:text-primary transition-colors min-w-0 ">
               <Phone className="h-4 w-4 text-muted-foreground group-hover/item:text-primary transition-colors shrink-0" />
               <span className="text-sm truncate">{contact.phoneNumber}</span>
